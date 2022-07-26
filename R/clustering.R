@@ -20,9 +20,8 @@ fit_mixture<-function(dat,max.components=10) {
   n<-nrow(dat)
   d<-ncol(dat)
   colnames(dat)<-NULL # remove colnames to prevent instigating bug in mclust
-  if (n<d*(d+3)/2) {stop("Not enough observations to fit mixture model.\n")}
-  required.params<-d*(d+3)/2*1:max.components
-  max.components<-min(n,which(required.params<=n)[1])
+  if (n<d+1) {stop("Not enough observations to fit mixture model.\n")}
+  max.components<-min(max.components,floor(n/(d+1)))
   # Start by fitting one group
   G<-1 # number of groups
   if (d==1) {
@@ -45,6 +44,7 @@ fit_mixture<-function(dat,max.components=10) {
     # Run EM algorithm
     em <- me(modelName=modelName,data=dat,z=z)
     em$BIC <- bic(modelName=modelName,loglik=em$loglik,n=n,d=d,G=g)
+    cat(g,em$BIC,em$loglik,"\n")
     if (!is.na(em$BIC) && em$BIC>BIC) {
       clustering<-em
       G<-g

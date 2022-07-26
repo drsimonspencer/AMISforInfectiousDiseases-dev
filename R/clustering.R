@@ -20,8 +20,9 @@ fit_mixture<-function(dat,max.components=10) {
   n<-nrow(dat)
   d<-ncol(dat)
   colnames(dat)<-NULL # remove colnames to prevent instigating bug in mclust
-  if (n<d) {stop("Not enough observations to fit mixture model.\n")}
-  max.components<-min(n,max.components-1) # or even smaller?
+  if (n<d*(d+3)/2) {stop("Not enough observations to fit mixture model.\n")}
+  required.params<-d*(d+3)/2*1:max.components
+  max.components<-min(n,which(required.params<=n)[1])
   # Start by fitting one group
   G<-1 # number of groups
   if (d==1) {

@@ -22,14 +22,14 @@
 #' parameter names are inherited from the \code{colnames} from the output of \code{rprior} if possible.
 #' @param amis_params A list containing the control parameters for the AMIS algorithm
 #' \describe{
-#' \item{\code{delta}the smoothing parameter in the empirical RN derivative (usually 0.01).}
-#' \item{\code{nsamples}the number of new samples drawn within each AMIS iteration.}
-#' \item{\code{mixture_samples}the number of samples used to represent the weighted parameters in the mixture fitting.}
-#' \item{\code{df}the degrees of freedom in the t-distributions, used to yield a heavy tailed proposal.}
-#' \item{\code{target_ess}the target effective sample size.}
+#' \item{\code{delta} the smoothing parameter in the empirical RN derivative (usually 0.01).}
+#' \item{\code{nsamples} the number of new samples drawn within each AMIS iteration.}
+#' \item{\code{mixture_samples} the number of samples used to represent the weighted parameters in the mixture fitting.}
+#' \item{\code{df} the degrees of freedom in the t-distributions, used to yield a heavy tailed proposal.}
+#' \item{\code{target_ess} the target effective sample size.}
 #' \item{\code{log} logical indicating if calculations are to be performed on log scale.} 
-#' \item{\code{max_iters}maximum number of AMIS iterations.}
-#' \item{\code{breaks}optional vector specifying the breaks for the histogram.}
+#' \item{\code{max_iters} maximum number of AMIS iterations.}
+#' \item{\code{breaks} optional vector specifying the breaks for the histogram.}
 #' }
 #' @param seed Optional seed for the random number generator
 #' @return A dataframe of the sampled parameters, simulation seed, and weight in each location.

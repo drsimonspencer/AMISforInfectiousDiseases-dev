@@ -39,7 +39,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   # add some checks to beginning of function with helpful error messages?
   if(!is.null(seed)) set.seed(seed)
   nsamples <- amis_params[["nsamples"]]
-  print("AMIS iteration 1")
+  cat("AMIS iteration 1\n")
   # Sample first set of parameters from the prior
   param <- prior$rprior(nsamples)
   # to avoid duplication, evaluate prior density now.
@@ -55,6 +55,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     first_weight = rep(1-amis_params[["log"]], nsamples)
   )
   ess <- calculate_ess(weight_matrix,amis_params[["log"]])
+  cat("  min ESS:",round(min(ess))," mean ESS:",round(mean(ess))," max ESS:",round(max(ess)),"\n")
+  cat(" ",length(which(ess<amis_params[["target_ess"]])),"locations are below the target ESS.\n")
   # Make object to store the components of the AMIS mixture.
   components <- list(
     G = c(0), # number of mixture components from proposal for each iteration (zero is for prior)
@@ -65,10 +67,11 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   seeds <- function(t) ((t - 1) * nsamples + 1):(t * nsamples)  #function to calculate the seeds for iteration t.
   niter <- 1 # number of completed iterations
   for (t in 2:amis_params[["max_iters"]]) {
-    print(sprintf("AMIS iteration %g", t))
+    cat("AMIS iteration",t,"\n")
     mean_weights <- update_according_to_ess_value(weight_matrix, ess, amis_params[["target_ess"]],amis_params[["log"]])
     if ((amis_params[["log"]] && max(mean_weights)==-Inf) || (!amis_params[["log"]] && max(mean_weights)==0)) {stop("No weight on any particles for locations in the active set.\n")}
     mixture <- weighted_mixture(param, amis_params[["mixture_samples"]], mean_weights, amis_params[["log"]])
+    cat("  A",mixture$G,"component mixture has been fitted.\n")
     components <- update_mixture_components(mixture, components, t)
     new_params <- sample_new_parameters(mixture, nsamples, amis_params[["df"]], prior, amis_params[["log"]])
     param <- rbind(param, new_params$params)
@@ -79,6 +82,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     first_weight <- compute_prior_proposal_ratio(components, param, prior_density, amis_params[["df"]], amis_params[["log"]]) # Prior/proposal
     weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, amis_params, first_weight) # RN derivative (shd take all amis_params)
     ess <- calculate_ess(weight_matrix,amis_params[["log"]])
+    cat("  min ESS:",round(min(ess))," mean ESS:",round(mean(ess))," max ESS:",round(max(ess)),"\n")
+    cat(" ",length(which(ess<amis_params[["target_ess"]])),"locations are below the target ESS.\n")
     niter <- niter + 1
     if (min(ess) >= amis_params[["target_ess"]]) break
   }

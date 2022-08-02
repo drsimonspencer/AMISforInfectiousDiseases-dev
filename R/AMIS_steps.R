@@ -97,7 +97,9 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
   for (t in 1:n_tims) {
     lik_mat <- lik_matrix(likelihoods[t,,])
     # Update the weights by the latest likelihood (filtering)
-    if (is.null(amis_params[["breaks"]])) {
+    if (amis_params[["bayesian"]][t]) {
+      weight_matrix <- compute_weight_matrix_bayesian(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)
+    } else if (is.null(amis_params[["breaks"]])) {
       weight_matrix <- compute_weight_matrix_empirical(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)
     } else {
       weight_matrix <- compute_weight_matrix_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)
@@ -133,7 +135,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
 compute_weight_matrix_empirical <- function(likelihoods, prev_sim, amis_params, weight_matrix) {
   delta<-amis_params[["delta"]]
   locs<-which(!is.na(likelihoods[1,])) # if there is no data for a location, do not update weights.
-  new_weights<-matrix(ifelse(amis_params[["log"]],-Inf,0),length(prev_sim),length(likelihoods[1,]))
+  new_weights<-weight_matrix
   for (i in 1:length(prev_sim)) {
     wh<-which(abs(prev_sim-prev_sim[i])<=delta/2)
     g_terms<-weight_matrix[wh,locs,drop=FALSE]
@@ -147,7 +149,9 @@ compute_weight_matrix_empirical <- function(likelihoods, prev_sim, amis_params, 
       non_zero_locs<-locs[which(g>0)]
       g<-g[which(g>0)]
       new_weights[i,non_zero_locs]<-weight_matrix[i,non_zero_locs]*likelihoods[i,non_zero_locs]/g*delta
-    }  
+    }
+    zero_locs<-setdiff(locs,non_zero_locs)
+    if (length(zero_locs)>0) {new_weights[i,zero_locs]<-ifelse(amis_params[["log"]],-Inf,0)}
   }
   return(new_weights)
 }
@@ -175,7 +179,7 @@ compute_weight_matrix_histogram<-function(likelihoods, prev_sim, amis_params, we
   upr<-breaks[2:L]
   wdt<-upr-lwr
   locs<-which(!is.na(likelihoods[1,])) # if there is no data for a location, do not update weights.
-  new_weights<-matrix(ifelse(amis_params[["log"]],-Inf,0),length(prev_sim),length(likelihoods[1,]))
+  new_weights<-weight_matrix
   for (l in 1:L) {
     wh<-which(prev_sim>=lwr[l] & prev_sim<upr[l])
     if (length(wh)>0) {
@@ -190,10 +194,40 @@ compute_weight_matrix_histogram<-function(likelihoods, prev_sim, amis_params, we
         non_zero_locs<-locs[which(g>0)]
         g<-g[which(g>0)]
         new_weights[wh,non_zero_locs]<-weight_matrix[wh,non_zero_locs]*likelihoods[wh,non_zero_locs]/rep(g,each=length(wh))*wdt[l]
-      } 
+      }
+      zero_locs<-setdiff(locs,non_zero_locs)
+      if (length(zero_locs)>0) {
+        cat("Non-zero IUs",zero_locs,"\n")
+        new_weights[wh,zero_locs]<-ifelse(amis_params[["log"]],-Inf,0)
+      }
     }
   }
+  wh<-which(prev_sim<min(lwr) | prev_sim>=max(upr))
+  new_weights[wh,]<-ifelse(amis_params[["log"]],-Inf,0)
   return(new_weights)
+}
+
+#' Compute weight matrix using Bayesian updating
+#'
+#' Compute matrix describing the weights for each parameter sampled, for each
+#' location. One row per sample, one column per location.  Each weight
+#' is computed based only on the previous weight (prior) times the likelihood.
+#'
+#' @param likelihoods An n_sims x n_locs matrix of (log-)likelihoods
+#' NB: transpose of slice of array.
+#' @param prev_sim A vector containing the simulated prevalence value for each
+#'     parameter sample. Not used, but included for comparison with other functions.
+#' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
+#' @param weight_matrix A matrix containing the current values of the weights.
+#' @return An updated weight matrix.
+compute_weight_matrix_bayesian <- function(likelihoods, prev_sim, amis_params, weight_matrix) {
+  locs<-which(!is.na(likelihoods[1,])) # if there is no data for a location, do not update weights.
+  if (amis_params[["log"]]) {
+    weight_matrix[,locs]<-weight_matrix[,locs]+likelihoods[,locs]
+  } else {
+    weight_matrix[,locs]<-weight_matrix[,locs]*likelihoods[,locs]
+  }
+  return(weight_matrix)
 }
 
 #' Compute the current effective sample size

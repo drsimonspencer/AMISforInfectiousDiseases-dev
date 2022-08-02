@@ -30,12 +30,14 @@
 #' \item{\code{log} logical indicating if calculations are to be performed on log scale.} 
 #' \item{\code{max_iters} maximum number of AMIS iterations.}
 #' \item{\code{breaks} optional vector specifying the breaks for the histogram.}
+#' \item{\code{bayesian} optional binary vector with length timepoints, specifying if each timepoint update is Bayesian.}
 #' }
 #' @param seed Optional seed for the random number generator
 #' @return A dataframe of the sampled parameters, simulation seed, and weight in each location.
 #' @export
 amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = NULL) {
   if (is.matrix(prevalence_map) || is.data.frame(prevalence_map)) {prevalence_map=list(list(data=prevalence_map))}
+  if (is.null(amis_params[["bayesian"]])) {amis_params[["bayesian"]]<-rep(FALSE,length(prevalence_map))}
   # add some checks to beginning of function with helpful error messages?
   if(!is.null(seed)) set.seed(seed)
   nsamples <- amis_params[["nsamples"]]

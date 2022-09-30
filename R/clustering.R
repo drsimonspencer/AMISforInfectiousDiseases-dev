@@ -44,7 +44,7 @@ fit_mixture<-function(dat,max.components=10) {
     # Run EM algorithm
     em <- me(modelName=modelName,data=dat,z=z)
     em$BIC <- bic(modelName=modelName,loglik=em$loglik,n=n,d=d,G=g)
-    if (!is.na(em$BIC) && em$BIC<BIC) {
+    if (!is.na(em$BIC) && em$BIC>BIC) {
       clustering<-em
       G<-g
       BIC<-em$BIC

@@ -1,4 +1,8 @@
+.Rproj.user
+.Rproj
+*.Rproj
 .Rhistory
 tests/.Rhistory
+**/.Rhistory
 files/
 output/

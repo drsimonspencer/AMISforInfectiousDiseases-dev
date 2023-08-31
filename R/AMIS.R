@@ -88,13 +88,30 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   # Formatting
   if (is.matrix(prevalence_map) || is.data.frame(prevalence_map)) {prevalence_map=list(list(data=prevalence_map))}
   if (is.null(amis_params[["bayesian"]])) {amis_params[["bayesian"]]<-FALSE}
+  use_gaussian_kernel <- ifelse(is.null(amis_params[["breaks"]]) && !is.null(amis_params[["sigma"]]), TRUE, FALSE)
+  boundaries <- amis_params[["boundaries"]]
+  nsamples <- amis_params[["nsamples"]]
+  n_tims <- length(prevalence_map)
+  n_locs <- dim(prevalence_map[[1]]$data)[1]
+  n_samples <- dim(prevalence_map[[1]]$data)[2]   # CHECK notation (n_samples x nsamples)
+  
+  
+  # Check which prevalence map samples are valid (non-NA and within boundaries); and 
+  # calculate normalising constant for truncated Gaussian kernel
+  which_valid_prev_map <- get_which_valid_prev_map(prevalence_map, boundaries)
+  
+  log_norm_const_gaussian <- array(NA, c(1,1,1))  # for the Gaussian case only 
+  if(use_gaussian_kernel){
+    log_norm_const_gaussian <- calc_log_norm_const_gaussian(prevalence_map=prevalence_map, 
+                                                            boundaries=boundaries, 
+                                                            sd=amis_params[["sigma"]])
+  }
+  
+  which_valid_locs_prev_map <- get_which_valid_locs_prev_map(which_valid_prev_map, n_tims, n_locs)
   
   # Initialise
   if(!is.null(seed)) set.seed(seed)
-  nsamples <- amis_params[["nsamples"]]
-  
-  
-  t=1
+  t <- 1
   if(is.null(initial_amis_vals)){
     cat("AMIS iteration 1\n")
     # Sample first set of parameters from the prior

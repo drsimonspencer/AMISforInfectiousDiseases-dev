@@ -1,0 +1,39 @@
+
+## With R 3.1.0 or later, you can uncomment the following line to tell R to 
+## enable compilation with C++11 (where available)
+##
+## Also, OpenMP support in Armadillo prefers C++11 support. However, for wider
+## availability of the package we do not yet enforce this here.  It is however
+## recommended for client packages to set it.
+##
+## And with R 3.4.0, and RcppArmadillo 0.7.960.*, we turn C++11 on as OpenMP
+## support within Armadillo prefers / requires it
+
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) 
+PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+
+$(SHLIB): $(OBJECTS)
+
+MY_CPPFLAGS=-g0 -O3
+
+calc_log_norm_const_gaussian.o: calc_log_norm_const_gaussian.cpp
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
+
+compute_weight_matrix_empirical_uniform.o: compute_weight_matrix_empirical_uniform.cpp
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
+	
+compute_weight_matrix_empirical_gauss.o: compute_weight_matrix_empirical_gauss.cpp
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@	
+	
+f_estimator_gaussian.o: f_estimator_gaussian.cpp
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
+
+f_estimator_uniform.o: f_estimator_uniform.cpp
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
+
+get_which_valid_prev_map.o: get_which_valid_prev_map.cpp
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
+	
+RcppExports.o: RcppExports.cpp
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
+	

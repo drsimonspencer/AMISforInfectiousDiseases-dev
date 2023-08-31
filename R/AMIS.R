@@ -42,10 +42,6 @@
 #' @export
 amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = NULL, initial_amis_vals = NULL) {
 
-  tidy_warning <- function(..., prefix = " ", initial = ""){
-    warning(strwrap(..., prefix = prefix, initial = initial))
-  }
-  
   # Checks
   check_inputs(prevalence_map, transmission_model, prior, amis_params, seed)
   
@@ -95,22 +91,20 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   use_gaussian_kernel <- ifelse(is.null(amis_params[["breaks"]]) && !is.null(amis_params[["sigma"]]), TRUE, FALSE)
   boundaries <- amis_params[["boundaries"]]
   nsamples <- amis_params[["nsamples"]]
-  n_tims <- length(prevalence_map)
-  n_locs <- dim(prevalence_map[[1]]$data)[1]
-  n_samples <- dim(prevalence_map[[1]]$data)[2]   # CHECK notation (n_samples x nsamples)
-  
-  
+
   # Check which prevalence map samples are valid (non-NA and within boundaries); and 
   # calculate normalising constant for truncated Gaussian kernel
   which_valid_prev_map <- get_which_valid_prev_map(prevalence_map, boundaries)
   
-  log_norm_const_gaussian <- array(NA, c(1,1,1))  # for the Gaussian case only 
+  log_norm_const_gaussian <- array(NA, c(1,1,1))  # for the Gaussian kernel case only 
   if(use_gaussian_kernel){
     log_norm_const_gaussian <- calc_log_norm_const_gaussian(prevalence_map=prevalence_map, 
                                                             boundaries=boundaries, 
                                                             sd=amis_params[["sigma"]])
   }
   
+  n_tims <- length(prevalence_map)
+  n_locs <- dim(prevalence_map[[1]]$data)[1]
   which_valid_locs_prev_map <- get_which_valid_locs_prev_map(which_valid_prev_map, n_tims, n_locs)
   
   # Initialise
@@ -147,11 +141,11 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     }
     # to avoid duplication, evaluate likelihood now.
     likelihoods <- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params)
-    if(length(c(which(is.nan(likelihoods))))>0) {warning("Likelihood evaluation produced greater than 1 NaN value. \n")}
-  
+    if(any(is.nan(likelihoods))>0) {warning("Likelihood evaluation produced at least one NaN value. \n")}
+    
     # Determine first time each location appears in the data
-    n_tims = dim(likelihoods)[1]
-    n_locs = dim(likelihoods)[2]
+    n_tims <- dim(likelihoods)[1]
+    n_locs <- dim(likelihoods)[2]
     if (n_locs == 1) {
       lik_matrix <- function(l) as.matrix(l)
     } else {
@@ -159,9 +153,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     }
     locations_first_t = rep(NA,n_locs)
     for (j in 1:n_tims) {
-      lik_mat = lik_matrix(likelihoods[j,,])
+      lik_mat <- lik_matrix(likelihoods[j,,])
       for (l in 1:n_locs){
-      locations_first_t[which(!is.na(lik_mat[1,]) & is.na(locations_first_t))] = j
+      locations_first_t[which(!is.na(lik_mat[1,]) & is.na(locations_first_t))] <- j
       }
     }
      

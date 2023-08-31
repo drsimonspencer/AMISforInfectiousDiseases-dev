@@ -13,6 +13,7 @@ default_amis_params <- function(histogram=FALSE,intermittent_output=FALSE) {
 #' Compute likelihood for each additional simulation across timepoints
 #'
 #' Calls evaluate likelihood for each timepoint.
+#' @param param A matrix containing the sampled parameter vectors.
 #' @param prevalence_map A list with one entry for each timepoint.
 #' Each entry must be a list containing objects \code{data} (an L x M matrix of data);
 #' and optional function \code{likelihood} taking arguments \code{param} (model parameters used in the simulation), \code{data} (a matrix of data as above),
@@ -39,6 +40,7 @@ compute_likelihood<-function(param,prevalence_map,simulated_prevalences,amis_par
 #'
 #' Implements analytical likelihoods if a likelihood function is available; otherwise histogram or empirical
 #' likelihoods are generated based on samples from a geostatistical map.
+#' @param param A matrix containing the sampled parameter vectors.
 #' @param prevalence_map A list containing objects \code{data} (an L x M matrix of data);
 #' and \code{likelihood} a function taking arguments \code{data} (a matrix of data as above),
 #' \code{prevalence} (a matrix of output from the transmission model) and optional logical \code{log}, which returns the vector of (log)-likelihoods.    
@@ -83,6 +85,7 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params) {
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
 #' @param first_weight A vector containing the values for the right hand side of
 #'     the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.
+#' @param locations_first_t locations_first_t 
 #' @return normalised weight matrix.
 compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params, first_weight, locations_first_t) {
   n_tims <- dim(likelihoods)[1]
@@ -306,7 +309,7 @@ systematic_sample <- function(nsamples,weights,log=F) {
   } else {
     cum <- cumsum(weights)/sum(weights) # cumulative sum of normalised weights
   }
-  u <- runif(1)/nsamples+0:(nsamples-1)/nsamples
+  u <- stats::runif(1)/nsamples+0:(nsamples-1)/nsamples
   return(1+matrix(rep(u,length(weights))>rep(cum,each=nsamples),nsamples,length(weights))%*%matrix(1,length(weights),1))
 }
 #' Fit mixture to weighted sample
@@ -339,7 +342,7 @@ weighted_mixture <- function(parameters, nsamples, weights, log=F) {
 #' t-distribution with \code{df} degrees of freedom and the mixture components \code{mixture}.
 #'
 #' @param mixture A list of mixture components as returned by
-#'     \code{\link{evaluate_mixture}}
+#'     \code{\link{weighted_mixture}}
 #' @param n_samples A number of new parameters to sample (integer)
 #' @param df The degrees of freedom for the t-dsitributed proposal distribution.
 #' @param prior list containing the functions \code{rprior} and \code{dprior}
@@ -382,7 +385,7 @@ sample_new_parameters <- function(mixture, n_samples, df, prior, log) {
 #' @param t The current iteration index (integer)
 #' @return The updated \code{components} list
 #'
-#' @seealso \code{\link{evaluate_mixture}}, \code{\link{fit_mixture}}
+#' @seealso \code{\link{weighted_mixture}}, \code{\link{fit_mixture}}
 update_mixture_components <- function(mixture, components, t) {
   components$G[t] <- mixture$G
   G_previous <- sum(components$G[1:(t - 1)]) # Number of pre-existing components

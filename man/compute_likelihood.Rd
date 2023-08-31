@@ -13,6 +13,8 @@ compute_likelihood(
 )
 }
 \arguments{
+\item{param}{A matrix containing the sampled parameter vectors.}
+
 \item{prevalence_map}{A list with one entry for each timepoint.
 Each entry must be a list containing objects \code{data} (an L x M matrix of data);
 and optional function \code{likelihood} taking arguments \code{param} (model parameters used in the simulation), \code{data} (a matrix of data as above),

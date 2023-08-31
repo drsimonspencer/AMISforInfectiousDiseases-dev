@@ -24,16 +24,16 @@
 #' parameter names are inherited from the \code{colnames} from the output of \code{rprior} if possible.
 #' @param amis_params A list containing the control parameters for the AMIS algorithm
 #' \describe{
-#' \item{\code{delta} the smoothing parameter in the empirical RN derivative (usually 0.01).}
-#' \item{\code{nsamples} the number of new samples drawn within each AMIS iteration.}
-#' \item{\code{mixture_samples} the number of samples used to represent the weighted parameters in the mixture fitting.}
-#' \item{\code{df} the degrees of freedom in the t-distributions, used to yield a heavy tailed proposal.}
-#' \item{\code{target_ess} the target effective sample size.}
-#' \item{\code{log} logical indicating if calculations are to be performed on log scale.} 
-#' \item{\code{max_iters} maximum number of AMIS iterations.}
-#' \item{\code{breaks} optional vector specifying the breaks for the histogram. Last entry must be strictly larger than the largest possible prevalence. }
+#' \item{\code{delta} the smoothing parameter in the empirical RN derivative (usually 0.01).}{}
+#' \item{\code{nsamples} the number of new samples drawn within each AMIS iteration.}{}
+#' \item{\code{mixture_samples} the number of samples used to represent the weighted parameters in the mixture fitting.}{}
+#' \item{\code{df} the degrees of freedom in the t-distributions, used to yield a heavy tailed proposal.}{}
+#' \item{\code{target_ess} the target effective sample size.}{}
+#' \item{\code{log} logical indicating if calculations are to be performed on log scale.}{}
+#' \item{\code{max_iters} maximum number of AMIS iterations.}{}
+#' \item{\code{breaks} optional vector specifying the breaks for the histogram. Last entry must be strictly larger than the largest possible prevalence. }{}
 #' \item{\code{bayesian} optional logical for whether to perform Bayesian updated step (does not divide by the induced prior 
-#' over the simulated prevalence when calculating weights).}
+#' over the simulated prevalence when calculating weights).}{}
 #' }
 #' @param seed Optional seed for the random number generator
 #' @param initial_amis_vals optional list containing the object created by setting intermittent_output=TRUE. 
@@ -170,10 +170,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     )
     seeds <- function(t) ((t - 1) * nsamples + 1):(t * nsamples)  #function to calculate the seeds for iteration t.
     niter <- 1 # number of completed iterations 
-    if (amis_params[["intermittent_output"]]){
-      res = save_output()
-      assign("intermittent_output",res,.GlobalEnv)
-    }
+    # if (amis_params[["intermittent_output"]]){
+    #   res = save_output()
+    #   assign("intermittent_output",res,.GlobalEnv)
+    # }
   } else {     
     cat("AMIS iteration 1\n")
     message("Initialising algorithm from a previous run provided by the user. \n")
@@ -244,10 +244,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       cat("  min ESS:",round(min(ess))," mean ESS:",round(mean(ess))," max ESS:",round(max(ess)),"\n")
       cat(" ",length(which(ess<amis_params[["target_ess"]])),"locations are below the target ESS.\n")
       niter <- niter + 1
-      if (amis_params[["intermittent_output"]]){
-        res = save_output()
-        assign("intermittent_output",res,.GlobalEnv)
-      }
+      # if (amis_params[["intermittent_output"]]){
+      #   res = save_output()
+      #   assign("intermittent_output",res,.GlobalEnv)
+      # }
       if (min(ess) >= amis_params[["target_ess"]]) break
     }
   }

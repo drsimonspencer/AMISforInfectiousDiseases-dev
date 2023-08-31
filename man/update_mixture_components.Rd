@@ -28,5 +28,5 @@ This function updates the mixture \code{components} according to
 the current mixture \code{mixture} generated at iteration \code{t}.
 }
 \seealso{
-\code{\link{evaluate_mixture}}, \code{\link{fit_mixture}}
+\code{\link{weighted_mixture}}, \code{\link{fit_mixture}}
 }

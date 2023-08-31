@@ -8,7 +8,7 @@ sample_new_parameters(mixture, n_samples, df, prior, log)
 }
 \arguments{
 \item{mixture}{A list of mixture components as returned by
-\code{\link{evaluate_mixture}}}
+\code{\link{weighted_mixture}}}
 
 \item{n_samples}{A number of new parameters to sample (integer)}
 

@@ -1,3 +1,4 @@
 ^trachoma$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^LICENSE\.md$

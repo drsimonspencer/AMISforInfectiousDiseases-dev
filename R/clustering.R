@@ -16,7 +16,6 @@
 #' \item{\code{ModelName}}{The model name from the package \code{mclust}.}
 #' }
 fit_mixture<-function(dat,max.components=10) {
-  require(mclust)
   n<-nrow(dat)
   d<-ncol(dat)
   colnames(dat)<-NULL # remove colnames to prevent instigating bug in mclust
@@ -30,7 +29,7 @@ fit_mixture<-function(dat,max.components=10) {
     modelName<-"XXX"
   }
   clustering<-mclust::mvn(modelName=modelName,data=dat)
-  BIC <- bic(modelName=modelName,loglik=clustering$loglik,n=n,d=d,G=1)
+  BIC <- mclust::bic(modelName=modelName,loglik=clustering$loglik,n=n,d=d,G=1)
   print(BIC)
   # fit agglomerative clustering model
   if (d==1) {
@@ -38,13 +37,13 @@ fit_mixture<-function(dat,max.components=10) {
   } else {
     modelName <- "VVV"
   }
-  hcPairs <- hc(modelName=modelName,data=dat)
-  cut.tree <- hclass(hcPairs=hcPairs,G=2:max.components)
+  hcPairs <- mclust::hc(modelName=modelName,data=dat)
+  cut.tree <- mclust::hclass(hcPairs=hcPairs,G=2:max.components)
   for (g in 2:max.components) {
-    z<-unmap(cut.tree[,g-1]) # extract cluster indices
+    z<-mclust::unmap(cut.tree[,g-1]) # extract cluster indices
     # Run EM algorithm
-    em <- me(modelName=modelName,data=dat,z=z)
-    em$BIC <- bic(modelName=modelName,loglik=em$loglik,n=n,d=d,G=g) 
+    em <- mclust::me(modelName=modelName,data=dat,z=z)
+    em$BIC <- mclust::bic(modelName=modelName,loglik=em$loglik,n=n,d=d,G=g) 
     if (!is.na(em$BIC) && em$BIC>BIC) { #mclust:::bic calculates the negative BIC
       clustering<-em
       G<-g

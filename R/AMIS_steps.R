@@ -2,6 +2,110 @@
 #' @importFrom Rcpp sourceCpp
 NULL
 
+#' Check inputs of \code{amis} function
+#' @inheritParams amis
+#' @export
+check_inputs <- function(prevalence_map, transmission_model, prior, amis_params, seed) {
+  
+  if (!(is.matrix(prevalence_map) || is.data.frame(prevalence_map) || is.list(prevalence_map))) {
+    stop(strwrap("prevalence_map must be a matrix or data frame of size 
+    #locations by #samples (for one timepoint) or a list of matrices (for >1 timepoints). \n"))}
+  if(is.list(prevalence_map)){
+    dims <- lapply(prevalence_map, dim)
+    if(!all(sapply(dims, FUN = identical, dims[[1]]))){
+      stop(strwrap("'prevalence_map' must have the same dimension 
+      (number of spatial units and number of samples) at each time point.
+      If data for some locations are missing at a timepoint set to NA."))
+    }
+    num_time_points <- length(prevalence_map)
+  }
+  stopifnot("'transmission_model' must be a function." = is.function(transmission_model))
+  stopifnot("'prior' must be a list." = is.list(prior))
+  stopifnot("'prior' must be a list of two elements." = (length(prior)==2))
+  stopifnot("'prior'  must be a list with two elements called 'dprior' and 'rprior'." = all(sort(names(prior))==c("dprior","rprior")))
+  stopifnot("'prior$dprior' must be a function." = is.function(prior$dprior))
+  stopifnot("'prior$rprior' must be a function." = is.function(prior$rprior))
+  stopifnot("'log' must be a single logical value" = (length(amis_params$log)==1 && is.logical(amis_params$log)))
+  delta <- amis_params$delta
+  sigma <- amis_params$sigma
+  nsamples <- amis_params$nsamples
+  mixture_samples <- amis_params$mixture_samples
+  df <- amis_params$df
+  target_ess <- amis_params$target_ess
+  max_iters <- amis_params$max_iters
+  bayesian <- amis_params$bayesian
+  breaks <- amis_params$breaks
+  boundaries <- amis_params$boundaries
+  boundaries <- as.numeric(boundaries)
+  if(length(boundaries)!=2){stop("'boundaries' must be a vector of length 2.")}
+  if(!(diff(boundaries)>0)){stop("The second element of 'boundaries' must be larger than the first one.")}
+  if(!is.null(breaks)){
+    if(!all(breaks>=boundaries[1] && breaks<=boundaries[2])){
+      stop("If 'breaks' is supplied, all its elemenths must be within the 'boundaries' if these are also supplied.")
+    }
+  }
+  stopifnot("'delta' must be either NULL or a single positive numeric value" = ((length(delta)==1 && is.numeric(delta) && delta>0) || is.null(delta)))
+  stopifnot("'sigma' must be either NULL or a single positive numeric value" = ((length(sigma)==1 && is.numeric(sigma) && sigma>0) || is.null(sigma)))
+  stopifnot("'nsamples' must be a single numeric value greater than 1" = (length(nsamples)==1 && is.numeric(nsamples) && nsamples>1))
+  stopifnot("'mixture_samples' must be a single numeric value" = (length(mixture_samples)==1 && is.numeric(mixture_samples)))
+  stopifnot("'df' must be a single numeric value greater than 0" = (length(df)==1 && is.numeric(df) && df>0))
+  stopifnot("'target_ess' must be a single numeric value greater than 0" = (length(target_ess)==1 && is.numeric(target_ess) && target_ess>0))
+  stopifnot("'max_iters' must be a single numeric value greater than 1" = (length(max_iters)==1 && is.numeric(max_iters) && max_iters>1))
+  if(!is.null(bayesian)){
+    stopifnot("If 'bayesian' is supplied, it must a vector of length timepoints" = (length(bayesian)==num_time_points))  
+  }
+  stopifnot("'seed' must be either NULL or a single numeric value" = ((length(seed)==1 && is.numeric(seed)) || is.null(seed)))
+  
+  if (!is.null(amis_params[["breaks"]])){
+    message(strwrap("Using empirical weights from user-defined histogram. Ensure 
+      last entry is strictly larger than the largest possible prevalence."))
+  }
+
+
+  
+  
+  ########################################
+  ### NEED TO DOUBLE-CHECK THE BELOW MESSAGES
+  # These messages seem necessary because of the hierarchy of 3+ inputs.
+  # If the user supplies 'sigma' AND 'breaks', they will not know which method will be used
+  # I think we should not expect that the user will follow exactly this order:
+  # -- first, the default (uniform kernel with delta), 
+  # -- second, the Gaussian kernel,
+  # -- third, histogram method.
+  # (unless we explain this order of hierarchy in the documentation and expect that they read it very carefully).
+  
+  if(is.null(c(amis_params[["delta"]], amis_params[["sigma"]], amis_params[["breaks"]]))){
+    stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL.")
+  }
+  # Even if 'bayesian' is supplied, we still need either delta, sigma or breaks to compute the approximation for likelihood.
+  if(!is.null(amis_params[["bayesian"]])){
+    ## Bayesian method for weight matrix
+    cat("Bayesian updating will be used when computing the weight matrix as 'bayesian' was supplied. \n")
+    ## and then specifically for f -----
+    if(!is.null(amis_params[["breaks"]])){
+      cat("Histogram method will be used in the approximation for the likelihood as 'breaks' was supplied. \n")
+    }else{
+      if(!is.null(amis_params[["sigma"]])){
+        cat("Gaussian kernel will be used in the approximation for the likelihood as 'sigma' was supplied. \n")
+      }else{
+        cat("Uniform kernel will be used in the approximation for the likelihood. \n")
+      }
+    }
+    ## ----------------
+  }else if(!is.null(amis_params[["breaks"]])){
+    cat("Histogram method will be used when computing the weight matrix as 'breaks' was supplied. \n")
+  }else{
+    if(!is.null(amis_params[["sigma"]])){
+      cat("Gaussian kernel will be used when computing the weight matrix as 'sigma' was supplied. \n")
+    }else{
+      cat("Uniform kernel will be used when computing the weight matrix. \n")
+    }
+  }
+  ########################################
+  
+}
+
+
 #' Produce list containing the default AMIS parameters
 #' @param histogram optional logical indicating whether to use the histogram method.
 #' @param intermittent_output optional logical indicating whether to save output to the global workspace at each iteration of the algorithm

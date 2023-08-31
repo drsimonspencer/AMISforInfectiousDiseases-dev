@@ -42,6 +42,9 @@
 #' @export
 amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = NULL, initial_amis_vals = NULL) {
 
+  # Checks
+  check_inputs(prevalence_map, transmission_model, prior, amis_params, seed)
+  
   if(amis_params[["intermittent_output"]]){
     message("Saving output after each iteration (this will increase memory usage). \n")
   }
@@ -80,23 +83,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
                                               param=param, 
                                               prior_density=prior_density,
                                               last_simulation_seed=max(allseeds))))
-  }
-  
-  # Checks
-  if (!is.null(amis_params[["breaks"]])){print("Using empirical weights from user-defined histogram. Ensure last entry is strictly larger than the largest possible prevalence.\n")}
-  if (tryCatch(!(is.numeric(amis_params$delta) || is.numeric(amis_params$nsamples || is.numeric(amis_params$mixture_samples) || is.numeric(amis_params$df) || is.numeric(amis_params$target_ess) || is.logical(amis_params$log || is.numeric(amis_params$max_iters)))),error=function(e) return(TRUE))) {stop("Error in arguments for amis_params. Refer to function documentation for correct specification. For defaults set amis_params = default_amis_params(). \n")}
-  if (tryCatch(amis_params[["nsamples"]] <= 1,error=function(e) return(TRUE))) {stop("Number of samples must be greater than 1. \n")}  
-  if (tryCatch(amis_params[["df"]] < 1,error=function(e) return(TRUE))) {stop("Degrees of freedom must be greater than 0. \n")}
-  if (tryCatch(amis_params[["target_ess"]] < 1,error=function(e) return(TRUE))) {stop("Target ESS must be greater than 0. \n")}
-  if (tryCatch(amis_params[["max_iters"]] <= 1,error=function(e) return(TRUE))) {stop("Maximum number of iterations must be greater than 1. \n")}
-  if (!(is.matrix(prevalence_map) || is.data.frame(prevalence_map) || is.list(prevalence_map))) {stop("prevalence_map must be a matrix or data frame of size #locations by #samples (for one timepoint) or a list of matrices (for >1 timepoints). \n")}
-  if (tryCatch(!(is.function(prior$rprior) || is.function(prior$dprior)),error=function(e) return(TRUE))) {stop("prior must be a list containing functions named rprior and dprior. \n")}
-  if (!is.function(transmission_model)) {stop("transmission_model must be a function. \n")}
-  if (is.list(prevalence_map)) {
-    spatial_units = sapply(1:length(prevalence_map), function(t) nrow(prevalence_map[[t]]))
-    if (!(length(unique(spatial_units)) == 1)){
-      stop("Number of spatial units at each time point in prevalence_map must be equal. If data for some locations are missing at a timepoint set to NA.\n")
-    }
   }
   
   # Formatting

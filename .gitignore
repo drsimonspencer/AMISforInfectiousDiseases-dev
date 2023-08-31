@@ -2,8 +2,6 @@
 .Rproj
 *.Rproj
 .Rhistory
-.Rbuildignore
-*.Rbuildignore
 tests/.Rhistory
 **/.Rhistory
 files/

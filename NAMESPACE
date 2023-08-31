@@ -2,3 +2,5 @@
 
 export(amis)
 export(default_amis_params)
+importFrom(Rcpp,sourceCpp)
+useDynLib(AMISforInfectiousDiseases)

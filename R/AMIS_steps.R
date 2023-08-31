@@ -1,3 +1,7 @@
+#' @useDynLib AMISforInfectiousDiseases
+#' @importFrom Rcpp sourceCpp
+NULL
+
 #' Produce list containing the default AMIS parameters
 #' @param histogram optional logical indicating whether to use the histogram method.
 #' @param intermittent_output optional logical indicating whether to save output to the global workspace at each iteration of the algorithm

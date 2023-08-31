@@ -4,13 +4,20 @@
 \alias{amis}
 \title{Run the AMIS algorithm to fit a transmission model to a map}
 \usage{
-amis(prevalence_map, transmission_model, prior, amis_params, seed = NULL)
+amis(
+  prevalence_map,
+  transmission_model,
+  prior,
+  amis_params,
+  seed = NULL,
+  initial_amis_vals = NULL
+)
 }
 \arguments{
 \item{prevalence_map}{An L x M matrix containing samples from the fitted prevalence map, where L is the number of locations and M the number of samples.
 The location names are inherited from \code{rownames(prevalence_map)} if possible. Alternatively, a list with one entry for each timepoint.
 Each entry must be a list containing objects \code{data} (an L x M matrix of data as above);
-and \code{likelihood} a function taking arguments \code{data} (a matrix of data as above),
+and \code{likelihood} a function taking arguments \code{param} (model parameters used in the simulation), \code{data} (a matrix of data as above),
 \code{prevalence} (a matrix of output from the transmission model) and optional logical \code{log}, which returns the vector of (log)-likelihoods.
 If a likelihood is not specified then it is assumed that
 the data consist of samples from a geo-statistical model and empirical methods are used.}
@@ -19,22 +26,29 @@ the data consist of samples from a geo-statistical model and empirical methods a
 and producing a n x timepoints MATRIX of prevalences as output (it must be a matrix even when timepoints==1).}
 
 \item{prior}{A list containing the functions \code{dprior} and \code{rprior} (density and RNG).
+Argument to \code{dprior} must be a d-length vector of model parameters and binary indicator \code{log} to indicate whether to calculate log density or not.
+Argument to \code{rprior} must be a single integer \code{n} that determines the number of samples to draw.
 \code{rprior} must produce an n by d MATRIX of parameters, even when d=1.
 parameter names are inherited from the \code{colnames} from the output of \code{rprior} if possible.}
 
 \item{amis_params}{A list containing the control parameters for the AMIS algorithm
 \describe{
-\item{\code{delta}the smoothing parameter in the empirical RN derivative (usually 0.01).}
-\item{\code{nsamples}the number of new samples drawn within each AMIS iteration.}
-\item{\code{mixture_samples}the number of samples used to represent the weighted parameters in the mixture fitting.}
-\item{\code{df}the degrees of freedom in the t-distributions, used to yield a heavy tailed proposal.}
-\item{\code{target_ess}the target effective sample size.}
+\item{\code{delta} the smoothing parameter in the empirical RN derivative (usually 0.01).}
+\item{\code{nsamples} the number of new samples drawn within each AMIS iteration.}
+\item{\code{mixture_samples} the number of samples used to represent the weighted parameters in the mixture fitting.}
+\item{\code{df} the degrees of freedom in the t-distributions, used to yield a heavy tailed proposal.}
+\item{\code{target_ess} the target effective sample size.}
 \item{\code{log} logical indicating if calculations are to be performed on log scale.}
-\item{\code{max_iters}maximum number of AMIS iterations.}
-\item{\code{breaks}optional vector specifying the breaks for the histogram.}
+\item{\code{max_iters} maximum number of AMIS iterations.}
+\item{\code{breaks} optional vector specifying the breaks for the histogram. Last entry must be strictly larger than the largest possible prevalence. }
+\item{\code{bayesian} optional logical for whether to perform Bayesian updated step (does not divide by the induced prior
+over the simulated prevalence when calculating weights).}
 }}
 
 \item{seed}{Optional seed for the random number generator}
+
+\item{initial_amis_vals}{optional list containing the object created by setting intermittent_output=TRUE.
+Necessary to initialise the algorithm from intermittent output from a previous run (where at least one iteration was successful!)}
 }
 \value{
 A dataframe of the sampled parameters, simulation seed, and weight in each location.

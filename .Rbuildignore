@@ -1,1 +1,3 @@
 ^trachoma$
+^.*\.Rproj$
+^\.Rproj\.user$

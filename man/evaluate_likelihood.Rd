@@ -4,7 +4,7 @@
 \alias{evaluate_likelihood}
 \title{Evaluate likelihood for each additional simulation for a single timepoint}
 \usage{
-evaluate_likelihood(prevalence_map, prev_sim, amis_params)
+evaluate_likelihood(param, prevalence_map, prev_sim, amis_params)
 }
 \arguments{
 \item{prevalence_map}{A list containing objects \code{data} (an L x M matrix of data);

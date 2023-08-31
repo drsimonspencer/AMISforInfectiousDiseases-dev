@@ -42,6 +42,10 @@
 #' @export
 amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = NULL, initial_amis_vals = NULL) {
 
+  tidy_warning <- function(..., prefix = " ", initial = ""){
+    warning(strwrap(..., prefix = prefix, initial = initial))
+  }
+  
   # Checks
   check_inputs(prevalence_map, transmission_model, prior, amis_params, seed)
   
@@ -117,23 +121,32 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     # Sample first set of parameters from the prior
     param <- prior$rprior(nsamples)
     if(!is.matrix(param)) {stop("rprior function must produce a MATRIX of size #simulations by #parameters, even when #parameters is equal to 1. \n")}
-    if(length(c(which(is.na(param)),which(is.nan(param))))>0) {warning("Greater than 1 sample from the prior was an NA or NaN value. \n")}
-    if(ncol(param)==1 & amis_params[["bayesian"]]==F) {warning("Currently running with amis_params[['bayesian']]==FALSE. 
-                                                                              For models with only one parameter it is recommended to set 
-                                                                              amis_params[['bayesian']] = TRUE for prior to influence the weights calculation.\n")}
+    if(any(is.na(param))){warning("At least one sample from the prior was NA or NaN. \n")}
+    if(ncol(param)==1 && amis_params[["bayesian"]]==F) {warning("Currently running with amis_params[['bayesian']]==FALSE. For models with only one parameter it is recommended to set amis_params[['bayesian']] = TRUE for prior to influence the weights calculation.\n")}
     # to avoid duplication, evaluate prior density now.
     prior_density<-sapply(1:nsamples,function(b) {prior$dprior(param[b,],log=amis_params[["log"]])})
-    if(!(length(prior_density)==nsamples)) {stop("Output from dprior function must have length 1. \n")}
-    if(length(c(which(is.na(prior_density)),which(is.nan(prior_density))))>0) {warning("Greater than 1 prior density evaluation was an NA or NaN value. \n")}
+    if(length(prior_density)!=nsamples) {stop("Output from dprior function must have length 1. \n")}
+    if(any(is.na(prior_density))){warning("At least one prior density evaluation was NA or NaN. \n")}
     # Simulate from transmission model
     simulated_prevalences <- transmission_model(seeds = 1:nsamples, param)
     if(!is.matrix(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, transmission_model function should produce a MATRIX of size #simulations by #timepoints, even when #timepoints is equal to 1. \n")}
-    if(!(nrow(param) == nrow(simulated_prevalences))) {warning("Unless specifying a bespoke likelihood function, number of rows in matrices from transmission_model and rprior functions must be equal (#simulations). \n")}
-    if(!(length(prevalence_map) == ncol(simulated_prevalences))) {warning("Unless specifying a bespoke likelihood function, number of timepoints in prevalence_map and the number of columns in output from transmission_model function must be equal to #timepoints. \n")}
-    if(length(c(which(is.na(simulated_prevalences)),which(is.nan(simulated_prevalences))))>0) {warning("Output from transmission model produced greater than 1 NA or NaN value. \n")}
-    
+    if(nrow(param) != nrow(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of rows in matrices from transmission_model and rprior functions must be equal (#simulations). \n")}
+    if(length(prevalence_map) != ncol(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of timepoints in prevalence_map and the number of columns in output from transmission_model function must be equal to #timepoints. \n")}
+    if(any(is.na(simulated_prevalences))) {warning("Output from transmission model produced at least one NA or NaN value. \n")}
+    #   #   #   #   #   #   #   #   
+    # if(!all(is.finite(c(simulated_prevalences)))){
+    #   stop(paste0("transmission_model is producing non-finite values (NA, NaN, Inf or -Inf) at iteration ", 1))}
+    #   #   #   #   #   #   #   #  
+    is_within_boundaries <- simulated_prevalences>=boundaries[1] & simulated_prevalences<=boundaries[2]
+    sim_within_boundaries <- which(is_within_boundaries)-1L
+    sim_outside_boundaries <- which(!is_within_boundaries)-1L
+    if(length(sim_within_boundaries)<length(simulated_prevalences)){
+      paste0("At iteration t=",t, ", transmission_model produced ", 
+             length(simulated_prevalences)-length(sim_within_boundaries), 
+             " samples outside of the boundaries")
+    }
     # to avoid duplication, evaluate likelihood now.
-    likelihoods<- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params)
+    likelihoods <- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params)
     if(length(c(which(is.nan(likelihoods))))>0) {warning("Likelihood evaluation produced greater than 1 NaN value. \n")}
   
     # Determine first time each location appears in the data
@@ -177,7 +190,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     #   res = save_output()
     #   assign("intermittent_output",res,.GlobalEnv)
     # }
-  } else {     
+  } else {
     cat("AMIS iteration 1\n")
     message("Initialising algorithm from a previous run provided by the user. \n")
     check_initial_vals = function(d){

@@ -6,16 +6,17 @@ NULL
 #' @inheritParams amis
 #' @export
 check_inputs <- function(prevalence_map, transmission_model, prior, amis_params, seed) {
-  
+
   if (!(is.matrix(prevalence_map) || is.data.frame(prevalence_map) || is.list(prevalence_map))) {
-    stop(strwrap("prevalence_map must be a matrix or data frame of size 
-    #locations by #samples (for one timepoint) or a list of matrices (for >1 timepoints). \n"))}
+    stop(("prevalence_map must be a matrix or data frame of size 
+    #locations by #samples (for one timepoint) or a list of matrices (for >1 timepoints)."))
+    }
   if(is.list(prevalence_map)){
     dims <- lapply(prevalence_map, dim)
     if(!all(sapply(dims, FUN = identical, dims[[1]]))){
-      stop(strwrap("'prevalence_map' must have the same dimension 
+      stop("'prevalence_map' must have the same dimension 
       (number of spatial units and number of samples) at each time point.
-      If data for some locations are missing at a timepoint set to NA."))
+      If data for some locations are missing at a timepoint set to NA.")
     }
     num_time_points <- length(prevalence_map)
   }
@@ -57,11 +58,12 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   stopifnot("'seed' must be either NULL or a single numeric value" = ((length(seed)==1 && is.numeric(seed)) || is.null(seed)))
   
   if (!is.null(amis_params[["breaks"]])){
-    message(strwrap("Using empirical weights from user-defined histogram. Ensure 
+    warning(strwrap(prefix = " ", initial = "", 
+    "Using empirical weights from user-defined histogram. Ensure 
       last entry is strictly larger than the largest possible prevalence."))
   }
 
-
+  
   
   
   ########################################

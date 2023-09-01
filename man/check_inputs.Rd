@@ -34,8 +34,8 @@ parameter names are inherited from the \code{colnames} from the output of \code{
 \item{\code{log} logical indicating if calculations are to be performed on log scale.}{}
 \item{\code{max_iters} maximum number of AMIS iterations.}{}
 \item{\code{breaks} optional vector specifying the breaks for the histogram. Last entry must be strictly larger than the largest possible prevalence. }{}
-\item{\code{bayesian} optional logical for whether to perform Bayesian updated step (does not divide by the induced prior
-over the simulated prevalence when calculating weights).}{}
+\item{\code{RN} logical for whether to divide by the induced prior
+over the simulated prevalence when calculating weights or not (default to TRUE).}{}
 }}
 
 \item{seed}{Optional seed for the random number generator}

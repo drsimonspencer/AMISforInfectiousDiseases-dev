@@ -4,22 +4,22 @@
 \alias{sample_new_parameters}
 \title{Sample new parameters}
 \usage{
-sample_new_parameters(mixture, n_samples, df, prior, log)
+sample_new_parameters(mixture, nsamples, df, prior, log)
 }
 \arguments{
 \item{mixture}{A list of mixture components as returned by
 \code{\link{weighted_mixture}}}
 
-\item{n_samples}{A number of new parameters to sample (integer)}
+\item{nsamples}{A number of new parameters to sample (integer)}
 
-\item{df}{The degrees of freedom for the t-dsitributed proposal distribution.}
+\item{df}{The degrees of freedom for the t-distributed proposal distribution.}
 
 \item{prior}{list containing the functions \code{rprior} and \code{dprior}}
 
 \item{log}{A logical indicating if densities}
 }
 \value{
-A list containing \code{params}, an \code{n_samples} x d matrix containing the sampled parameter values and
+A list containing \code{params}, an \code{nsamples} x d matrix containing the sampled parameter values and
 \code{prior_density}, the corresponding vector of prior densities.
 }
 \description{

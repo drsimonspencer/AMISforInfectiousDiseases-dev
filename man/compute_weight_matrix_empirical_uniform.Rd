@@ -25,6 +25,8 @@ NB: transpose of slice of array.}
 
 \item{weight_matrix}{An n_sims x n_locs matrix containing the current values of the weights.}
 
+\item{is_within_boundaries}{Logical vector showing which simulated values are within boundaries.}
+
 \item{sim_within_boundaries}{Vector showing which simulated values are within boundaries.}
 
 \item{sim_outside_boundaries}{Vector showing which simulated values are outside boundaries.}

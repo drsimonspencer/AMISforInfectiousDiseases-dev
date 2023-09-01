@@ -26,11 +26,11 @@ f_estimator_Gaussian(
 
 \item{which_valid_prev_map_t}{List showing which samples are valid for each location at a time point.}
 
+\item{log_norm_const_gaussian_t}{(n_locs x M) matrix showing the log normalising constant for the Gaussian kernels.}
+
 \item{left_boundary}{Lower boundary for the prevalence.}
 
 \item{right_boundary}{Upper boundary for the prevalence.}
-
-\item{norm_const_gaussian_t}{(n_locs x M) matrix showing normalising constant for the Gaussian kernels.}
 }
 \value{
 A matrix with L rows containing the empirical estimates for the likelihood.

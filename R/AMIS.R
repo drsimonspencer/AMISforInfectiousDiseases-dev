@@ -32,8 +32,8 @@
 #' \item{\code{log} logical indicating if calculations are to be performed on log scale.}{}
 #' \item{\code{max_iters} maximum number of AMIS iterations.}{}
 #' \item{\code{breaks} optional vector specifying the breaks for the histogram. Last entry must be strictly larger than the largest possible prevalence. }{}
-#' \item{\code{bayesian} optional logical for whether to perform Bayesian updated step (does not divide by the induced prior 
-#' over the simulated prevalence when calculating weights).}{}
+#' \item{\code{RN} logical for whether to divide by the induced prior 
+#' over the simulated prevalence when calculating weights or not (default to TRUE).}{}
 #' }
 #' @param seed Optional seed for the random number generator
 #' @param initial_amis_vals optional list containing the object created by setting intermittent_output=TRUE. 
@@ -87,7 +87,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   
   # Formatting
   if (is.matrix(prevalence_map) || is.data.frame(prevalence_map)) {prevalence_map=list(list(data=prevalence_map))}
-  if (is.null(amis_params[["bayesian"]])) {amis_params[["bayesian"]]<-FALSE}
   use_gaussian_kernel <- ifelse(is.null(amis_params[["breaks"]]) && !is.null(amis_params[["sigma"]]), TRUE, FALSE)
   boundaries <- amis_params[["boundaries"]]
   nsamples <- amis_params[["nsamples"]]
@@ -109,14 +108,16 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   
   # Initialise
   if(!is.null(seed)) set.seed(seed)
-  t <- 1
+  iter <- 1
   if(is.null(initial_amis_vals)){
     cat("AMIS iteration 1\n")
     # Sample first set of parameters from the prior
     param <- prior$rprior(nsamples)
     if(!is.matrix(param)) {stop("rprior function must produce a MATRIX of size #simulations by #parameters, even when #parameters is equal to 1. \n")}
     if(any(is.na(param))){warning("At least one sample from the prior was NA or NaN. \n")}
-    if(ncol(param)==1 && amis_params[["bayesian"]]==F) {warning("Currently running with amis_params[['bayesian']]==FALSE. For models with only one parameter it is recommended to set amis_params[['bayesian']] = TRUE for prior to influence the weights calculation.\n")}
+    if(ncol(param)==1 && amis_params[["RN"]]) {warning("Currently running with amis_params[['RN']]==TRUE. 
+                                                          For models with only one parameter it is recommended to set 
+                                                          amis_params[['RN']] = FALSE for prior to influence the weights calculation.\n")}
     # to avoid duplication, evaluate prior density now.
     prior_density<-sapply(1:nsamples,function(b) {prior$dprior(param[b,],log=amis_params[["log"]])})
     if(length(prior_density)!=nsamples) {stop("Output from dprior function must have length 1. \n")}
@@ -127,15 +128,29 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     if(nrow(param) != nrow(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of rows in matrices from transmission_model and rprior functions must be equal (#simulations). \n")}
     if(length(prevalence_map) != ncol(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of timepoints in prevalence_map and the number of columns in output from transmission_model function must be equal to #timepoints. \n")}
     if(any(is.na(simulated_prevalences))) {warning("Output from transmission model produced at least one NA or NaN value. \n")}
+    
+    
+    
+    ## if boundaries, then .....
+    
+    
+    
+    
+    
     #   #   #   #   #   #   #   #   
-    # if(!all(is.finite(c(simulated_prevalences)))){
-    #   stop(paste0("transmission_model is producing non-finite values (NA, NaN, Inf or -Inf) at iteration ", 1))}
-    #   #   #   #   #   #   #   #  
+    if(!all(is.finite(c(simulated_prevalences)))){
+      warning(paste0("transmission_model is producing non-finite values (NA, NaN, Inf or -Inf) at iteration ", 1))}
+    
+    # REPLACE Inf and -Inf by NAs? (for them not to be used?)
+    
+      #   #   #   #   #   #   #
+    
+    
     is_within_boundaries <- simulated_prevalences>=boundaries[1] & simulated_prevalences<=boundaries[2]
     sim_within_boundaries <- which(is_within_boundaries)-1L
     sim_outside_boundaries <- which(!is_within_boundaries)-1L
     if(length(sim_within_boundaries)<length(simulated_prevalences)){
-      paste0("At iteration t=",t, ", transmission_model produced ", 
+      paste0("At iteration ",iter, ", transmission_model produced ", 
              length(simulated_prevalences)-length(sim_within_boundaries), 
              " samples outside of the boundaries")
     }
@@ -155,7 +170,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     for (j in 1:n_tims) {
       lik_mat <- lik_matrix(likelihoods[j,,])
       for (l in 1:n_locs){
-      locations_first_t[which(!is.na(lik_mat[1,]) & is.na(locations_first_t))] <- j
+        locations_first_t[!is.na(lik_mat[1,]) & is.na(locations_first_t)] <- j
       }
     }
      
@@ -178,7 +193,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       Mean = list(), # list of means for each component
       probs = list() # probability of each component (unnormalised)
     )
-    seeds <- function(t) ((t - 1) * nsamples + 1):(t * nsamples)  #function to calculate the seeds for iteration t.
+    seeds <- function(iter) ((iter - 1) * nsamples + 1):(iter * nsamples)  #function to calculate the seeds for iteration iter.
     niter <- 1 # number of completed iterations 
     # if (amis_params[["intermittent_output"]]){
     #   res = save_output()
@@ -214,11 +229,11 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     for (j in 1:n_tims) {
       lik_mat = lik_matrix(likelihoods[j,,])
       for (l in 1:n_locs){
-        locations_first_t[which(!is.na(lik_mat[1,]) & is.na(locations_first_t))] = j
+        locations_first_t[!is.na(lik_mat[1,]) & is.na(locations_first_t)] = j
       }
     }
     
-    seeds <- function(t) ((t - 2) * nsamples + 1):((t - 1) * nsamples) + initial_amis_vals$amis_bits$last_simulation_seed #function to calculate the seeds for iteration t.
+    seeds <- function(iter) ((iter - 2) * nsamples + 1):((iter - 1) * nsamples) + initial_amis_vals$amis_bits$last_simulation_seed #function to calculate the seeds for iteration iter.
     niter <- 0 # number of completed iterations 
   }
   
@@ -231,18 +246,18 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   first_weight = rep(1-amis_params[["log"]], nsamples)
   # Continue if target_ess not yet reached
   if (min(ess) < amis_params[["target_ess"]]){
-    for (t in 2:amis_params[["max_iters"]]) {
-      cat("AMIS iteration",t,"\n")
+    for (iter in 2:amis_params[["max_iters"]]) {
+      cat("AMIS iteration ",iter,"\n")
       mean_weights <- update_according_to_ess_value(weight_matrix, ess, amis_params[["target_ess"]],amis_params[["log"]])
       if ((amis_params[["log"]] && max(mean_weights)==-Inf) || (!amis_params[["log"]] && max(mean_weights)==0)) {stop("No weight on any particles for locations in the active set.\n")}
       mixture <- weighted_mixture(param, amis_params[["mixture_samples"]], mean_weights, amis_params[["log"]])
       cat("  A",mixture$G,"component mixture has been fitted.\n")
-      components <- update_mixture_components(mixture, components, t)
+      components <- update_mixture_components(mixture, components, iter)
       new_params <- sample_new_parameters(mixture, nsamples, amis_params[["df"]], prior, amis_params[["log"]])
       if(length(c(which(is.na(new_params$params)), which(is.nan(new_params$params))))>0) {warning("Greater than 1 sample from the proposal after the first iteration of AMIS was an NA or NaN value. \n")}
       param <- rbind(param, new_params$params)
       prior_density <- c(prior_density,new_params$prior_density)
-      new_prevalences <- transmission_model(seeds(t), new_params$params)
+      new_prevalences <- transmission_model(seeds(iter), new_params$params)
       if(length(c(which(is.na(new_prevalences)), which(is.nan(simulated_prevalences))))>0) {warning("Output from transmission model produced greater than 1 NA or NaN value. \n")}
       simulated_prevalences <- rbind(simulated_prevalences,new_prevalences)
       likelihoods <- compute_likelihood(new_params$params,prevalence_map,new_prevalences,amis_params,likelihoods)
@@ -273,11 +288,11 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   # Save output
   res = save_output()
   
-  # Calculate model evidence if using Bayesian updating
-  if (amis_params[["bayesian"]]){
-    model_evidence = compute_model_evidence(likelihoods, simulated_prevalences, amis_params, first_weight)
-    return(list(sample=res$results, evidence=model_evidence))
-  } else {
+  # Calculate model evidence if using Bayesian updating (RN derivative not being used)
+  if (amis_params[["RN"]]){
     return(list(sample=res$results,evidence=NULL))
+  } else {
+    model_evidence = compute_model_evidence(likelihoods, amis_params, first_weight)
+    return(list(sample=res$results, evidence=model_evidence))
   }
 }

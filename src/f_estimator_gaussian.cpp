@@ -7,7 +7,7 @@
 //' @param sd Bandwith value.
 //' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
 //' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
-//' @param norm_const_gaussian_t (n_locs x M) matrix showing normalising constant for the Gaussian kernels.
+//' @param log_norm_const_gaussian_t (n_locs x M) matrix showing the log normalising constant for the Gaussian kernels.
 //' @param left_boundary Lower boundary for the prevalence.
 //' @param right_boundary Upper boundary for the prevalence.
 //' @return A matrix with L rows containing the empirical estimates for the likelihood.

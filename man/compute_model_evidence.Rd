@@ -4,23 +4,15 @@
 \alias{compute_model_evidence}
 \title{Compute the model evidence}
 \usage{
-compute_model_evidence(
-  likelihoods,
-  simulated_prevalence,
-  amis_params,
-  first_weight
-)
+compute_model_evidence(likelihoods, amis_params, first_weight)
 }
 \arguments{
 \item{likelihoods}{An array with dimension n_tims,n_locs,n_sims -- ie timepoints x locations x simulations.}
 
-\item{simulated_prevalence}{An n_sims x n_tims matrix containing the simulated prevalence values for each of the
-parameter samples. (double)}
-
 \item{amis_params}{A list of parameters, e.g. from \code{\link{default_amis_params}}.}
 
 \item{first_weight}{A vector containing the values for the right hand side of
-the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.}
+the weight expression.}
 }
 \value{
 estimate of the model evidence.

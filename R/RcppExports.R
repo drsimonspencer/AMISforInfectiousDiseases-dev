@@ -42,6 +42,7 @@ compute_weight_matrix_empirical_gauss <- function(likelihoods, prev_sim, amis_pa
 #' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
 #' @param weight_matrix An n_sims x n_locs matrix containing the current values of the weights.
+#' @param is_within_boundaries Logical vector showing which simulated values are within boundaries.
 #' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
 #' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
 #' @param locs Vector showing which locations have data.
@@ -57,7 +58,7 @@ compute_weight_matrix_empirical_uniform <- function(likelihoods, prev_sim, amis_
 #' @param sd Bandwith value.
 #' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
-#' @param norm_const_gaussian_t (n_locs x M) matrix showing normalising constant for the Gaussian kernels.
+#' @param log_norm_const_gaussian_t (n_locs x M) matrix showing the log normalising constant for the Gaussian kernels.
 #' @param left_boundary Lower boundary for the prevalence.
 #' @param right_boundary Upper boundary for the prevalence.
 #' @return A matrix with L rows containing the empirical estimates for the likelihood.

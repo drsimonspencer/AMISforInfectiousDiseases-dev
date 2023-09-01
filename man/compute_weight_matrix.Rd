@@ -23,7 +23,8 @@ parameter samples. (double)}
 \item{first_weight}{A vector containing the values for the right hand side of
 the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.}
 
-\item{locations_first_t}{locations_first_t}
+\item{locations_first_t}{Vector of length n_locs showing the first time each location appears in the data,
+or an NA if there is no data.}
 }
 \value{
 normalised weight matrix.

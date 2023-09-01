@@ -12,6 +12,7 @@
 //' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 //' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
 //' @param weight_matrix An n_sims x n_locs matrix containing the current values of the weights.
+//' @param is_within_boundaries Logical vector showing which simulated values are within boundaries.
 //' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
 //' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
 //' @param locs Vector showing which locations have data.

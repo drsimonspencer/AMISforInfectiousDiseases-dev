@@ -34,7 +34,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   df <- amis_params$df
   target_ess <- amis_params$target_ess
   max_iters <- amis_params$max_iters
-  bayesian <- amis_params$bayesian
+  RN <- amis_params$RN
   breaks <- amis_params$breaks
   boundaries <- amis_params$boundaries
   boundaries <- as.numeric(boundaries)
@@ -52,37 +52,28 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   stopifnot("'df' must be a single numeric value greater than 0" = (length(df)==1 && is.numeric(df) && df>0))
   stopifnot("'target_ess' must be a single numeric value greater than 0" = (length(target_ess)==1 && is.numeric(target_ess) && target_ess>0))
   stopifnot("'max_iters' must be a single numeric value greater than 1" = (length(max_iters)==1 && is.numeric(max_iters) && max_iters>1))
-  if(!is.null(bayesian)){
-    stopifnot("If 'bayesian' is supplied, it must a vector of length timepoints" = (length(bayesian)==num_time_points))  
-  }
   stopifnot("'seed' must be either NULL or a single numeric value" = ((length(seed)==1 && is.numeric(seed)) || is.null(seed)))
-  
   if (!is.null(amis_params[["breaks"]])){
     warning(strwrap(prefix = " ", initial = "", 
     "Using empirical weights from user-defined histogram. Ensure 
       last entry is strictly larger than the largest possible prevalence."))
   }
-
-  
-  
-  
-  ########################################
-  ### NEED TO DOUBLE-CHECK THE BELOW MESSAGES
-  # These messages seem necessary because of the hierarchy of 3+ inputs.
-  # If the user supplies 'sigma' AND 'breaks', they will not know which method will be used
-  # I think we should not expect that the user will follow exactly this order:
-  # -- first, the default (uniform kernel with delta), 
-  # -- second, the Gaussian kernel,
-  # -- third, histogram method.
-  # (unless we explain this order of hierarchy in the documentation and expect that they read it very carefully).
-  
   if(is.null(c(amis_params[["delta"]], amis_params[["sigma"]], amis_params[["breaks"]]))){
     stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL.")
   }
-  # Even if 'bayesian' is supplied, we still need either delta, sigma or breaks to compute the approximation for likelihood.
-  if(!is.null(amis_params[["bayesian"]])){
+  if(amis_params[["RN"]]){
+    if(!is.null(amis_params[["breaks"]])){
+      cat("Histogram method will be used in the approximation for the likelihood and in the update of the weight matrix as 'breaks' was supplied. \n")
+    }else{
+      if(!is.null(amis_params[["sigma"]])){
+        cat("Gaussian kernel will be used in the approximation for the likelihood and in the update of the weight matrix as 'sigma' was supplied. \n")
+      }else{
+        cat("Uniform kernel will be used in the approximation for the likelihood and in the update of the weight matrix. \n")
+      }
+    }
+  }else{
     ## Bayesian method for weight matrix
-    cat("Bayesian updating will be used when computing the weight matrix as 'bayesian' was supplied. \n")
+    cat("Bayesian method will be used to update the weight matrix as 'RN' was set to FALSE. \n")
     ## and then specifically for f -----
     if(!is.null(amis_params[["breaks"]])){
       cat("Histogram method will be used in the approximation for the likelihood as 'breaks' was supplied. \n")
@@ -93,20 +84,8 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
         cat("Uniform kernel will be used in the approximation for the likelihood. \n")
       }
     }
-    ## ----------------
-  }else if(!is.null(amis_params[["breaks"]])){
-    cat("Histogram method will be used when computing the weight matrix as 'breaks' was supplied. \n")
-  }else{
-    if(!is.null(amis_params[["sigma"]])){
-      cat("Gaussian kernel will be used when computing the weight matrix as 'sigma' was supplied. \n")
-    }else{
-      cat("Uniform kernel will be used when computing the weight matrix. \n")
-    }
   }
-  ########################################
-  
 }
-
 
 #' Produce list containing the default AMIS parameters
 #' @param histogram optional logical indicating whether to use the histogram method.
@@ -114,7 +93,8 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
 #' @return list containing the default AMIS parameters
 #' @export
 default_amis_params <- function(histogram=FALSE,intermittent_output=FALSE) {
-  amis_params<-list(delta=0.01,nsamples=500,mixture_samples=1000,df=3,target_ess=500,log=F,max_iters=12,
+  amis_params<-list(delta=0.01,nsamples=500,mixture_samples=1000,df=3,
+                    target_ess=500,log=F,max_iters=12,RN=TRUE,
                     intermittent_output=intermittent_output)
   if (histogram) {amis_params[["breaks"]]<-0:100/100}
   return(amis_params)
@@ -195,7 +175,8 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params) {
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
 #' @param first_weight A vector containing the values for the right hand side of
 #'     the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.
-#' @param locations_first_t locations_first_t 
+#' @param locations_first_t Vector of length n_locs showing the first time each location appears in the data, 
+#' or an NA if there is no data.
 #' @return normalised weight matrix.
 compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params, first_weight, locations_first_t) {
   n_tims <- dim(likelihoods)[1]
@@ -212,19 +193,19 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
    for (t in 1:n_tims) {
     lik_mat <- lik_matrix(likelihoods[t,,])
     # Update the weights by the latest likelihood (filtering)
-    if (!amis_params[["bayesian"]]){
-      # If this is the first timepoint for a location then use empirical update, otherwise use bayesian
+    if (amis_params[["RN"]]){
+      # If this is the first timepoint for a location then use empirical update, otherwise use Bayesian
       locs_empirical = which(locations_first_t == t)
       locs_bayesian = which(locations_first_t < t)
       # Update weight matrix
-      weight_matrix[,locs_bayesian] <- compute_weight_matrix_bayesian(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)[,locs_bayesian]
+      weight_matrix[,locs_bayesian] <- compute_weight_matrix_nonRN(lik_mat,amis_params,weight_matrix)[,locs_bayesian]
       if (is.null(amis_params[["breaks"]])){
         weight_matrix[,locs_empirical] <- compute_weight_matrix_empirical(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)[,locs_empirical]
       } else {
         weight_matrix[,locs_empirical] <- compute_weight_matrix_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)[,locs_empirical]
       }
     } else {
-      weight_matrix <- compute_weight_matrix_bayesian(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)
+      weight_matrix <- compute_weight_matrix_nonRN(lik_mat,amis_params,weight_matrix)
     }
   }
   # renormalise weights
@@ -338,12 +319,10 @@ compute_weight_matrix_histogram<-function(likelihoods, prev_sim, amis_params, we
 #'
 #' @param likelihoods An n_sims x n_locs matrix of (log-)likelihoods
 #' NB: transpose of slice of array.
-#' @param prev_sim A vector containing the simulated prevalence value for each
-#'     parameter sample. Not used, but included for comparison with other functions.
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
 #' @param weight_matrix A matrix containing the current values of the weights.
 #' @return An updated weight matrix.
-compute_weight_matrix_bayesian <- function(likelihoods, prev_sim, amis_params, weight_matrix) {
+compute_weight_matrix_nonRN <- function(likelihoods, amis_params, weight_matrix) {
   locs<-which(!is.na(likelihoods[1,])) # if there is no data for a location, do not update weights.
   if (amis_params[["log"]]) {
     weight_matrix[,locs]<-weight_matrix[,locs]+likelihoods[,locs]
@@ -453,23 +432,23 @@ weighted_mixture <- function(parameters, nsamples, weights, log=F) {
 #'
 #' @param mixture A list of mixture components as returned by
 #'     \code{\link{weighted_mixture}}
-#' @param n_samples A number of new parameters to sample (integer)
-#' @param df The degrees of freedom for the t-dsitributed proposal distribution.
+#' @param nsamples A number of new parameters to sample (integer)
+#' @param df The degrees of freedom for the t-distributed proposal distribution.
 #' @param prior list containing the functions \code{rprior} and \code{dprior}
 #' @param log A logical indicating if densities 
-#' @return A list containing \code{params}, an \code{n_samples} x d matrix containing the sampled parameter values and
+#' @return A list containing \code{params}, an \code{nsamples} x d matrix containing the sampled parameter values and
 #' \code{prior_density}, the corresponding vector of prior densities.
 #'
 #' @seealso \code{\link{fit_mixture}}
-sample_new_parameters <- function(mixture, n_samples, df, prior, log) {
-  prior_density<-rep(NA,n_samples) 
+sample_new_parameters <- function(mixture, nsamples, df, prior, log) {
+  prior_density<-rep(NA,nsamples) 
   i<-1
-  while (i <= n_samples) {
+  while (i <= nsamples) {
     compo <- sample(1:mixture$G, 1, prob = mixture$probs)
     proposal <- mnormt::rmt(1,mean=mixture$Mean[,compo],S=mixture$Sigma[,,compo],df=df)
     density_of_proposal <- prior$dprior(proposal,log=log)
     if (all(!is.na(proposal)) && ((log && density_of_proposal>-Inf) || (!log && density_of_proposal>0))) {
-      if (i==1) {params<-matrix(NA,n_samples,length(proposal))}
+      if (i==1) {params<-matrix(NA,nsamples,length(proposal))}
       params[i,]<-proposal
       prior_density[i]<-density_of_proposal
       i<-i+1
@@ -481,7 +460,7 @@ sample_new_parameters <- function(mixture, n_samples, df, prior, log) {
 #' Update the components of the mixture
 #'
 #' This function updates the mixture \code{components} according to
-#' the current mixture \code{mixture} generated at iteration \code{t}.
+#' the current mixture \code{mixture} generated at iteration \code{iter}.
 #'
 #' @param mixture A list of mixture components as returned by
 #'     \code{\link{fit_mixture}}
@@ -492,13 +471,13 @@ sample_new_parameters <- function(mixture, n_samples, df, prior, log) {
 #'       \item{\code{Mean}}{A list of means for each component}
 #'       \item{\code{probs}}{A list probability weights for each component}
 #'     }
-#' @param t The current iteration index (integer)
+#' @param iter The current iteration index (integer)
 #' @return The updated \code{components} list
 #'
 #' @seealso \code{\link{weighted_mixture}}, \code{\link{fit_mixture}}
-update_mixture_components <- function(mixture, components, t) {
-  components$G[t] <- mixture$G
-  G_previous <- sum(components$G[1:(t - 1)]) # Number of pre-existing components
+update_mixture_components <- function(mixture, components, iter) {
+  components$G[iter] <- mixture$G
+  G_previous <- sum(components$G[1:(iter - 1)]) # Number of pre-existing components
   for (i in 1:mixture$G) {
     components$Sigma[[i + G_previous]] <- mixture$Sigma[, , i]
     components$Mean[[i + G_previous]] <- mixture$Mean[,i]
@@ -560,13 +539,12 @@ compute_prior_proposal_ratio <- function(components, param, prior_density, df, l
 #' for a given set of unnormalised parameter weights.
 #'
 #' @param likelihoods An array with dimension n_tims,n_locs,n_sims -- ie timepoints x locations x simulations.
-#' @param simulated_prevalence An n_sims x n_tims matrix containing the simulated prevalence values for each of the
-#'     parameter samples. (double)
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
 #' @param first_weight A vector containing the values for the right hand side of
-#'     the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.
+#'     the weight expression. 
 #' @return estimate of the model evidence.
-compute_model_evidence <- function(likelihoods, simulated_prevalence, amis_params, first_weight){
+#' @export
+compute_model_evidence <- function(likelihoods, amis_params, first_weight){
   n_tims <- dim(likelihoods)[1]
   n_locs <- dim(likelihoods)[2]
   n_sims <- dim(likelihoods)[3]
@@ -581,7 +559,7 @@ compute_model_evidence <- function(likelihoods, simulated_prevalence, amis_param
   for (t in 1:n_tims) {
     lik_mat <- lik_matrix(likelihoods[t,,])
     # Update the weights by the latest likelihood (filtering)
-    weight_matrix <- compute_weight_matrix_bayesian(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)
+    weight_matrix <- compute_weight_matrix_nonRN(lik_mat,amis_params,weight_matrix)
   }
 
   if(amis_params[['log']] == T){ 
@@ -591,4 +569,3 @@ compute_model_evidence <- function(likelihoods, simulated_prevalence, amis_param
   model_evidence_var = 1/length(weight_matrix)^2 * model_evidence^2 * sum((weight_matrix-1)^2)
   return(c(model_evidence = model_evidence,variance = model_evidence_var))
 }
-

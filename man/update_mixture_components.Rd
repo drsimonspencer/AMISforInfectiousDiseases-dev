@@ -4,7 +4,7 @@
 \alias{update_mixture_components}
 \title{Update the components of the mixture}
 \usage{
-update_mixture_components(mixture, components, t)
+update_mixture_components(mixture, components, iter)
 }
 \arguments{
 \item{mixture}{A list of mixture components as returned by
@@ -18,14 +18,14 @@ update_mixture_components(mixture, components, t)
 \item{\code{probs}}{A list probability weights for each component}
 }}
 
-\item{t}{The current iteration index (integer)}
+\item{iter}{The current iteration index (integer)}
 }
 \value{
 The updated \code{components} list
 }
 \description{
 This function updates the mixture \code{components} according to
-the current mixture \code{mixture} generated at iteration \code{t}.
+the current mixture \code{mixture} generated at iteration \code{iter}.
 }
 \seealso{
 \code{\link{weighted_mixture}}, \code{\link{fit_mixture}}

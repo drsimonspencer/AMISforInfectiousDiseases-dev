@@ -127,7 +127,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     if(!is.matrix(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, transmission_model function should produce a MATRIX of size #simulations by #timepoints, even when #timepoints is equal to 1. \n")}
     if(nrow(param) != nrow(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of rows in matrices from transmission_model and rprior functions must be equal (#simulations). \n")}
     if(length(prevalence_map) != ncol(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of timepoints in prevalence_map and the number of columns in output from transmission_model function must be equal to #timepoints. \n")}
-    if(any(is.na(simulated_prevalences))) {warning(paste0("At iteration ",iter, ", transmission_model produced at least one NA or NaN value. \n"))}
 
     is_within_boundaries <- (simulated_prevalences>=boundaries[1]) & 
       (simulated_prevalences<=boundaries[2]) &
@@ -137,7 +136,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     if(length(sim_within_boundaries)<length(simulated_prevalences)){
       warning(paste0("At iteration ",iter, ", transmission_model produced ", 
              length(simulated_prevalences)-length(sim_within_boundaries), 
-             " invalid samples (either infinite values or values outside of the boundaries)"))
+             " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
     }
     # to avoid duplication, evaluate likelihood now.
     likelihoods <- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params)
@@ -251,7 +250,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       param <- rbind(param, new_params$params)
       prior_density <- c(prior_density,new_params$prior_density)
       new_prevalences <- transmission_model(seeds(iter), new_params$params)
-      if(any(is.na(new_prevalences))) {warning(paste0("At iteration ",iter, ", transmission_model produced at least one NA or NaN value. \n"))}
 
       is_within_boundaries_iter <- (new_prevalences>=boundaries[1]) & 
         (new_prevalences<=boundaries[2]) & 
@@ -263,7 +261,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       if(sum(is_within_boundaries_iter)<length(new_prevalences)){
         warning(paste0("At iteration iter=",iter, ", transmission_model produced ", 
                length(new_prevalences)-sum(is_within_boundaries_iter), 
-               " invalid samples (either infinite values or values outside of the boundaries)."))
+               " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
       }
             
       simulated_prevalences <- rbind(simulated_prevalences,new_prevalences)

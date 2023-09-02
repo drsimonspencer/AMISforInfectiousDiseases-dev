@@ -127,32 +127,17 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     if(!is.matrix(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, transmission_model function should produce a MATRIX of size #simulations by #timepoints, even when #timepoints is equal to 1. \n")}
     if(nrow(param) != nrow(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of rows in matrices from transmission_model and rprior functions must be equal (#simulations). \n")}
     if(length(prevalence_map) != ncol(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of timepoints in prevalence_map and the number of columns in output from transmission_model function must be equal to #timepoints. \n")}
-    if(any(is.na(simulated_prevalences))) {warning("Output from transmission model produced at least one NA or NaN value. \n")}
-    
-    
-    
-    ## if boundaries, then .....
-    
-    
-    
-    
-    
-    #   #   #   #   #   #   #   #   
-    if(!all(is.finite(c(simulated_prevalences)))){
-      warning(paste0("transmission_model is producing non-finite values (NA, NaN, Inf or -Inf) at iteration ", 1))}
-    
-    # REPLACE Inf and -Inf by NAs? (for them not to be used?)
-    
-      #   #   #   #   #   #   #
-    
-    
-    is_within_boundaries <- simulated_prevalences>=boundaries[1] & simulated_prevalences<=boundaries[2]
+    if(any(is.na(simulated_prevalences))) {warning(paste0("At iteration ",iter, ", transmission_model produced at least one NA or NaN value. \n"))}
+
+    is_within_boundaries <- (simulated_prevalences>=boundaries[1]) & 
+      (simulated_prevalences<=boundaries[2]) &
+      is.finite(simulated_prevalences)
     sim_within_boundaries <- which(is_within_boundaries)-1L
     sim_outside_boundaries <- which(!is_within_boundaries)-1L
     if(length(sim_within_boundaries)<length(simulated_prevalences)){
-      paste0("At iteration ",iter, ", transmission_model produced ", 
+      warning(paste0("At iteration ",iter, ", transmission_model produced ", 
              length(simulated_prevalences)-length(sim_within_boundaries), 
-             " samples outside of the boundaries")
+             " invalid samples (either infinite values or values outside of the boundaries)"))
     }
     # to avoid duplication, evaluate likelihood now.
     likelihoods <- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params)
@@ -211,6 +196,14 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     }
     
     simulated_prevalences = check_initial_vals("simulated_prevalences")
+    
+    
+    
+    ## Do we need to check for Inf and NAs in data and simulations here as well?
+    
+    
+    
+    
     likelihoods= check_initial_vals("likelihoods")
     weight_matrix= check_initial_vals("weight_matrix")
     ess = check_initial_vals("ess")
@@ -258,7 +251,21 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       param <- rbind(param, new_params$params)
       prior_density <- c(prior_density,new_params$prior_density)
       new_prevalences <- transmission_model(seeds(iter), new_params$params)
-      if(length(c(which(is.na(new_prevalences)), which(is.nan(simulated_prevalences))))>0) {warning("Output from transmission model produced greater than 1 NA or NaN value. \n")}
+      if(any(is.na(new_prevalences))) {warning(paste0("At iteration ",iter, ", transmission_model produced at least one NA or NaN value. \n"))}
+
+      is_within_boundaries_iter <- (new_prevalences>=boundaries[1]) & 
+        (new_prevalences<=boundaries[2]) & 
+        is.finite(new_prevalences)
+      is_within_boundaries <- c(is_within_boundaries, is_within_boundaries_iter)
+      sim_within_boundaries_iter <- which(is_within_boundaries_iter)-1L
+      sim_within_boundaries <- c(sim_within_boundaries, sim_within_boundaries_iter+nsamples*(iter-1))
+      sim_outside_boundaries <- c(sim_outside_boundaries, which(!is_within_boundaries_iter)-1L+nsamples*(iter-1))
+      if(sum(is_within_boundaries_iter)<length(new_prevalences)){
+        warning(paste0("At iteration iter=",iter, ", transmission_model produced ", 
+               length(new_prevalences)-sum(is_within_boundaries_iter), 
+               " invalid samples (either infinite values or values outside of the boundaries)."))
+      }
+            
       simulated_prevalences <- rbind(simulated_prevalences,new_prevalences)
       likelihoods <- compute_likelihood(new_params$params,prevalence_map,new_prevalences,amis_params,likelihoods)
       if(length(c(which(is.nan(likelihoods))))>0) {warning("Likelihood evaluation produced greater than 1 NaN value. \n")}

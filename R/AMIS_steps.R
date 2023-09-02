@@ -113,14 +113,19 @@ default_amis_params <- function(histogram=FALSE,intermittent_output=FALSE) {
 #' @param simulated_prevalences An n x timepoints matrix of prevalences simulated from the transmission model.
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
 #' @param likelihoods An array with dimension n_tims,n_locs,n_sims -- ie timepoints x locations x simulations (optional).
-#' @return A larger array with the likelihoods of the new simulations joined to the existing array \code{likelihoods}.  
-compute_likelihood<-function(param,prevalence_map,simulated_prevalences,amis_params,likelihoods=NULL) {
+#' @param sim_within_boundaries Vector showing which simulated prevalences are valid.
+#' @param which_valid_prev_map List showing which prevalence map samples are valid
+#' @param log_norm_const_gaussian Normalising constant (in log scale) for the Gaussian kernel. It is only used if Gaussian kernel is used.
+#' @return A larger array with the likelihoods of the new simulations joined to the existing array \code{likelihoods}.
+compute_likelihood<-function(param, prevalence_map,simulated_prevalences,amis_params,likelihoods=NULL,
+                             sim_within_boundaries,which_valid_prev_map,log_norm_const_gaussian) {
   n_tims<-length(prevalence_map)
   n_locs <- dim(prevalence_map[[1]]$data)[1]
   n_sims <- dim(simulated_prevalences)[1]
   lik<-array(NA,c(n_tims,n_locs,n_sims)) # this way around to avoid abind -- different to elsewhere
   for (t in 1:n_tims) {
-    lik[t,,]<-evaluate_likelihood(param,prevalence_map[[t]],simulated_prevalences[,t],amis_params) 
+    lik[t,,]<-evaluate_likelihood(param, prevalence_map[[t]],simulated_prevalences[,t],amis_params,
+                                  sim_within_boundaries,which_valid_prev_map[[t]],log_norm_const_gaussian[t,,]) 
   }
   if (!is.null(likelihoods)) {lik<-array(c(likelihoods,lik),c(n_tims,n_locs,dim(likelihoods)[3]+n_sims))}
   return(lik)
@@ -136,17 +141,43 @@ compute_likelihood<-function(param,prevalence_map,simulated_prevalences,amis_par
 #' \code{prevalence} (a matrix of output from the transmission model) and optional logical \code{log}, which returns the vector of (log)-likelihoods.    
 #' @param prev_sim A vector of simulated prevalences
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
+#' @param sim_within_boundaries Vector showing which simulated prevalences are valid.
+#' @param which_valid_prev_map_t List showing which prevalence map samples are valid at time t
+#' @param log_norm_const_gaussian_t Normalising constant (in log scale) for the Gaussian kernel at time t. It is only used if Gaussian kernel is used.
 #' @return A locations x simulations matrix of (log-)likelihoods.
-evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params) {
+evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params, 
+                              sim_within_boundaries,which_valid_prev_map_t,log_norm_const_gaussian_t) {
   locs<-which(!is.na(prevalence_map$data[,1])) # if there is no data for a location, do not update weights.
   f<-matrix(NA,dim(prevalence_map$data)[1],length(prev_sim))
   if (!is.null(prevalence_map$likelihood)) {
     f[locs,]<-t(prevalence_map$likelihood(param,prevalence_map$data[locs,,drop=FALSE],prev_sim,amis_params[["log"]])) # likelihood function must be vectorised.
   } else {
+    boundaries <- amis_params[["boundaries"]]
     if (is.null(amis_params[["breaks"]])) {
-      delta<-amis_params[["delta"]]
-      for (i in 1:length(prev_sim)) {
-        f[locs,i]<-rowSums(abs(prevalence_map$data[locs,,drop=FALSE]-prev_sim[i])<=delta/2)/(ncol(prevalence_map$data)*delta)
+      if(!is.null(amis_params[["sigma"]])){
+        sd <- amis_params[["sigma"]]
+        f <- f_estimator_Gaussian(prevalence_map=prevalence_map$data, 
+                                  prev_sim=prev_sim, 
+                                  sd=sd, 
+                                  sim_within_boundaries=sim_within_boundaries, 
+                                  which_valid_prev_map_t=which_valid_prev_map_t,
+                                  log_norm_const_gaussian_t=log_norm_const_gaussian_t,
+                                  left_bound=boundaries[1], 
+                                  right_bound=boundaries[2])
+      }else{
+        delta <- amis_params[["delta"]]
+        f <- f_estimator_uniform(prevalence_map=prevalence_map$data, 
+                                 prev_sim=prev_sim, 
+                                 delta=delta,
+                                 sim_within_boundaries=sim_within_boundaries, 
+                                 which_valid_prev_map_t=which_valid_prev_map_t,
+                                 left_bound=boundaries[1], 
+                                 right_bound=boundaries[2])
+        # # R code of previous version of the package
+        # for (i in 1:length(prev_sim)) {
+        #   # f[,i]<-rowSums(abs(prevalence_map$data[locs,,drop=FALSE]-prev_sim[i])<=delta/2)/delta
+        #   f[,i]<-rowSums(abs(prevalence_map$data[locs,,drop=FALSE]-prev_sim[i])<=delta/2)/(delta*M)
+        # }
       }
     } else {
       breaks<-amis_params[["breaks"]] # NB top entry in breaks must be strictly larger than the largest possible prevalence. 

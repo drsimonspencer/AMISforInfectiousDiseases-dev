@@ -95,7 +95,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   # calculate normalising constant for truncated Gaussian kernel
   which_valid_prev_map <- get_which_valid_prev_map(prevalence_map, boundaries)
   
-  log_norm_const_gaussian <- array(NA, c(1,1,1))  # for the Gaussian kernel case only 
+  log_norm_const_gaussian <- array(NA, c(1,1,1))  # for the Gaussian kernel case only, but needs to be declared
   if(use_gaussian_kernel){
     log_norm_const_gaussian <- calc_log_norm_const_gaussian(prevalence_map=prevalence_map, 
                                                             boundaries=boundaries, 
@@ -139,9 +139,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
              " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
     }
     # to avoid duplication, evaluate likelihood now.
-    likelihoods <- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params)
-    if(any(is.nan(likelihoods))>0) {warning("Likelihood evaluation produced at least one NaN value. \n")}
-    
+    likelihoods <- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params,
+                                      likelihoods=NULL, sim_within_boundaries,
+                                      which_valid_prev_map,log_norm_const_gaussian)
+    if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
     # Determine first time each location appears in the data
     n_tims <- dim(likelihoods)[1]
     n_locs <- dim(likelihoods)[2]
@@ -265,8 +266,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       }
             
       simulated_prevalences <- rbind(simulated_prevalences,new_prevalences)
-      likelihoods <- compute_likelihood(new_params$params,prevalence_map,new_prevalences,amis_params,likelihoods)
-      if(length(c(which(is.nan(likelihoods))))>0) {warning("Likelihood evaluation produced greater than 1 NaN value. \n")}
+      likelihoods <- compute_likelihood(new_params$params,prevalence_map,new_prevalences,amis_params, 
+                                        likelihoods,sim_within_boundaries_iter,
+                                        which_valid_prev_map,log_norm_const_gaussian)
+      if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
       first_weight <- compute_prior_proposal_ratio(components, param, prior_density, amis_params[["df"]], amis_params[["log"]]) # Prior/proposal
       weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, amis_params, first_weight,locations_first_t) # RN derivative (shd take all amis_params)
       if(length(c(which(is.na(weight_matrix)),which(is.nan(weight_matrix))))>0) {warning("Weight matrix contains greater than 1 NA or NaN value. \n")}

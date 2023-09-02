@@ -26,7 +26,9 @@ List get_which_valid_prev_map(const List& prevalence_map,
     for (int l=0; l<L; l++) {
       for (int m=0; m<M; m++) {
         p = prev_t(l,m);
-        m_idx[m] = !NumericVector::is_na(p) && (p>=boundaries[0]) && (p<=boundaries[1]);
+        m_idx[m] = (!NumericVector::is_na(p)) && 
+          (p>=boundaries[0]) && (p<=boundaries[1]) &&
+          (!Rcpp::traits::is_infinite<REALSXP>(p));
       }
       IntegerVector valid_samples_t_l = v[m_idx];
       valid_samples_t[l] = valid_samples_t_l;

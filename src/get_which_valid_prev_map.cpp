@@ -38,7 +38,7 @@ List get_which_valid_prev_map(const List& prevalence_map,
   return(prev_map_valid_samples);
 }
 
-//' @title Check, at each time, which locations have data
+//' @title Check, at each time, which locations have valid data
 //' @param which_valid_prev_map List obtained by get_which_valid_prev_map
 //' @param n_tims Number of time points
 //' @param n_locs Number of locations

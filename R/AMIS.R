@@ -158,15 +158,17 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
         locations_first_t[!is.na(lik_mat[1,]) & is.na(locations_first_t)] <- j
       }
     }
-     
     weight_matrix <- compute_weight_matrix(
       likelihoods,
       simulated_prevalences,
       amis_params,
       first_weight = rep(1-amis_params[["log"]], nsamples),
-      locations_first_t = locations_first_t
-    )
-    if(length(c(which(is.na(weight_matrix)), which(is.nan(weight_matrix))))>0) {warning("Weight matrix contains greater than 1 NA or NaN value. \n")}
+      locations_first_t = locations_first_t,
+      is_within_boundaries,
+      sim_within_boundaries, 
+      sim_outside_boundaries, 
+      which_valid_locs_prev_map)
+    if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
     
     ess <- calculate_ess(weight_matrix,amis_params[["log"]])
     cat("  min ESS:",round(min(ess))," mean ESS:",round(mean(ess))," max ESS:",round(max(ess)),"\n")
@@ -271,8 +273,12 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
                                         which_valid_prev_map,log_norm_const_gaussian)
       if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
       first_weight <- compute_prior_proposal_ratio(components, param, prior_density, amis_params[["df"]], amis_params[["log"]]) # Prior/proposal
-      weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, amis_params, first_weight,locations_first_t) # RN derivative (shd take all amis_params)
-      if(length(c(which(is.na(weight_matrix)),which(is.nan(weight_matrix))))>0) {warning("Weight matrix contains greater than 1 NA or NaN value. \n")}
+      weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, 
+                                             amis_params, first_weight,locations_first_t, 
+                                             is_within_boundaries, sim_within_boundaries, 
+                                             sim_outside_boundaries, which_valid_locs_prev_map) # RN derivative (shd take all amis_params)
+      if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
+      
       ess <- calculate_ess(weight_matrix,amis_params[["log"]])
       cat("  min ESS:",round(min(ess))," mean ESS:",round(mean(ess))," max ESS:",round(max(ess)),"\n")
       cat(" ",length(which(ess<amis_params[["target_ess"]])),"locations are below the target ESS.\n")

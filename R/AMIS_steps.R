@@ -41,8 +41,27 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   if(length(boundaries)!=2){stop("'boundaries' must be a vector of length 2.")}
   if(!(diff(boundaries)>0)){stop("The second element of 'boundaries' must be larger than the first one.")}
   if(!is.null(breaks)){
-    if(!all(breaks>=boundaries[1] && breaks<=boundaries[2])){
-      stop("If 'breaks' is supplied, all its elemenths must be within the 'boundaries' if these are also supplied.")
+    if(breaks!=sort(breaks)){
+      stop("'breaks' should be a vector with increasing values.")
+    }
+    if(length(breaks)!=length(unique(breaks))){
+      stop("'breaks' must not have repeated values.")
+    }
+    if(is.finite(boundaries[1])){
+      if(breaks[1]!=boundaries[1]){
+        stop("The first entry of 'breaks' must be equal to the left boundary if the left boundary is finite.")
+      }
+    }
+    if(is.finite(boundaries[2])){
+      if(breaks[length(breaks)]!=boundaries[2]){
+        stop("The last entry of 'breaks' must be equal to the right boundary if the right boundary is finite.")
+      }
+    }
+    if(is.infinite(boundaries[1])){
+      warning("If there is no left boundary, ensure the first entry of 'breaks' is not larger than the lowest possible prevalence.")
+    }
+    if(is.infinite(boundaries[2])){
+      warning("If there is no right boundary, ensure the last entry of 'breaks' is strictly larger than the largest possible prevalence.")
     }
   }
   stopifnot("'delta' must be either NULL or a single positive numeric value" = ((length(delta)==1 && is.numeric(delta) && delta>0) || is.null(delta)))
@@ -53,11 +72,6 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   stopifnot("'target_ess' must be a single numeric value greater than 0" = (length(target_ess)==1 && is.numeric(target_ess) && target_ess>0))
   stopifnot("'max_iters' must be a single numeric value greater than 1" = (length(max_iters)==1 && is.numeric(max_iters) && max_iters>1))
   stopifnot("'seed' must be either NULL or a single numeric value" = ((length(seed)==1 && is.numeric(seed)) || is.null(seed)))
-  if (!is.null(amis_params[["breaks"]])){
-    warning(strwrap(prefix = " ", initial = "", 
-    "Using empirical weights from user-defined histogram. Ensure 
-      last entry is strictly larger than the largest possible prevalence."))
-  }
   if(is.null(c(amis_params[["delta"]], amis_params[["sigma"]], amis_params[["breaks"]]))){
     stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL.")
   }

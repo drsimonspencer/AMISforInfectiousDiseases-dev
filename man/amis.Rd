@@ -40,7 +40,7 @@ parameter names are inherited from the \code{colnames} from the output of \code{
 \item{\code{target_ess} the target effective sample size.}{}
 \item{\code{log} logical indicating if calculations are to be performed on log scale.}{}
 \item{\code{max_iters} maximum number of AMIS iterations.}{}
-\item{\code{breaks} optional vector specifying the breaks for the histogram. Last entry must be strictly larger than the largest possible prevalence. }{}
+\item{\code{breaks} optional vector specifying the breaks for the histogram. Last entry must be strictly larger than the largest possible prevalence.}{}
 \item{\code{RN} logical for whether to divide by the induced prior
 over the simulated prevalence when calculating weights or not (default to TRUE).}{}
 }}

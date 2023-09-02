@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{get_which_valid_locs_prev_map}
 \alias{get_which_valid_locs_prev_map}
-\title{Check, at each time, which locations have data}
+\title{Check, at each time, which locations have valid data}
 \usage{
 get_which_valid_locs_prev_map(which_valid_prev_map, n_tims, n_locs)
 }
@@ -14,5 +14,5 @@ get_which_valid_locs_prev_map(which_valid_prev_map, n_tims, n_locs)
 \item{n_locs}{Number of locations}
 }
 \description{
-Check, at each time, which locations have data
+Check, at each time, which locations have valid data
 }

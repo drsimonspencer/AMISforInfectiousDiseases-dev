@@ -9,7 +9,11 @@ compute_weight_matrix(
   simulated_prevalence,
   amis_params,
   first_weight,
-  locations_first_t
+  locations_first_t,
+  is_within_boundaries,
+  sim_within_boundaries,
+  sim_outside_boundaries,
+  which_valid_locs_prev_map
 )
 }
 \arguments{
@@ -25,6 +29,14 @@ the weight expression. Should be of the same length as the rows in \code{simulat
 
 \item{locations_first_t}{Vector of length n_locs showing the first time each location appears in the data,
 or an NA if there is no data.}
+
+\item{is_within_boundaries}{Logical vector showing which simulated prevalences are valid.}
+
+\item{sim_within_boundaries}{Vector showing which simulated prevalences are valid.}
+
+\item{sim_outside_boundaries}{Vector showing which simulated prevalences are invalid}
+
+\item{which_valid_locs_prev_map}{List showing which locations have valid data at each time}
 }
 \value{
 normalised weight matrix.

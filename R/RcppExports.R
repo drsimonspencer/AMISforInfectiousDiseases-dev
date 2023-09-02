@@ -68,6 +68,18 @@ f_estimator_Gaussian <- function(prevalence_map, prev_sim, sd, sim_within_bounda
 #' @title Empirical estimator for the likelihood using Uniform kernel
 #' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
 #' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
+#' @param breaks vector specifying the breaks for the histogram.
+#' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+#' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
+#' @return A matrix with L rows containing the empirical estimates for the likelihood.
+#' @export
+f_estimator_histogram <- function(prevalence_map, prev_sim, breaks, sim_within_boundaries, which_valid_prev_map_t) {
+    .Call('_AMISforInfectiousDiseases_f_estimator_histogram', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, breaks, sim_within_boundaries, which_valid_prev_map_t)
+}
+
+#' @title Empirical estimator for the likelihood using Uniform kernel
+#' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
+#' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 #' @param delta Bandwidth value.
 #' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
@@ -88,7 +100,7 @@ get_which_valid_prev_map <- function(prevalence_map, boundaries) {
     .Call('_AMISforInfectiousDiseases_get_which_valid_prev_map', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, boundaries)
 }
 
-#' @title Check, at each time, which locations have data
+#' @title Check, at each time, which locations have valid data
 #' @param which_valid_prev_map List obtained by get_which_valid_prev_map
 #' @param n_tims Number of time points
 #' @param n_locs Number of locations

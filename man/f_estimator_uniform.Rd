@@ -10,8 +10,7 @@ f_estimator_uniform(
   delta,
   sim_within_boundaries,
   which_valid_prev_map_t,
-  left_boundary,
-  right_boundary
+  boundaries
 )
 }
 \arguments{
@@ -25,9 +24,7 @@ f_estimator_uniform(
 
 \item{which_valid_prev_map_t}{List showing which samples are valid for each location at a time point.}
 
-\item{left_boundary}{Lower boundary for the prevalence.}
-
-\item{right_boundary}{Upper boundary for the prevalence.}
+\item{boundaries}{Vector of length two.}
 }
 \value{
 A matrix with L rows containing the empirical estimates for the likelihood.

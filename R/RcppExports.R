@@ -59,12 +59,10 @@ compute_weight_matrix_empirical_uniform <- function(likelihoods, prev_sim, amis_
 #' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 #' @param log_norm_const_gaussian_t (n_locs x M) matrix showing the log normalising constant for the Gaussian kernels.
-#' @param left_boundary Lower boundary for the prevalence.
-#' @param right_boundary Upper boundary for the prevalence.
 #' @return A matrix with L rows containing the empirical estimates for the likelihood.
 #' @export
-f_estimator_Gaussian <- function(prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t, left_boundary, right_boundary) {
-    .Call('_AMISforInfectiousDiseases_f_estimator_Gaussian', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t, left_boundary, right_boundary)
+f_estimator_Gaussian <- function(prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t) {
+    .Call('_AMISforInfectiousDiseases_f_estimator_Gaussian', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t)
 }
 
 #' @title Empirical estimator for the likelihood using Uniform kernel
@@ -73,12 +71,11 @@ f_estimator_Gaussian <- function(prevalence_map, prev_sim, sd, sim_within_bounda
 #' @param delta Bandwidth value.
 #' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
-#' @param left_boundary Lower boundary for the prevalence.
-#' @param right_boundary Upper boundary for the prevalence.
+#' @param boundaries Vector of length two.
 #' @return A matrix with L rows containing the empirical estimates for the likelihood.
 #' @export
-f_estimator_uniform <- function(prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, left_boundary, right_boundary) {
-    .Call('_AMISforInfectiousDiseases_f_estimator_uniform', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, left_boundary, right_boundary)
+f_estimator_uniform <- function(prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries) {
+    .Call('_AMISforInfectiousDiseases_f_estimator_uniform', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries)
 }
 
 #' @title Check which prevalence samples are valid for each location at each time point.

@@ -7,8 +7,7 @@
 //' @param delta Bandwidth value.
 //' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
 //' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
-//' @param left_boundary Lower boundary for the prevalence.
-//' @param right_boundary Upper boundary for the prevalence.
+//' @param boundaries Vector of length two.
 //' @return A matrix with L rows containing the empirical estimates for the likelihood.
 //' @export
 // [[Rcpp::export]]
@@ -17,8 +16,9 @@ arma::mat f_estimator_uniform(arma::mat& prevalence_map,
                               double delta, 
                               arma::uvec& sim_within_boundaries,
                               List& which_valid_prev_map_t,
-                              double left_boundary, 
-                              double right_boundary){
+                              arma::vec& boundaries){
+  double left_boundary = boundaries[0];
+  double right_boundary = boundaries[1];
   int R = prev_sim.n_elem;
   int L = prevalence_map.n_rows;
   double half_delta = delta/2;

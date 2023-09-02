@@ -60,8 +60,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // f_estimator_Gaussian
-arma::mat f_estimator_Gaussian(arma::mat& prevalence_map, arma::vec& prev_sim, double sd, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t, arma::mat& log_norm_const_gaussian_t, double left_boundary, double right_boundary);
-RcppExport SEXP _AMISforInfectiousDiseases_f_estimator_Gaussian(SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP sdSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP log_norm_const_gaussian_tSEXP, SEXP left_boundarySEXP, SEXP right_boundarySEXP) {
+arma::mat f_estimator_Gaussian(arma::mat& prevalence_map, arma::vec& prev_sim, double sd, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t, arma::mat& log_norm_const_gaussian_t);
+RcppExport SEXP _AMISforInfectiousDiseases_f_estimator_Gaussian(SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP sdSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP log_norm_const_gaussian_tSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -71,15 +71,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
     Rcpp::traits::input_parameter< List& >::type which_valid_prev_map_t(which_valid_prev_map_tSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type log_norm_const_gaussian_t(log_norm_const_gaussian_tSEXP);
-    Rcpp::traits::input_parameter< double >::type left_boundary(left_boundarySEXP);
-    Rcpp::traits::input_parameter< double >::type right_boundary(right_boundarySEXP);
-    rcpp_result_gen = Rcpp::wrap(f_estimator_Gaussian(prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t, left_boundary, right_boundary));
+    rcpp_result_gen = Rcpp::wrap(f_estimator_Gaussian(prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t));
     return rcpp_result_gen;
 END_RCPP
 }
 // f_estimator_uniform
-arma::mat f_estimator_uniform(arma::mat& prevalence_map, arma::vec& prev_sim, double delta, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t, double left_boundary, double right_boundary);
-RcppExport SEXP _AMISforInfectiousDiseases_f_estimator_uniform(SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP deltaSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP left_boundarySEXP, SEXP right_boundarySEXP) {
+arma::mat f_estimator_uniform(arma::mat& prevalence_map, arma::vec& prev_sim, double delta, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t, arma::vec& boundaries);
+RcppExport SEXP _AMISforInfectiousDiseases_f_estimator_uniform(SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP deltaSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP boundariesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -88,9 +86,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type delta(deltaSEXP);
     Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
     Rcpp::traits::input_parameter< List& >::type which_valid_prev_map_t(which_valid_prev_map_tSEXP);
-    Rcpp::traits::input_parameter< double >::type left_boundary(left_boundarySEXP);
-    Rcpp::traits::input_parameter< double >::type right_boundary(right_boundarySEXP);
-    rcpp_result_gen = Rcpp::wrap(f_estimator_uniform(prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, left_boundary, right_boundary));
+    Rcpp::traits::input_parameter< arma::vec& >::type boundaries(boundariesSEXP);
+    rcpp_result_gen = Rcpp::wrap(f_estimator_uniform(prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -124,8 +121,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_AMISforInfectiousDiseases_calc_log_norm_const_gaussian", (DL_FUNC) &_AMISforInfectiousDiseases_calc_log_norm_const_gaussian, 3},
     {"_AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss", (DL_FUNC) &_AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss, 7},
     {"_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform", (DL_FUNC) &_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform, 8},
-    {"_AMISforInfectiousDiseases_f_estimator_Gaussian", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_Gaussian, 8},
-    {"_AMISforInfectiousDiseases_f_estimator_uniform", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_uniform, 7},
+    {"_AMISforInfectiousDiseases_f_estimator_Gaussian", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_Gaussian, 6},
+    {"_AMISforInfectiousDiseases_f_estimator_uniform", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_uniform, 6},
     {"_AMISforInfectiousDiseases_get_which_valid_prev_map", (DL_FUNC) &_AMISforInfectiousDiseases_get_which_valid_prev_map, 2},
     {"_AMISforInfectiousDiseases_get_which_valid_locs_prev_map", (DL_FUNC) &_AMISforInfectiousDiseases_get_which_valid_locs_prev_map, 3},
     {NULL, NULL, 0}

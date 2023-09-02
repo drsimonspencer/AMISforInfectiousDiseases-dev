@@ -161,9 +161,7 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
                                   sd=sd, 
                                   sim_within_boundaries=sim_within_boundaries, 
                                   which_valid_prev_map_t=which_valid_prev_map_t,
-                                  log_norm_const_gaussian_t=log_norm_const_gaussian_t,
-                                  left_bound=boundaries[1], 
-                                  right_bound=boundaries[2])
+                                  log_norm_const_gaussian_t=log_norm_const_gaussian_t)
       }else{
         delta <- amis_params[["delta"]]
         f <- f_estimator_uniform(prevalence_map=prevalence_map$data, 
@@ -171,8 +169,7 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
                                  delta=delta,
                                  sim_within_boundaries=sim_within_boundaries, 
                                  which_valid_prev_map_t=which_valid_prev_map_t,
-                                 left_bound=boundaries[1], 
-                                 right_bound=boundaries[2])
+                                 boundaries=boundaries)
         # # R code of previous version of the package
         # for (i in 1:length(prev_sim)) {
         #   # f[,i]<-rowSums(abs(prevalence_map$data[locs,,drop=FALSE]-prev_sim[i])<=delta/2)/delta

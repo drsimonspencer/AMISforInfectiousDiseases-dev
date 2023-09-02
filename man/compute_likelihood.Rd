@@ -9,7 +9,10 @@ compute_likelihood(
   prevalence_map,
   simulated_prevalences,
   amis_params,
-  likelihoods = NULL
+  likelihoods = NULL,
+  sim_within_boundaries,
+  which_valid_prev_map,
+  log_norm_const_gaussian
 )
 }
 \arguments{
@@ -27,6 +30,12 @@ the data consist of samples from a geo-statistical model and empirical methods a
 \item{amis_params}{A list of parameters, e.g. from \code{\link{default_amis_params}}.}
 
 \item{likelihoods}{An array with dimension n_tims,n_locs,n_sims -- ie timepoints x locations x simulations (optional).}
+
+\item{sim_within_boundaries}{Vector showing which simulated prevalences are valid.}
+
+\item{which_valid_prev_map}{List showing which prevalence map samples are valid}
+
+\item{log_norm_const_gaussian}{Normalising constant (in log scale) for the Gaussian kernel. It is only used if Gaussian kernel is used.}
 }
 \value{
 A larger array with the likelihoods of the new simulations joined to the existing array \code{likelihoods}.

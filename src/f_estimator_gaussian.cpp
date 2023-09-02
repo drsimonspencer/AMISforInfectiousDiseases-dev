@@ -8,8 +8,6 @@
 //' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
 //' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 //' @param log_norm_const_gaussian_t (n_locs x M) matrix showing the log normalising constant for the Gaussian kernels.
-//' @param left_boundary Lower boundary for the prevalence.
-//' @param right_boundary Upper boundary for the prevalence.
 //' @return A matrix with L rows containing the empirical estimates for the likelihood.
 //' @export
 // [[Rcpp::export]]
@@ -18,9 +16,7 @@ arma::mat f_estimator_Gaussian(arma::mat& prevalence_map,
                                double sd, 
                                arma::uvec& sim_within_boundaries,
                                List& which_valid_prev_map_t,
-                               arma::mat& log_norm_const_gaussian_t,
-                               double left_boundary, 
-                               double right_boundary){
+                               arma::mat& log_norm_const_gaussian_t){
   int R = prev_sim.n_elem;
   int L = prevalence_map.n_rows;
   arma::mat f = arma::zeros<arma::mat>(L, R);

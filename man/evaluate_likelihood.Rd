@@ -4,7 +4,15 @@
 \alias{evaluate_likelihood}
 \title{Evaluate likelihood for each additional simulation for a single timepoint}
 \usage{
-evaluate_likelihood(param, prevalence_map, prev_sim, amis_params)
+evaluate_likelihood(
+  param,
+  prevalence_map,
+  prev_sim,
+  amis_params,
+  sim_within_boundaries,
+  which_valid_prev_map_t,
+  log_norm_const_gaussian_t
+)
 }
 \arguments{
 \item{param}{A matrix containing the sampled parameter vectors.}
@@ -16,6 +24,12 @@ and \code{likelihood} a function taking arguments \code{data} (a matrix of data 
 \item{prev_sim}{A vector of simulated prevalences}
 
 \item{amis_params}{A list of parameters, e.g. from \code{\link{default_amis_params}}.}
+
+\item{sim_within_boundaries}{Vector showing which simulated prevalences are valid.}
+
+\item{which_valid_prev_map_t}{List showing which prevalence map samples are valid at time t}
+
+\item{log_norm_const_gaussian_t}{Normalising constant (in log scale) for the Gaussian kernel at time t. It is only used if Gaussian kernel is used.}
 }
 \value{
 A locations x simulations matrix of (log-)likelihoods.

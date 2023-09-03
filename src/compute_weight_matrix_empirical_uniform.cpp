@@ -92,7 +92,7 @@ arma::mat compute_weight_matrix_empirical_uniform(const arma::mat& likelihoods,
     }
   }
   
-  if(sim_within_boundaries.n_elem>0){
+  if(sim_outside_boundaries.n_elem>0){
     if(logar){
       (new_weights(sim_outside_boundaries,locs)).fill(-arma::datum::inf);
     }else{

@@ -57,12 +57,6 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
         stop("The last entry of 'breaks' must be equal to the right boundary if the right boundary is finite.")
       }
     }
-    if(is.infinite(boundaries[1])){
-      warning("If there is no left boundary, ensure the first entry of 'breaks' is not larger than the lowest possible prevalence.")
-    }
-    if(is.infinite(boundaries[2])){
-      warning("If there is no right boundary, ensure the last entry of 'breaks' is strictly larger than the largest possible prevalence.")
-    }
   }
   stopifnot("'delta' must be either NULL or a single positive numeric value" = ((length(delta)==1 && is.numeric(delta) && delta>0) || is.null(delta)))
   stopifnot("'sigma' must be either NULL or a single positive numeric value" = ((length(sigma)==1 && is.numeric(sigma) && sigma>0) || is.null(sigma)))

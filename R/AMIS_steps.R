@@ -107,7 +107,9 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
 #' @return list containing the default AMIS parameters
 #' @export
 default_amis_params <- function(histogram=FALSE,intermittent_output=FALSE) {
-  amis_params<-list(delta=0.01,nsamples=500,mixture_samples=1000,df=3,
+  amis_params<-list(boundaries=c(0,1),
+                    delta=0.01,sigma=NULL,breaks=NULL,
+                    nsamples=500,mixture_samples=1000,df=3,
                     target_ess=500,log=F,max_iters=12,RN=TRUE,
                     intermittent_output=intermittent_output)
   if (histogram) {amis_params[["breaks"]]<-0:100/100}

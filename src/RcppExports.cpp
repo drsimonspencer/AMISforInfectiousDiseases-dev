@@ -41,6 +41,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_weight_matrix_empirical_histogram
+arma::mat compute_weight_matrix_empirical_histogram(const arma::mat& likelihoods, const arma::vec& prev_sim, List amis_params, const arma::mat& weight_matrix, arma::uvec& is_within_boundaries, arma::uvec& sim_within_boundaries, arma::uvec& sim_outside_boundaries, arma::uvec& locs);
+RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_empirical_histogram(SEXP likelihoodsSEXP, SEXP prev_simSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP is_within_boundariesSEXP, SEXP sim_within_boundariesSEXP, SEXP sim_outside_boundariesSEXP, SEXP locsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type likelihoods(likelihoodsSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type prev_sim(prev_simSEXP);
+    Rcpp::traits::input_parameter< List >::type amis_params(amis_paramsSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type weight_matrix(weight_matrixSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type is_within_boundaries(is_within_boundariesSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type sim_outside_boundaries(sim_outside_boundariesSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type locs(locsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_weight_matrix_empirical_histogram(likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compute_weight_matrix_empirical_uniform
 arma::mat compute_weight_matrix_empirical_uniform(const arma::mat& likelihoods, const arma::vec& prev_sim, List amis_params, const arma::mat& weight_matrix, arma::uvec& is_within_boundaries, arma::uvec& sim_within_boundaries, arma::uvec& sim_outside_boundaries, arma::uvec& locs);
 RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform(SEXP likelihoodsSEXP, SEXP prev_simSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP is_within_boundariesSEXP, SEXP sim_within_boundariesSEXP, SEXP sim_outside_boundariesSEXP, SEXP locsSEXP) {
@@ -134,6 +152,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_AMISforInfectiousDiseases_calc_log_norm_const_gaussian", (DL_FUNC) &_AMISforInfectiousDiseases_calc_log_norm_const_gaussian, 3},
     {"_AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss", (DL_FUNC) &_AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss, 7},
+    {"_AMISforInfectiousDiseases_compute_weight_matrix_empirical_histogram", (DL_FUNC) &_AMISforInfectiousDiseases_compute_weight_matrix_empirical_histogram, 8},
     {"_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform", (DL_FUNC) &_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform, 8},
     {"_AMISforInfectiousDiseases_f_estimator_Gaussian", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_Gaussian, 6},
     {"_AMISforInfectiousDiseases_f_estimator_histogram", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_histogram, 4},

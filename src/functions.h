@@ -6,6 +6,23 @@
 
 using namespace Rcpp;
 
+arma::mat compute_weight_matrix_empirical_gauss(const arma::mat& likelihoods, 
+                                                const arma::vec& prev_sim, 
+                                                List amis_params,
+                                                const arma::mat& weight_matrix,
+                                                arma::uvec& sim_within_boundaries,
+                                                arma::uvec& sim_outside_boundaries,
+                                                arma::uvec& locs);
+
+arma::mat compute_weight_matrix_empirical_histogram(const arma::mat& likelihoods, 
+                                                    const arma::vec& prev_sim, 
+                                                    List amis_params,
+                                                    const arma::mat& weight_matrix,
+                                                    arma::uvec& is_within_boundaries,
+                                                    arma::uvec& sim_within_boundaries,
+                                                    arma::uvec& sim_outside_boundaries,
+                                                    arma::uvec& locs);
+                                                  
 arma::mat compute_weight_matrix_empirical_uniform(const arma::mat& likelihoods, 
                                                   const arma::vec& prev_sim, 
                                                   List amis_params,
@@ -14,15 +31,7 @@ arma::mat compute_weight_matrix_empirical_uniform(const arma::mat& likelihoods,
                                                   arma::uvec& sim_within_boundaries,
                                                   arma::uvec& sim_outside_boundaries,
                                                   arma::uvec& locs);
-
-arma::mat compute_weight_matrix_empirical_gauss(const arma::mat& likelihoods, 
-                                                const arma::vec& prev_sim, 
-                                                List amis_params,
-                                                const arma::mat& weight_matrix,
-                                                arma::uvec& sim_within_boundaries,
-                                                arma::uvec& sim_outside_boundaries,
-                                                arma::uvec& locs);
-                                                   
+                                                  
 arma::mat f_estimator_uniform(arma::mat& prevalence_map, 
                               arma::vec& prev_sim, 
                               double delta, 

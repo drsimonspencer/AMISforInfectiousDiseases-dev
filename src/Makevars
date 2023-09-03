@@ -19,11 +19,14 @@ MY_CPPFLAGS=-g0 -O3
 calc_log_norm_const_gaussian.o: calc_log_norm_const_gaussian.cpp
 	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
 
-compute_weight_matrix_empirical_uniform.o: compute_weight_matrix_empirical_uniform.cpp
-	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
-	
 compute_weight_matrix_empirical_gauss.o: compute_weight_matrix_empirical_gauss.cpp
 	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@	
+
+compute_weight_matrix_empirical_histogram.o: compute_weight_matrix_empirical_histogram.cpp
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
+
+compute_weight_matrix_empirical_uniform.o: compute_weight_matrix_empirical_uniform.cpp
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
 	
 f_estimator_gaussian.o: f_estimator_gaussian.cpp
 	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@

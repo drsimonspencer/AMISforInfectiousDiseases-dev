@@ -48,6 +48,27 @@ compute_weight_matrix_empirical_gauss <- function(likelihoods, prev_sim, amis_pa
 #' @param locs Vector showing which locations have data.
 #' @return An updated weight matrix.
 #' @export
+compute_weight_matrix_empirical_histogram <- function(likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs) {
+    .Call('_AMISforInfectiousDiseases_compute_weight_matrix_empirical_histogram', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs)
+}
+
+#' @title  Compute weight matrix using empirical Radon-Nikodym derivative (Rcpp version)
+#' @description Compute matrix describing the weights for each parameter sampled, for each
+#' location. One row per sample, one column per location.  Each weight 
+#' is computed based on the empirical Radon-Nikodym derivative, taking into account 
+#' geostatistical prevalence data for the specific location and the prevalence values 
+#' computed from the transmission model for the specific parameter sample.
+#' @param likelihoods An n_sims x n_locs matrix of (log-)likelihoods
+#' NB: transpose of slice of array. 
+#' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
+#' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
+#' @param weight_matrix An n_sims x n_locs matrix containing the current values of the weights.
+#' @param is_within_boundaries Logical vector showing which simulated values are within boundaries.
+#' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+#' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
+#' @param locs Vector showing which locations have data.
+#' @return An updated weight matrix.
+#' @export
 compute_weight_matrix_empirical_uniform <- function(likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs) {
     .Call('_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs)
 }

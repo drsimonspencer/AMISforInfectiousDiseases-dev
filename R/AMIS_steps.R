@@ -258,6 +258,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
           if(is.null(amis_params[["sigma"]])){
             weight_matrix <- compute_weight_matrix_empirical_uniform(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix,
                                                                      is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, which_valid_locs_prev_map[[t]])
+            
             # # R code of previous version of the package
             # weight_matrix <- compute_weight_matrix_empirical(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)
             
@@ -271,7 +272,16 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
         
 
       } else {
-        weight_matrix[,locs_empirical] <- compute_weight_matrix_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)[,locs_empirical]
+
+        weight_matrix <- compute_weight_matrix_empirical_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix,
+                                                                   is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, which_valid_locs_prev_map[[t]])
+        
+        # # R code of previous version of the package
+        # weight_matrix <- compute_weight_matrix_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)
+        
+        # # Raiha's code
+        # weight_matrix[,locs_empirical] <- compute_weight_matrix_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)[,locs_empirical]
+        
       }
     } else {
       weight_matrix <- compute_weight_matrix_nonRN(lik_mat,amis_params,weight_matrix)

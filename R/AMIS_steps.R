@@ -372,7 +372,7 @@ compute_weight_matrix_histogram<-function(likelihoods, prev_sim, amis_params, we
         M<-apply(g_terms,2,max)
         non_zero_locs<-locs[which(M>-Inf)]
         M<-M[which(M>-Inf)]
-        g_terms = g_terms[,which(M>-Inf),drop=FALSE]
+        g_terms = g_terms[,which(M>-Inf),drop=FALSE]   # Revise this
         new_weights[wh,non_zero_locs]<-weight_matrix[wh,non_zero_locs]+likelihoods[wh,non_zero_locs]-rep(M+log(colSums(exp(g_terms-M))),each=length(wh))+log(wdt[l])
       } else {
         g<-colSums(g_terms)

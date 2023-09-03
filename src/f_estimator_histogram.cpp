@@ -5,7 +5,6 @@
 //' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
 //' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 //' @param breaks vector specifying the breaks for the histogram.
-//' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
 //' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 //' @return A matrix with L rows containing the empirical estimates for the likelihood.
 //' @export
@@ -13,7 +12,6 @@
 arma::mat f_estimator_histogram(arma::mat& prevalence_map, 
                                 arma::vec& prev_sim, 
                                 arma::vec& breaks, 
-                                arma::uvec& sim_within_boundaries,
                                 List& which_valid_prev_map_t){
   int R = prev_sim.n_elem;
   int L = prevalence_map.n_rows;
@@ -28,7 +26,6 @@ arma::mat f_estimator_histogram(arma::mat& prevalence_map,
   double c; 
   int M_l;
   int count;
-  int bin;
   double lwr_r;
   double upr_r;
   arma::uvec loc = arma::zeros<arma::uvec>(1L);
@@ -39,19 +36,34 @@ arma::mat f_estimator_histogram(arma::mat& prevalence_map,
     if(M_l>0L){
       prevalence_map_l_valid = prevalence_map(loc, valid_samples_t_l);
       c = 1.0/((double)M_l);
-      for(auto & r : sim_within_boundaries){
-        bin = max(arma::find(prev_sim>=lwr));
-        lwr_r = lwr[bin];
-        upr_r = upr[bin];
-        count = 0L;
-        for (int m=0; m<M_l; m++) {
-          if((prevalence_map_l_valid[m]>=lwr_r)&&(prevalence_map_l_valid[m]<upr_r)){
-            count++;
+      for (int b=0; b<B; b++) {
+        lwr_r = lwr[b];
+        upr_r = upr[b];
+        arma::uvec wh = arma::find((prev_sim>=lwr_r) && (prev_sim<upr_r));
+        if(wh.n_elem>0L){
+          count = 0L;
+          for (int m=0; m<M_l; m++) {
+            if((prevalence_map_l_valid[m]>=lwr_r)&&(prevalence_map_l_valid[m]<upr_r)){
+              count++;
+            }
           }
+          (f(loc, wh)).fill(c*(double)count/(wdt[b]));
         }
-        f(l,r) = c*(double)count/(wdt[bin]);
       }
     }
   }
   return(f);
 }
+
+// for(auto & r : sim_within_boundaries){
+//   bin = max(arma::find(prev_sim>=lwr));   // this is wrong
+//   lwr_r = lwr[bin];
+//   upr_r = upr[bin];
+//   count = 0L;
+//   for (int m=0; m<M_l; m++) {
+//     if((prevalence_map_l_valid[m]>=lwr_r)&&(prevalence_map_l_valid[m]<upr_r)){
+//       count++;
+//     }
+//   }
+//   f(l,r) = c*(double)count/(wdt[bin]);
+// }

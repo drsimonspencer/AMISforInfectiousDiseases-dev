@@ -4,13 +4,7 @@
 \alias{f_estimator_histogram}
 \title{Empirical estimator for the likelihood using Uniform kernel}
 \usage{
-f_estimator_histogram(
-  prevalence_map,
-  prev_sim,
-  breaks,
-  sim_within_boundaries,
-  which_valid_prev_map_t
-)
+f_estimator_histogram(prevalence_map, prev_sim, breaks, which_valid_prev_map_t)
 }
 \arguments{
 \item{prevalence_map}{An L x M matrix containing samples from the fitted prevalence map.}
@@ -18,8 +12,6 @@ f_estimator_histogram(
 \item{prev_sim}{A vector containing the simulated prevalence value for each parameter sample.}
 
 \item{breaks}{vector specifying the breaks for the histogram.}
-
-\item{sim_within_boundaries}{Vector showing which simulated values are within boundaries.}
 
 \item{which_valid_prev_map_t}{List showing which samples are valid for each location at a time point.}
 }

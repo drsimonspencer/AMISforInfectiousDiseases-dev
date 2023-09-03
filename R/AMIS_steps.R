@@ -191,17 +191,22 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
         # }
       }
     } else {
-      breaks<-amis_params[["breaks"]] # NB top entry in breaks must be strictly larger than the largest possible prevalence. 
-      L<-length(breaks)
-      lwr<-breaks[1:(L-1)]
-      upr<-breaks[2:L]
-      wdt<-upr-lwr
-      for (l in 1:L) {
-        wh<-which(prev_sim>=lwr[l] & prev_sim<upr[l])
-        if (length(wh)>0) {
-          f[locs,wh]<-rowSums(prevalence_map$data[locs,,drop=FALSE]>=lwr[l] & prevalence_map$data[locs,,drop=FALSE]<upr[l])/(ncol(prevalence_map$data)*wdt[l])
-        }
-      }
+      breaks<-amis_params[["breaks"]]
+      f <- f_estimator_histogram(prevalence_map=prevalence_map$data, 
+                                 prev_sim=prev_sim, 
+                                 breaks=breaks, 
+                                 which_valid_prev_map_t=which_valid_prev_map_t)
+      # # R code of previous version of the package                                      
+      # L<-length(breaks)
+      # lwr<-breaks[1:(L-1)]
+      # upr<-breaks[2:L]
+      # wdt<-upr-lwr
+      # for (l in 1:L) {
+      #   wh<-which(prev_sim>=lwr[l] & prev_sim<upr[l])
+      #   if (length(wh)>0) {
+      #     f[locs,wh]<-rowSums(prevalence_map$data[locs,,drop=FALSE]>=lwr[l] & prevalence_map$data[locs,,drop=FALSE]<upr[l])/(ncol(prevalence_map$data)*wdt[l])
+      #   }
+      # }
     }
     if (amis_params[["log"]]) {f<-log(f)}
   }

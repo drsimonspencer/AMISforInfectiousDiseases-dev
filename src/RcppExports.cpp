@@ -76,17 +76,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // f_estimator_histogram
-arma::mat f_estimator_histogram(arma::mat& prevalence_map, arma::vec& prev_sim, arma::vec& breaks, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t);
-RcppExport SEXP _AMISforInfectiousDiseases_f_estimator_histogram(SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP breaksSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP) {
+arma::mat f_estimator_histogram(arma::mat& prevalence_map, arma::vec& prev_sim, arma::vec& breaks, List& which_valid_prev_map_t);
+RcppExport SEXP _AMISforInfectiousDiseases_f_estimator_histogram(SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP breaksSEXP, SEXP which_valid_prev_map_tSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat& >::type prevalence_map(prevalence_mapSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type prev_sim(prev_simSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type breaks(breaksSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
     Rcpp::traits::input_parameter< List& >::type which_valid_prev_map_t(which_valid_prev_map_tSEXP);
-    rcpp_result_gen = Rcpp::wrap(f_estimator_histogram(prevalence_map, prev_sim, breaks, sim_within_boundaries, which_valid_prev_map_t));
+    rcpp_result_gen = Rcpp::wrap(f_estimator_histogram(prevalence_map, prev_sim, breaks, which_valid_prev_map_t));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -137,7 +136,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss", (DL_FUNC) &_AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss, 7},
     {"_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform", (DL_FUNC) &_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform, 8},
     {"_AMISforInfectiousDiseases_f_estimator_Gaussian", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_Gaussian, 6},
-    {"_AMISforInfectiousDiseases_f_estimator_histogram", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_histogram, 5},
+    {"_AMISforInfectiousDiseases_f_estimator_histogram", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_histogram, 4},
     {"_AMISforInfectiousDiseases_f_estimator_uniform", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_uniform, 6},
     {"_AMISforInfectiousDiseases_get_which_valid_prev_map", (DL_FUNC) &_AMISforInfectiousDiseases_get_which_valid_prev_map, 2},
     {"_AMISforInfectiousDiseases_get_which_valid_locs_prev_map", (DL_FUNC) &_AMISforInfectiousDiseases_get_which_valid_locs_prev_map, 3},

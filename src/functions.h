@@ -43,7 +43,6 @@ arma::mat f_estimator_Gaussian(arma::mat& prevalence_map,
 arma::mat f_estimator_histogram(arma::mat& prevalence_map, 
                                 arma::vec& prev_sim, 
                                 arma::vec& breaks, 
-                                arma::uvec& sim_within_boundaries,
                                 List& which_valid_prev_map_t);
                                 
 List get_which_valid_prev_map(const List& prevalence_map, 

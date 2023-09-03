@@ -57,7 +57,7 @@ arma::mat compute_weight_matrix_empirical_histogram(const arma::mat& likelihoods
     arma::uvec l_col = arma::zeros<arma::uvec>(1L);
 
     // which bin each prev_sim[i] is in
-    for (int b=0; b<B; b++) {
+    for (int b=0; b<(B-1L); b++) {
       lwr_r = lwr[b];
       upr_r = upr[b];
       arma::uvec which_in_bin_b = arma::find((prev_sim>=lwr_r) && (prev_sim<upr_r));
@@ -73,18 +73,20 @@ arma::mat compute_weight_matrix_empirical_histogram(const arma::mat& likelihoods
       b = bin_prev_sim[i];
       lwr_r = lwr[b];
       upr_r = upr[b];
+
       arma::uvec wh = arma::find(is_within_boundaries && (prev_sim>=lwr_r) && (prev_sim<upr_r));
-      (kern(wh)).fill(1.0/wdt(b));
       if(wh.n_elem==0){
         Rcout << "-------- " << std::endl;
         Rcout << "A prevalence value within boundaries does not belong to any bin of the histogram: " << std::endl;
         arma::vec boundaries = amis_params["boundaries"];
         Rcout << "Boundaries: " << boundaries.t();
-        Rcout << "Simulated prevalence value: " << prev_sim[i] << std::endl;
-        Rcout << "First entry of breaks: " << breaks[0] << std::endl;
-        Rcout << "Last entry of breaks: " << breaks[breaks.n_elem-1] << std::endl;
+        Rcout << "Simulated prevalence value: " << prev_sim(i) << std::endl;
+        Rcout << "First entry of breaks: " << breaks << std::endl;
+        Rcout << "Last entry of breaks: " << max(breaks) << std::endl;
         Rcpp::stop("Prevalence value simulated from the transmission model is not assigned to any bin of the histogram. Ensure the range of 'breaks' includes any possible prevalence value.");
       }
+
+      (kern(wh)).fill(1.0/wdt(b));
 
 // Here we have the same prior for each location. ----------------
       if(logar){

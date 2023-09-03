@@ -36,7 +36,7 @@ arma::mat f_estimator_histogram(arma::mat& prevalence_map,
     if(M_l>0L){
       prevalence_map_l_valid = prevalence_map(loc, valid_samples_t_l);
       c = 1.0/((double)M_l);
-      for (int b=0; b<B; b++) {
+      for (int b=0; b<(B-1L); b++) {
         lwr_r = lwr[b];
         upr_r = upr[b];
         arma::uvec wh = arma::find((prev_sim>=lwr_r) && (prev_sim<upr_r));

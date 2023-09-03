@@ -15,6 +15,7 @@
 #' \item{\code{BIC}}{The BIC of the chosen mixture.}
 #' \item{\code{ModelName}}{The model name from the package \code{mclust}.}
 #' }
+#' @import mclust
 fit_mixture<-function(dat,max.components=10) {
   n<-nrow(dat)
   d<-ncol(dat)

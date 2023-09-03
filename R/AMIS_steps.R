@@ -41,7 +41,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   if(length(boundaries)!=2){stop("'boundaries' must be a vector of length 2.")}
   if(!(diff(boundaries)>0)){stop("The second element of 'boundaries' must be larger than the first one.")}
   if(!is.null(breaks)){
-    if(breaks!=sort(breaks)){
+    if(any(breaks!=sort(breaks))){
       stop("'breaks' should be a vector with increasing values.")
     }
     if(length(breaks)!=length(unique(breaks))){

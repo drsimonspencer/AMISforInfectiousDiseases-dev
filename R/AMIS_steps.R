@@ -250,11 +250,15 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
       # locs_bayesian = which(locations_first_t < t)
       
       
-      # Update weight matrix
-      weight_matrix[,locs_bayesian[[t]]] <- compute_weight_matrix_nonRN(lik_mat,amis_params,weight_matrix)[,locs_bayesian[[t]]]
+      # # Update weight matrix
       
+      # # Raiha's code
+      # weight_matrix[,locs_bayesian[[t]]] <- compute_weight_matrix_nonRN(lik_mat,amis_params,weight_matrix)[,locs_bayesian[[t]]]
       
-      
+      weight_matrix <- compute_weight_matrix_nonRN_Rcpp(lik_mat, amis_params, weight_matrix,
+                                                        sim_within_boundaries, sim_outside_boundaries, 
+                                                        locs_bayesian[[t]])
+
       if (is.null(amis_params[["breaks"]])){
         
           if(is.null(amis_params[["sigma"]])){
@@ -286,7 +290,14 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
         
       }
     } else {
-      weight_matrix <- compute_weight_matrix_nonRN(lik_mat,amis_params,weight_matrix)  # Argument which_valid_locs_prev_map must be used here
+      
+      # # Raiha's code
+      # weight_matrix <- compute_weight_matrix_nonRN(lik_mat,amis_params,weight_matrix)  # Argument which_valid_locs_prev_map must be used here
+      
+      weight_matrix <- compute_weight_matrix_nonRN_Rcpp(lik_mat, amis_params, weight_matrix,
+                                                        sim_within_boundaries, sim_outside_boundaries, 
+                                                        which_valid_locs_prev_map[[t]])
+      
     }
   }
   # renormalise weights

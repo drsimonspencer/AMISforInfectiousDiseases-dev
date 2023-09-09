@@ -54,6 +54,13 @@ arma::mat f_estimator_histogram(arma::mat& prevalence_map,
                                 arma::vec& breaks, 
                                 List& which_valid_prev_map_t);
                                 
+arma::mat compute_weight_matrix_nonRN_Rcpp(const arma::mat& likelihoods, 
+                                      List amis_params,
+                                      const arma::mat& weight_matrix,
+                                      arma::uvec& sim_within_boundaries,
+                                      arma::uvec& sim_outside_boundaries,
+                                      arma::uvec& locs);
+                                
 List get_which_valid_prev_map(const List& prevalence_map, 
                               NumericVector boundaries);
                               

@@ -8,7 +8,7 @@
 //' be a list of n_locs elements, where each one shows which samples (out of M) are valid. 
 //' @export
 // [[Rcpp::export]]
-List get_which_valid_prev_map(const List& prevalence_map, 
+List get_which_valid_prev_map(const List& prevalence_map,
                               NumericVector boundaries){
   int TT = prevalence_map.size();
   List prev_t_list = prevalence_map(0);
@@ -26,7 +26,7 @@ List get_which_valid_prev_map(const List& prevalence_map,
     for (int l=0; l<L; l++) {
       for (int m=0; m<M; m++) {
         p = prev_t(l,m);
-        m_idx[m] = (!NumericVector::is_na(p)) && 
+        m_idx[m] = (!NumericVector::is_na(p)) &&
           (p>=boundaries[0]) && (p<=boundaries[1]) &&
           (!Rcpp::traits::is_infinite<REALSXP>(p));
       }
@@ -37,6 +37,47 @@ List get_which_valid_prev_map(const List& prevalence_map,
   }
   return(prev_map_valid_samples);
 }
+
+// // // Code where -Inf and Inf values are valid
+// List get_which_valid_prev_map(const List& prevalence_map, 
+//                               NumericVector boundaries){
+//   int TT = prevalence_map.size();
+//   List prev_t_list = prevalence_map(0);
+//   NumericMatrix prev_t = prev_t_list["data"];
+//   int L = prev_t.nrow();
+//   int M = prev_t.ncol();
+//   LogicalVector m_idx(M);
+//   Rcpp::IntegerVector v = Rcpp::seq(0, M-1);
+//   Rcpp::List prev_map_valid_samples(TT);
+//   double left_b = boundaries[0];
+//   double right_b = boundaries[1];
+//   bool inf_left_b = true;
+//   if(!Rcpp::traits::is_infinite<REALSXP>(left_b)){
+//     inf_left_b = false;
+//   }
+//   bool inf_right_b = true;
+//   if(!Rcpp::traits::is_infinite<REALSXP>(right_b)){
+//     inf_right_b = false;
+//   }
+//   double p;
+//   for (int t=0; t<TT; t++) {
+//     List prev_t_list = prevalence_map(t);
+//     NumericMatrix prev_t = prev_t_list["data"];
+//     Rcpp::List valid_samples_t(L);
+//     for (int l=0; l<L; l++) {
+//       for (int m=0; m<M; m++) {
+//         p = prev_t(l,m);
+//         m_idx[m] = (!NumericVector::is_na(p)) && (inf_left_b || p>=left_b) && (inf_right_b || p<=right_b);
+//       }
+//       IntegerVector valid_samples_t_l = v[m_idx];
+//       valid_samples_t[l] = valid_samples_t_l;
+//     }
+//     prev_map_valid_samples[t] = valid_samples_t;
+//   }
+//   return(prev_map_valid_samples);
+// }
+
+
 
 //' @title Check, at each time, which locations have valid data
 //' @param which_valid_prev_map List obtained by get_which_valid_prev_map

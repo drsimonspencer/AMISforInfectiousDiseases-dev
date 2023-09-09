@@ -105,7 +105,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   n_tims <- length(prevalence_map)
   n_locs <- dim(prevalence_map[[1]]$data)[1]
   which_valid_locs_prev_map <- get_which_valid_locs_prev_map(which_valid_prev_map, n_tims, n_locs)
-  
+  locations_first_t <- get_locations_first_t(which_valid_locs_prev_map, n_tims, n_locs)
+  locs_empirical <- get_locs_empirical(locations_first_t, n_tims)
+  locs_bayesian <- get_locs_bayesian(locations_first_t, n_tims)
+
   # Initialise
   if(!is.null(seed)) set.seed(seed)
   iter <- 1
@@ -144,26 +147,15 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
                                       which_valid_prev_map,log_norm_const_gaussian)
     if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
     # Determine first time each location appears in the data
-    n_tims <- dim(likelihoods)[1]
-    n_locs <- dim(likelihoods)[2]
-    if (n_locs == 1) {
-      lik_matrix <- function(l) as.matrix(l)
-    } else {
-      lik_matrix <- function(l) t(l)
-    }
-    locations_first_t = rep(NA,n_locs)
-    for (j in 1:n_tims) {
-      lik_mat <- lik_matrix(likelihoods[j,,])
-      for (l in 1:n_locs){
-        locations_first_t[!is.na(lik_mat[1,]) & is.na(locations_first_t)] <- j
-      }
-    }
+
+
     weight_matrix <- compute_weight_matrix(
       likelihoods,
       simulated_prevalences,
       amis_params,
       first_weight = rep(1-amis_params[["log"]], nsamples),
-      locations_first_t = locations_first_t,
+      locs_empirical,
+      locs_bayesian,
       is_within_boundaries,
       sim_within_boundaries, 
       sim_outside_boundaries, 
@@ -203,15 +195,19 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     
     ## Do we need to check for Inf and NAs in data and simulations here as well?
     
-    
-    
-    
+
     likelihoods= check_initial_vals("likelihoods")
     weight_matrix= check_initial_vals("weight_matrix")
     ess = check_initial_vals("ess")
     components = check_initial_vals("components")
     param = check_initial_vals("param")
     prior_density = check_initial_vals("prior_density")
+    
+    
+    
+    
+    # locations_first_t is based on data above. Is it different when user supplies likelihood?
+    
     n_tims = dim(likelihoods)[1]
     n_locs = dim(likelihoods)[2]
     if (n_locs == 1) {
@@ -232,9 +228,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     niter <- 0 # number of completed iterations 
   }
   
-  # More checks
-  if (length(which(is.na(locations_first_t)))>0){
-    warning(paste0(length(which(is.na(locations_first_t))), " location(s) provided with no data. Using prior information to determine weights for these locations.\n"))
+  # Checking whether some locations have no data at any time point
+  if(any(locations_first_t==-1L)){
+    warning(paste0(sum(locations_first_t==-1L), " location(s) provided with no data. Using prior information to determine weights for these locations.\n"))
   }
   
   # Define first_weight object in case target_ess reached in first iteration
@@ -274,7 +270,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
       first_weight <- compute_prior_proposal_ratio(components, param, prior_density, amis_params[["df"]], amis_params[["log"]]) # Prior/proposal
       weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, 
-                                             amis_params, first_weight,locations_first_t, 
+                                             amis_params, first_weight,
+                                             locs_empirical, locs_bayesian,
                                              is_within_boundaries, sim_within_boundaries, 
                                              sim_outside_boundaries, which_valid_locs_prev_map) # RN derivative (shd take all amis_params)
       if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}

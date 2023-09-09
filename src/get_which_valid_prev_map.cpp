@@ -102,3 +102,62 @@ List get_which_valid_locs_prev_map(List& which_valid_prev_map,
   }
   return(which_valid_locs_prev_map);
 }
+
+
+//' @title Determine first time each location appears in the data
+//' @param which_valid_locs_prev_map List obtained by get_which_valid_locs_prev_map
+//' @param n_tims Number of time points
+//' @param n_locs Number of locations
+//' @export
+// [[Rcpp::export]]
+arma::ivec get_locations_first_t(List& which_valid_locs_prev_map, 
+                                 int n_tims, int n_locs){
+ int t = 0L;
+ arma::ivec locations_first_t = arma::zeros<arma::ivec>(n_locs);
+ locations_first_t.fill(-1L);
+ for (unsigned int l=0; l<(unsigned int)n_locs; l++) {
+   t = 0L;
+   while((locations_first_t[l]==-1L) && (t<n_tims)){
+     arma::uvec which_valid_prev_map_t = which_valid_locs_prev_map[t];
+     if(any(which_valid_prev_map_t==l)){
+       locations_first_t[l] = t;
+     }
+     t++;
+   }
+ }
+ return(locations_first_t);
+}
+
+//' @title Determine, at which time point, which locations are updated using an empirical method
+//' @param locations_first_t Vector obtained by locations_first_t
+//' @param n_tims Number of time points
+//' @export
+// [[Rcpp::export]]
+List get_locs_empirical(arma::ivec& locations_first_t, int n_tims){
+  List locs_empirical(n_tims);
+  for (int t=0; t<n_tims; t++) {
+    arma::uvec idx = arma::find(locations_first_t == t);
+    if(idx.n_elem>0L){
+      arma::ivec locs_empirical_t_arma = locations_first_t(idx);
+      locs_empirical[t] = wrap(locs_empirical_t_arma); 
+    }
+  }
+return(locs_empirical);
+}
+
+//' @title Determine, at which time point, which locations are updated using Bayesian method
+//' @param locations_first_t Vector obtained by locations_first_t
+//' @param n_tims Number of time points
+//' @export
+// [[Rcpp::export]]
+List get_locs_bayesian(arma::ivec& locations_first_t, int n_tims){
+ List locs_bayesian(n_tims);
+ for (int t=0; t<n_tims; t++) {
+   arma::uvec idx = arma::find(locations_first_t < t);
+   if(idx.n_elem>0L){
+     arma::ivec locs_bayesian_t_arma = locations_first_t(idx);
+     locs_bayesian[t] = wrap(locs_bayesian_t_arma);
+   }
+ }
+ return(locs_bayesian);
+}

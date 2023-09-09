@@ -9,7 +9,8 @@ compute_weight_matrix(
   simulated_prevalence,
   amis_params,
   first_weight,
-  locations_first_t,
+  locs_empirical,
+  locs_bayesian,
   is_within_boundaries,
   sim_within_boundaries,
   sim_outside_boundaries,
@@ -27,8 +28,9 @@ parameter samples. (double)}
 \item{first_weight}{A vector containing the values for the right hand side of
 the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.}
 
-\item{locations_first_t}{Vector of length n_locs showing the first time each location appears in the data,
-or an NA if there is no data.}
+\item{locs_empirical}{List showing, at each time, which locations are updated using an empirical method.}
+
+\item{locs_bayesian}{List showing, at each time, which locations are updated using Bayesian method.}
 
 \item{is_within_boundaries}{Logical vector showing which simulated prevalences are valid.}
 

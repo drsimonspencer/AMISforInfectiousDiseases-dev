@@ -289,6 +289,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       # }
       if (min(ess) >= amis_params[["target_ess"]]) break
     }
+  }else{
+    cat("Algorithm finished after the first iteration with all locations below the target ESS. \n")
   }
 
   if(niter == amis_params[["max_iters"]] && min(ess) < amis_params[["target_ess"]]) {

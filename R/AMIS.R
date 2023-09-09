@@ -245,7 +245,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       cat("  A",mixture$G,"component mixture has been fitted.\n")
       components <- update_mixture_components(mixture, components, iter)
       new_params <- sample_new_parameters(mixture, nsamples, amis_params[["df"]], prior, amis_params[["log"]])
-      if(length(c(which(is.na(new_params$params)), which(is.nan(new_params$params))))>0) {warning("Greater than 1 sample from the proposal after the first iteration of AMIS was an NA or NaN value. \n")}
+      if(any(is.na(new_params$params))){warning("At least one sample from the proposal after the first iteration of AMIS was NA or NaN. \n")}
       param <- rbind(param, new_params$params)
       prior_density <- c(prior_density,new_params$prior_density)
       new_prevalences <- transmission_model(seeds(iter), new_params$params)

@@ -129,15 +129,17 @@ default_amis_params <- function(histogram=FALSE,intermittent_output=FALSE) {
 #' @return A larger array with the likelihoods of the new simulations joined to the existing array \code{likelihoods}.
 compute_likelihood<-function(param, prevalence_map,simulated_prevalences,amis_params,likelihoods=NULL,
                              sim_within_boundaries,which_valid_prev_map,log_norm_const_gaussian) {
-  n_tims<-length(prevalence_map)
+  n_tims <- length(prevalence_map)
   n_locs <- dim(prevalence_map[[1]]$data)[1]
   n_sims <- dim(simulated_prevalences)[1]
-  lik<-array(NA,c(n_tims,n_locs,n_sims)) # this way around to avoid abind -- different to elsewhere
+  lik <- array(NA, c(n_tims,n_locs,n_sims)) # this way around to avoid abind -- different to elsewhere
   for (t in 1:n_tims) {
     lik[t,,]<-evaluate_likelihood(param, prevalence_map[[t]],simulated_prevalences[,t],amis_params,
                                   sim_within_boundaries,which_valid_prev_map[[t]],log_norm_const_gaussian[t,,]) 
   }
-  if (!is.null(likelihoods)) {lik<-array(c(likelihoods,lik),c(n_tims,n_locs,dim(likelihoods)[3]+n_sims))}
+  if (!is.null(likelihoods)) {
+    lik <- array(c(likelihoods,lik), c(n_tims,n_locs,dim(likelihoods)[3]+n_sims))
+  }
   return(lik)
 }
 

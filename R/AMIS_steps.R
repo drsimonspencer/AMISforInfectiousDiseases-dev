@@ -2,6 +2,11 @@
 #' @importFrom Rcpp sourceCpp
 NULL
 
+#' Environment where intermittent outputs are saved
+#' @export
+amis_env <- new.env()
+
+
 #' Check inputs of \code{amis} function
 #' @inheritParams amis
 #' @export

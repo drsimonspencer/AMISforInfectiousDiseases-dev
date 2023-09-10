@@ -175,14 +175,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     )
     seeds <- function(iter) ((iter - 1) * nsamples + 1):(iter * nsamples)  # function to calculate the seeds for iteration iter.
     niter <- 1 # number of completed iterations 
-    # if (amis_params[["intermittent_output"]]){
-    #   res <- save_output()
-    #   assign("intermittent_output",res,.GlobalEnv)
-    # }
-    # if (amis_params[["intermittent_output"]]){
-    #   res <- save_output()
-    #   assign(x="intermittent_output",value=res,envir=environment(AMISforInfectiousDiseases:::amis))
-    # }
+    if (amis_params[["intermittent_output"]]){
+      res <- save_output()
+      assign(x="intermittent_output",value=res,envir=amis_env)
+    }
   } else {
     cat("AMIS iteration 1\n")
     message("Initialising algorithm from a previous run provided by the user. \n")
@@ -289,14 +285,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       cat("  min ESS:",round(min(ess))," mean ESS:",round(mean(ess))," max ESS:",round(max(ess)),"\n")
       cat(" ",length(which(ess<amis_params[["target_ess"]])),"locations are below the target ESS.\n")
       niter <- niter + 1
-      # if (amis_params[["intermittent_output"]]){
-      #   res = save_output()
-      #   assign("intermittent_output",res,.GlobalEnv)
-      # }
-      # if (amis_params[["intermittent_output"]]){
-      #   res <- save_output()
-      #   assign(x="intermittent_output",value=res,envir=environment(AMISforInfectiousDiseases:::amis))
-      # }
+      if (amis_params[["intermittent_output"]]){
+        res <- save_output()
+        assign(x="intermittent_output",value=res,envir=amis_env)
+      }
       if (min(ess) >= amis_params[["target_ess"]]) break
     }
   }else{

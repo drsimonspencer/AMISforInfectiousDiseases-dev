@@ -189,7 +189,7 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
         # }
       }
     } else {
-      breaks<-amis_params[["breaks"]]
+      breaks <- amis_params[["breaks"]]
       f <- f_estimator_histogram(prevalence_map=prevalence_map$data, 
                                  prev_sim=prev_sim, 
                                  breaks=breaks, 
@@ -206,7 +206,7 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
       #   }
       # }
     }
-    if (amis_params[["log"]]) {f<-log(f)}
+    if (amis_params[["log"]]) {f <- log(f)}
   }
   return(f)
 }
@@ -257,9 +257,11 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
       # # Raiha's code
       # weight_matrix[,locs_bayesian[[t]]] <- compute_weight_matrix_nonRN(lik_mat,amis_params,weight_matrix)[,locs_bayesian[[t]]]
       
-      weight_matrix <- compute_weight_matrix_nonRN_Rcpp(lik_mat, amis_params, weight_matrix,
-                                                        sim_within_boundaries, sim_outside_boundaries, 
-                                                        locs_bayesian[[t]])
+      if(!is.null(locs_bayesian[[t]])){
+        weight_matrix <- compute_weight_matrix_nonRN_Rcpp(lik_mat, amis_params, weight_matrix,
+                                                          sim_within_boundaries, sim_outside_boundaries, 
+                                                          locs_bayesian[[t]])
+      }
 
       if (is.null(amis_params[["breaks"]])){
         

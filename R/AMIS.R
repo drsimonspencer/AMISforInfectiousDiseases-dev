@@ -52,26 +52,26 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   save_output <- function(){
     
     if (is.null(initial_amis_vals)){
-      allseeds <- 1:(niter * nsamples) 
+      allseeds <- 1:(niter * nsamples)
     } else {
-      allseeds <- c(1:(initial_amis_vals$amis_bits$last_simulation_seed + (niter * nsamples))) 
+      allseeds <- c(1:(initial_amis_vals$amis_bits$last_simulation_seed + (niter * nsamples)))
     }
     
     ret <- data.frame(allseeds, param, simulated_prevalences, weight_matrix)
     if (is.null(rownames(prevalence_map[[1]]$data))) {
-      iunames<-sapply(1:dim(weight_matrix)[2], function(idx) sprintf("iu%g", idx))
+      iunames <- sapply(1:dim(weight_matrix)[2], function(idx) sprintf("iu%g", idx))
     } else {
-      iunames<-rownames(prevalence_map[[1]]$data)
+      iunames <- rownames(prevalence_map[[1]]$data)
     }
     if (is.null(colnames(param))) {
-      paramnames<-sapply(1:dim(param)[2], function(idx) sprintf("param%g", idx))
+      paramnames <- sapply(1:dim(param)[2], function(idx) sprintf("param%g", idx))
     } else {
-      paramnames<-colnames(param)
+      paramnames <- colnames(param)
     }
     if (is.null(colnames(simulated_prevalences))) {
-      prevnames<-sapply(1:dim(simulated_prevalences)[2], function(idx) sprintf("prev%g", idx))
+      prevnames <- sapply(1:dim(simulated_prevalences)[2], function(idx) sprintf("prev%g", idx))
     } else {
-      prevnames<-paste0("prev",colnames(simulated_prevalences))
+      prevnames <- paste0("prev",colnames(simulated_prevalences))
     }
     colnames(ret) <- c("seeds",paramnames,prevnames,iunames)
     
@@ -141,6 +141,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
              length(simulated_prevalences)-length(sim_within_boundaries), 
              " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
     }
+    
     # to avoid duplication, evaluate likelihood now.
     likelihoods <- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params,
                                       likelihoods=NULL, sim_within_boundaries,
@@ -172,11 +173,15 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       Mean = list(), # list of means for each component
       probs = list() # probability of each component (unnormalised)
     )
-    seeds <- function(iter) ((iter - 1) * nsamples + 1):(iter * nsamples)  #function to calculate the seeds for iteration iter.
+    seeds <- function(iter) ((iter - 1) * nsamples + 1):(iter * nsamples)  # function to calculate the seeds for iteration iter.
     niter <- 1 # number of completed iterations 
     # if (amis_params[["intermittent_output"]]){
-    #   res = save_output()
+    #   res <- save_output()
     #   assign("intermittent_output",res,.GlobalEnv)
+    # }
+    # if (amis_params[["intermittent_output"]]){
+    #   res <- save_output()
+    #   assign(x="intermittent_output",value=res,envir=environment(AMISforInfectiousDiseases:::amis))
     # }
   } else {
     cat("AMIS iteration 1\n")
@@ -225,7 +230,11 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     }
     
     seeds <- function(iter) ((iter - 2) * nsamples + 1):((iter - 1) * nsamples) + initial_amis_vals$amis_bits$last_simulation_seed #function to calculate the seeds for iteration iter.
+    
+    
     niter <- 0 # number of completed iterations 
+    
+    
   }
   
   # Checking whether some locations have no data at any time point
@@ -284,6 +293,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       #   res = save_output()
       #   assign("intermittent_output",res,.GlobalEnv)
       # }
+      # if (amis_params[["intermittent_output"]]){
+      #   res <- save_output()
+      #   assign(x="intermittent_output",value=res,envir=environment(AMISforInfectiousDiseases:::amis))
+      # }
       if (min(ess) >= amis_params[["target_ess"]]) break
     }
   }else{
@@ -299,13 +312,13 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   }
   
   # Save output
-  res = save_output()
+  res <- save_output()
   
   # Calculate model evidence if using Bayesian updating (RN derivative not being used)
   if (amis_params[["RN"]]){
     return(list(sample=res$results,evidence=NULL))
   } else {
-    model_evidence = compute_model_evidence(likelihoods, amis_params, first_weight)
+    model_evidence <- compute_model_evidence(likelihoods, amis_params, first_weight)
     return(list(sample=res$results, evidence=model_evidence))
   }
 }

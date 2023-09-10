@@ -138,7 +138,7 @@ List get_locs_empirical(arma::ivec& locations_first_t, int n_tims){
   for (int t=0; t<n_tims; t++) {
     arma::uvec idx = arma::find(locations_first_t == t);
     if(idx.n_elem>0L){
-      arma::ivec locs_empirical_t_arma = locations_first_t(idx);
+      arma::uvec locs_empirical_t_arma = idx;
       locs_empirical[t] = wrap(locs_empirical_t_arma); 
     }
   }
@@ -155,7 +155,7 @@ List get_locs_bayesian(arma::ivec& locations_first_t, int n_tims){
  for (int t=0; t<n_tims; t++) {
    arma::uvec idx = arma::find(locations_first_t < t);
    if(idx.n_elem>0L){
-     arma::ivec locs_bayesian_t_arma = locations_first_t(idx);
+     arma::uvec locs_bayesian_t_arma = idx;
      locs_bayesian[t] = wrap(locs_bayesian_t_arma);
    }
  }

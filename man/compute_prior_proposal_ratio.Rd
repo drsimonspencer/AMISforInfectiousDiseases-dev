@@ -24,8 +24,7 @@ compute_prior_proposal_ratio(components, param, prior_density, df, log)
 \item{log}{A logical indicating whether to work on the log scale.}
 }
 \value{
-A vector containing the prior/proposal ratio for each row in
-\code{param}
+A vector containing the prior/proposal ratio for each row in \code{param}
 }
 \description{
 This function returns the ratio between the prior and proposal distribution

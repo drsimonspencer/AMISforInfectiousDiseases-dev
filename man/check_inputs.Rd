@@ -2,7 +2,7 @@
 % Please edit documentation in R/AMIS_steps.R
 \name{check_inputs}
 \alias{check_inputs}
-\title{Check inputs of \code{amis} function}
+\title{Check inputs of \code{\link{amis}} function}
 \usage{
 check_inputs(prevalence_map, transmission_model, prior, amis_params, seed)
 }
@@ -75,5 +75,5 @@ For non-finite \code{boundaries}, ensure that the range of 'breaks' includes any
 \item{seed}{Optional seed for the random number generator.}
 }
 \description{
-Check inputs of \code{amis} function
+Check inputs of \code{\link{amis}} function
 }

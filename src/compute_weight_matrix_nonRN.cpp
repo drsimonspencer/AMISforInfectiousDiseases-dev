@@ -15,7 +15,7 @@
 //' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
 //' @param locs Vector showing which locations have data.
 //' @return An updated weight matrix.
-//' @export
+//' @noRd
 // [[Rcpp::export]]
 arma::mat compute_weight_matrix_nonRN_Rcpp(const arma::mat& likelihoods, 
                                       List amis_params,

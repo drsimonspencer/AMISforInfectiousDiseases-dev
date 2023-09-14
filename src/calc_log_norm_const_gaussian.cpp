@@ -6,7 +6,7 @@
 //' @param boundaries Vector of length two.
 //' @param sd Parameter sigma of the Gaussian kernel.
 //' @return An (n_tims x n_locs x m) array.
-//' @export
+//' @noRd
 // [[Rcpp::export]]
 arma::cube calc_log_norm_const_gaussian(const List& prevalence_map, 
                                         NumericVector boundaries, 

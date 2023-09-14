@@ -7,7 +7,7 @@
 //' @param breaks vector specifying the breaks for the histogram.
 //' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 //' @return A matrix with L rows containing the empirical estimates for the likelihood.
-//' @export
+//' @noRd
 // [[Rcpp::export]]
 arma::mat f_estimator_histogram(arma::mat& prevalence_map, 
                                 arma::vec& prev_sim, 

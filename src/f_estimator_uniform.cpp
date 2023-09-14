@@ -9,7 +9,7 @@
 //' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 //' @param boundaries Vector of length two.
 //' @return A matrix with L rows containing the empirical estimates for the likelihood.
-//' @export
+//' @noRd
 // [[Rcpp::export]]
 arma::mat f_estimator_uniform(arma::mat& prevalence_map, 
                               arma::vec& prev_sim, 

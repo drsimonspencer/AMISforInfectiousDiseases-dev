@@ -9,7 +9,7 @@
 //' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 //' @param log_norm_const_gaussian_t (n_locs x M) matrix showing the log normalising constant for the Gaussian kernels.
 //' @return A matrix with L rows containing the empirical estimates for the likelihood.
-//' @export
+//' @noRd
 // [[Rcpp::export]]
 arma::mat f_estimator_Gaussian(arma::mat& prevalence_map, 
                                arma::vec& prev_sim, 

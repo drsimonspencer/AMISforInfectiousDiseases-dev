@@ -345,7 +345,11 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   if (amis_params[["RN"]]){
     return(list(sample=res$results, evidence=NULL))
   } else {
-    model_evidence <- compute_model_evidence(likelihoods, amis_params, first_weight)
+    
+    model_evidence <- NULL
+    warning("model_evidence not calculated. Function compute_model_evidence() is under development.")
+    # model_evidence <- compute_model_evidence(likelihoods, amis_params, first_weight)
+    
     return(list(sample=res$results, evidence=model_evidence))
   }
 }

@@ -6,7 +6,7 @@
 #' @param boundaries Vector of length two.
 #' @param sd Parameter sigma of the Gaussian kernel.
 #' @return An (n_tims x n_locs x m) array.
-#' @export
+#' @noRd
 calc_log_norm_const_gaussian <- function(prevalence_map, boundaries, sd) {
     .Call('_AMISforInfectiousDiseases_calc_log_norm_const_gaussian', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, boundaries, sd)
 }
@@ -26,7 +26,7 @@ calc_log_norm_const_gaussian <- function(prevalence_map, boundaries, sd) {
 #' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
 #' @param locs Vector showing which locations have data.
 #' @return An updated weight matrix.
-#' @export
+#' @noRd
 compute_weight_matrix_empirical_gauss <- function(likelihoods, prev_sim, amis_params, weight_matrix, sim_within_boundaries, sim_outside_boundaries, locs) {
     .Call('_AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, prev_sim, amis_params, weight_matrix, sim_within_boundaries, sim_outside_boundaries, locs)
 }
@@ -47,7 +47,7 @@ compute_weight_matrix_empirical_gauss <- function(likelihoods, prev_sim, amis_pa
 #' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
 #' @param locs Vector showing which locations have data.
 #' @return An updated weight matrix.
-#' @export
+#' @noRd
 compute_weight_matrix_empirical_histogram <- function(likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs) {
     .Call('_AMISforInfectiousDiseases_compute_weight_matrix_empirical_histogram', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs)
 }
@@ -68,7 +68,7 @@ compute_weight_matrix_empirical_histogram <- function(likelihoods, prev_sim, ami
 #' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
 #' @param locs Vector showing which locations have data.
 #' @return An updated weight matrix.
-#' @export
+#' @noRd
 compute_weight_matrix_empirical_uniform <- function(likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs) {
     .Call('_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs)
 }
@@ -87,7 +87,7 @@ compute_weight_matrix_empirical_uniform <- function(likelihoods, prev_sim, amis_
 #' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
 #' @param locs Vector showing which locations have data.
 #' @return An updated weight matrix.
-#' @export
+#' @noRd
 compute_weight_matrix_nonRN_Rcpp <- function(likelihoods, amis_params, weight_matrix, sim_within_boundaries, sim_outside_boundaries, locs) {
     .Call('_AMISforInfectiousDiseases_compute_weight_matrix_nonRN_Rcpp', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, amis_params, weight_matrix, sim_within_boundaries, sim_outside_boundaries, locs)
 }
@@ -100,7 +100,7 @@ compute_weight_matrix_nonRN_Rcpp <- function(likelihoods, amis_params, weight_ma
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 #' @param log_norm_const_gaussian_t (n_locs x M) matrix showing the log normalising constant for the Gaussian kernels.
 #' @return A matrix with L rows containing the empirical estimates for the likelihood.
-#' @export
+#' @noRd
 f_estimator_Gaussian <- function(prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t) {
     .Call('_AMISforInfectiousDiseases_f_estimator_Gaussian', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t)
 }
@@ -111,7 +111,7 @@ f_estimator_Gaussian <- function(prevalence_map, prev_sim, sd, sim_within_bounda
 #' @param breaks vector specifying the breaks for the histogram.
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 #' @return A matrix with L rows containing the empirical estimates for the likelihood.
-#' @export
+#' @noRd
 f_estimator_histogram <- function(prevalence_map, prev_sim, breaks, which_valid_prev_map_t) {
     .Call('_AMISforInfectiousDiseases_f_estimator_histogram', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, breaks, which_valid_prev_map_t)
 }
@@ -124,7 +124,7 @@ f_estimator_histogram <- function(prevalence_map, prev_sim, breaks, which_valid_
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 #' @param boundaries Vector of length two.
 #' @return A matrix with L rows containing the empirical estimates for the likelihood.
-#' @export
+#' @noRd
 f_estimator_uniform <- function(prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries) {
     .Call('_AMISforInfectiousDiseases_f_estimator_uniform', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries)
 }
@@ -134,7 +134,7 @@ f_estimator_uniform <- function(prevalence_map, prev_sim, delta, sim_within_boun
 #' @param boundaries Vector of length two.
 #' @return A list where each element corresponds to a time point. For each time point, there will 
 #' be a list of n_locs elements, where each one shows which samples (out of M) are valid. 
-#' @export
+#' @noRd
 get_which_valid_prev_map <- function(prevalence_map, boundaries) {
     .Call('_AMISforInfectiousDiseases_get_which_valid_prev_map', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, boundaries)
 }
@@ -143,7 +143,7 @@ get_which_valid_prev_map <- function(prevalence_map, boundaries) {
 #' @param which_valid_prev_map List obtained by get_which_valid_prev_map
 #' @param n_tims Number of time points
 #' @param n_locs Number of locations
-#' @export
+#' @noRd
 get_which_valid_locs_prev_map <- function(which_valid_prev_map, n_tims, n_locs) {
     .Call('_AMISforInfectiousDiseases_get_which_valid_locs_prev_map', PACKAGE = 'AMISforInfectiousDiseases', which_valid_prev_map, n_tims, n_locs)
 }
@@ -152,7 +152,7 @@ get_which_valid_locs_prev_map <- function(which_valid_prev_map, n_tims, n_locs) 
 #' @param which_valid_locs_prev_map List obtained by get_which_valid_locs_prev_map
 #' @param n_tims Number of time points
 #' @param n_locs Number of locations
-#' @export
+#' @noRd
 get_locations_first_t <- function(which_valid_locs_prev_map, n_tims, n_locs) {
     .Call('_AMISforInfectiousDiseases_get_locations_first_t', PACKAGE = 'AMISforInfectiousDiseases', which_valid_locs_prev_map, n_tims, n_locs)
 }
@@ -160,7 +160,7 @@ get_locations_first_t <- function(which_valid_locs_prev_map, n_tims, n_locs) {
 #' @title Determine, at which time point, which locations are updated using an empirical method
 #' @param locations_first_t Vector obtained by locations_first_t
 #' @param n_tims Number of time points
-#' @export
+#' @noRd
 get_locs_RN <- function(locations_first_t, n_tims) {
     .Call('_AMISforInfectiousDiseases_get_locs_RN', PACKAGE = 'AMISforInfectiousDiseases', locations_first_t, n_tims)
 }
@@ -168,7 +168,7 @@ get_locs_RN <- function(locations_first_t, n_tims) {
 #' @title Determine, at which time point, which locations are updated using RN without denominator
 #' @param locations_first_t Vector obtained by locations_first_t
 #' @param n_tims Number of time points
-#' @export
+#' @noRd
 get_locs_nonRN <- function(locations_first_t, n_tims) {
     .Call('_AMISforInfectiousDiseases_get_locs_nonRN', PACKAGE = 'AMISforInfectiousDiseases', locations_first_t, n_tims)
 }

@@ -7,7 +7,7 @@ NULL
 amis_env <- new.env()
 
 
-#' Check inputs of \code{amis} function
+#' Check inputs of \code{\link{amis}} function
 #' @inheritParams amis
 #' @export
 check_inputs <- function(prevalence_map, transmission_model, prior, amis_params, seed) {
@@ -326,7 +326,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
   return(weight_matrix)
 }
 
-#' Compute weight matrix using empirical Radon-Nikodym derivative
+#' Compute weight matrix using empirical Radon-Nikodym derivative using Uniform kernel (old code)
 #'
 #' Compute matrix describing the weights for each parameter sampled, for each
 #' location. One row per sample, one column per location.  Each weight
@@ -335,10 +335,11 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
 #' computed from the transmission model for the specific parameter sample.
 #'
 #' @param likelihoods An n_sims x n_locs matrix of (log-)likelihoods
-#' NB: transpose of slice of array. 
+#' NB: transpose of slice of array.
 #' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
 #' @param weight_matrix An n_sims x n_locs matrix containing the current values of the weights.
+#' @noRd
 #' @return An updated weight matrix.
 compute_weight_matrix_empirical <- function(likelihoods, prev_sim, amis_params, weight_matrix) {
   delta<-amis_params[["delta"]]
@@ -365,7 +366,7 @@ compute_weight_matrix_empirical <- function(likelihoods, prev_sim, amis_params, 
   return(new_weights)
 }
 
-#' Compute weight matrix using empirical Radon-Nikodym derivative (with fixed breaks)
+#' Compute weight matrix using empirical Radon-Nikodym derivative (with fixed breaks) (old code)
 #'
 #' Compute matrix describing the weights for each parameter sampled, for each
 #' location. One row per sample, one column per location.  Each weight
@@ -379,9 +380,10 @@ compute_weight_matrix_empirical <- function(likelihoods, prev_sim, amis_params, 
 #'     parameter sample. (double)
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
 #' @param weight_matrix A matrix containing the current values of the weights.
+#' @noRd
 #' @return An updated weight matrix.
 compute_weight_matrix_histogram<-function(likelihoods, prev_sim, amis_params, weight_matrix) {
-  breaks<-amis_params[["breaks"]] # NB top entry in breaks must be strictly larger than the largest possible prevalence. 
+  breaks<-amis_params[["breaks"]] # NB top entry in breaks must be strictly larger than the largest possible prevalence.
   L<-length(breaks)
   lwr<-breaks[1:(L-1)]
   upr<-breaks[2:L]
@@ -416,7 +418,7 @@ compute_weight_matrix_histogram<-function(likelihoods, prev_sim, amis_params, we
   return(new_weights)
 }
 
-#' Compute weight matrix without using empirical Radon-Nikodym derivative
+#' Compute weight matrix without using empirical Radon-Nikodym derivative (old code)
 #'
 #' Compute matrix describing the weights for each parameter sampled, for each
 #' location. One row per sample, one column per location.  Each weight
@@ -426,6 +428,7 @@ compute_weight_matrix_histogram<-function(likelihoods, prev_sim, amis_params, we
 #' NB: transpose of slice of array.
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
 #' @param weight_matrix A matrix containing the current values of the weights.
+#' @noRd
 #' @return An updated weight matrix.
 compute_weight_matrix_nonRN <- function(likelihoods, amis_params, weight_matrix) {
   locs<-which(!is.na(likelihoods[1,])) # if there is no data for a location, do not update weights.
@@ -615,8 +618,7 @@ update_mixture_components <- function(mixture, components, iter) {
 #' @param prior_density Vector containing the prior density of each sampled parameter vector.
 #' @param df The degrees of freedom for the t-distributed proposal distribution.
 #' @param log A logical indicating whether to work on the log scale.
-#' @return A vector containing the prior/proposal ratio for each row in
-#'     \code{param}
+#' @return A vector containing the prior/proposal ratio for each row in \code{param}
 compute_prior_proposal_ratio <- function(components, param, prior_density, df, log) {
   probs <- components$probs # /sum(unlist(components$probs)) # to normalise?
   Sigma <- components$Sigma
@@ -648,7 +650,7 @@ compute_prior_proposal_ratio <- function(components, param, prior_density, df, l
 #' @param first_weight A vector containing the values for the right hand side of
 #'     the weight expression. 
 #' @return estimate of the model evidence.
-#' @export
+#' @noRd
 compute_model_evidence <- function(likelihoods, amis_params, first_weight){
   n_tims <- dim(likelihoods)[1]
   n_locs <- dim(likelihoods)[2]

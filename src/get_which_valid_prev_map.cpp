@@ -6,7 +6,7 @@
 //' @param boundaries Vector of length two.
 //' @return A list where each element corresponds to a time point. For each time point, there will 
 //' be a list of n_locs elements, where each one shows which samples (out of M) are valid. 
-//' @export
+//' @noRd
 // [[Rcpp::export]]
 List get_which_valid_prev_map(const List& prevalence_map,
                               NumericVector boundaries){
@@ -83,7 +83,7 @@ List get_which_valid_prev_map(const List& prevalence_map,
 //' @param which_valid_prev_map List obtained by get_which_valid_prev_map
 //' @param n_tims Number of time points
 //' @param n_locs Number of locations
-//' @export
+//' @noRd
 // [[Rcpp::export]]
 List get_which_valid_locs_prev_map(List& which_valid_prev_map, 
                                    int n_tims, int n_locs){
@@ -108,7 +108,7 @@ List get_which_valid_locs_prev_map(List& which_valid_prev_map,
 //' @param which_valid_locs_prev_map List obtained by get_which_valid_locs_prev_map
 //' @param n_tims Number of time points
 //' @param n_locs Number of locations
-//' @export
+//' @noRd
 // [[Rcpp::export]]
 arma::ivec get_locations_first_t(List& which_valid_locs_prev_map, 
                                  int n_tims, int n_locs){
@@ -131,7 +131,7 @@ arma::ivec get_locations_first_t(List& which_valid_locs_prev_map,
 //' @title Determine, at which time point, which locations are updated using an empirical method
 //' @param locations_first_t Vector obtained by locations_first_t
 //' @param n_tims Number of time points
-//' @export
+//' @noRd
 // [[Rcpp::export]]
 List get_locs_RN(arma::ivec& locations_first_t, int n_tims){
   List locs_RN(n_tims);
@@ -148,7 +148,7 @@ return(locs_RN);
 //' @title Determine, at which time point, which locations are updated using RN without denominator
 //' @param locations_first_t Vector obtained by locations_first_t
 //' @param n_tims Number of time points
-//' @export
+//' @noRd
 // [[Rcpp::export]]
 List get_locs_nonRN(arma::ivec& locations_first_t, int n_tims){
  List locs_nonRN(n_tims);

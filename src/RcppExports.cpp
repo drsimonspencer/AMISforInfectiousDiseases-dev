@@ -177,27 +177,27 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// get_locs_empirical
-List get_locs_empirical(arma::ivec& locations_first_t, int n_tims);
-RcppExport SEXP _AMISforInfectiousDiseases_get_locs_empirical(SEXP locations_first_tSEXP, SEXP n_timsSEXP) {
+// get_locs_RN
+List get_locs_RN(arma::ivec& locations_first_t, int n_tims);
+RcppExport SEXP _AMISforInfectiousDiseases_get_locs_RN(SEXP locations_first_tSEXP, SEXP n_timsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::ivec& >::type locations_first_t(locations_first_tSEXP);
     Rcpp::traits::input_parameter< int >::type n_tims(n_timsSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_locs_empirical(locations_first_t, n_tims));
+    rcpp_result_gen = Rcpp::wrap(get_locs_RN(locations_first_t, n_tims));
     return rcpp_result_gen;
 END_RCPP
 }
-// get_locs_bayesian
-List get_locs_bayesian(arma::ivec& locations_first_t, int n_tims);
-RcppExport SEXP _AMISforInfectiousDiseases_get_locs_bayesian(SEXP locations_first_tSEXP, SEXP n_timsSEXP) {
+// get_locs_nonRN
+List get_locs_nonRN(arma::ivec& locations_first_t, int n_tims);
+RcppExport SEXP _AMISforInfectiousDiseases_get_locs_nonRN(SEXP locations_first_tSEXP, SEXP n_timsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::ivec& >::type locations_first_t(locations_first_tSEXP);
     Rcpp::traits::input_parameter< int >::type n_tims(n_timsSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_locs_bayesian(locations_first_t, n_tims));
+    rcpp_result_gen = Rcpp::wrap(get_locs_nonRN(locations_first_t, n_tims));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -214,8 +214,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_AMISforInfectiousDiseases_get_which_valid_prev_map", (DL_FUNC) &_AMISforInfectiousDiseases_get_which_valid_prev_map, 2},
     {"_AMISforInfectiousDiseases_get_which_valid_locs_prev_map", (DL_FUNC) &_AMISforInfectiousDiseases_get_which_valid_locs_prev_map, 3},
     {"_AMISforInfectiousDiseases_get_locations_first_t", (DL_FUNC) &_AMISforInfectiousDiseases_get_locations_first_t, 3},
-    {"_AMISforInfectiousDiseases_get_locs_empirical", (DL_FUNC) &_AMISforInfectiousDiseases_get_locs_empirical, 2},
-    {"_AMISforInfectiousDiseases_get_locs_bayesian", (DL_FUNC) &_AMISforInfectiousDiseases_get_locs_bayesian, 2},
+    {"_AMISforInfectiousDiseases_get_locs_RN", (DL_FUNC) &_AMISforInfectiousDiseases_get_locs_RN, 2},
+    {"_AMISforInfectiousDiseases_get_locs_nonRN", (DL_FUNC) &_AMISforInfectiousDiseases_get_locs_nonRN, 2},
     {NULL, NULL, 0}
 };
 

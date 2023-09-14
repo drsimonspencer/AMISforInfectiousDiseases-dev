@@ -70,9 +70,9 @@ List get_which_valid_locs_prev_map(List& which_valid_prev_map,
 arma::ivec get_locations_first_t(List& which_valid_locs_prev_map, 
                                  int n_tims, int n_locs);
                                  
-List get_locs_empirical(arma::ivec& locations_first_t, int n_tims);
+List get_locs_RN(arma::ivec& locations_first_t, int n_tims);
                                  
-List get_locs_bayesian(arma::ivec& locations_first_t, int n_tims);
+List get_locs_nonRN(arma::ivec& locations_first_t, int n_tims);
 
 arma::cube calc_log_norm_const_gaussian(const List& prevalence_map, 
                                         NumericVector boundaries, 

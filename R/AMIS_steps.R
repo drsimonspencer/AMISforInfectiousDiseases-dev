@@ -85,8 +85,8 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
       }
     }
   }else{
-    ## Bayesian method for weight matrix
-    cat("Bayesian method will be used to update the weight matrix as 'RN' was set to FALSE. \n")
+    ## RN derivariate will not be used for weight matrix
+    cat("Empirical Radon-Nikodym derivative will not be used to update the weight matrix as 'RN' was set to FALSE. \n")
     ## and then specifically for f -----
     if(!is.null(amis_params[["breaks"]])){
       cat("Histogram method will be used in the approximation for the likelihood as 'breaks' was supplied. \n")
@@ -224,15 +224,15 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
 #' @param first_weight A vector containing the values for the right hand side of
 #'     the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.
-#' @param locs_empirical List showing, at each time, which locations are updated using an empirical method.
-#' @param locs_bayesian List showing, at each time, which locations are updated using Bayesian method.
+#' @param locs_RN List showing, at each time, which locations are updated using the RN derivative.
+#' @param locs_nonRN List showing, at each time, which locations are updated without using the RN derivative.
 #' @param is_within_boundaries Logical vector showing which simulated prevalences are valid.
 #' @param sim_within_boundaries Vector showing which simulated prevalences are valid.
 #' @param sim_outside_boundaries Vector showing which simulated prevalences are invalid
 #' @param which_valid_locs_prev_map List showing which locations have valid data at each time
 #' @return normalised weight matrix.
 compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params, first_weight, 
-                                  locs_empirical, locs_bayesian,
+                                  locs_RN, locs_nonRN,
                                   is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, 
                                   which_valid_locs_prev_map) {
 
@@ -251,55 +251,55 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
     lik_mat <- lik_matrix(likelihoods[t,,])
     # Update the weights by the latest likelihood (filtering)
     if (amis_params[["RN"]]){
-      # If this is the first timepoint for a location then use empirical update, otherwise use Bayesian
-      # locs_empirical = which(locations_first_t == t)
-      # locs_bayesian = which(locations_first_t < t)
+      # If this is the first timepoint for a location then use RN
+      # locs_RN = which(locations_first_t == t)
+      # locs_nonRN = which(locations_first_t < t)
       
       
       # # Update weight matrix
       
       # # Raiha's code
-      # weight_matrix[,locs_bayesian[[t]]] <- compute_weight_matrix_nonRN(lik_mat,amis_params,weight_matrix)[,locs_bayesian[[t]]]
+      # weight_matrix[,locs_nonRN[[t]]] <- compute_weight_matrix_nonRN(lik_mat,amis_params,weight_matrix)[,locs_nonRN[[t]]]
       
-      if(!is.null(locs_bayesian[[t]])){
+      if(!is.null(locs_nonRN[[t]])){
         weight_matrix <- compute_weight_matrix_nonRN_Rcpp(lik_mat, amis_params, weight_matrix,
                                                           sim_within_boundaries, sim_outside_boundaries, 
-                                                          locs_bayesian[[t]])
+                                                          locs_nonRN[[t]])
       }
 
       if (is.null(amis_params[["breaks"]])){
         
           if(is.null(amis_params[["sigma"]])){
-            if(!is.null(locs_empirical[[t]])){
+            if(!is.null(locs_RN[[t]])){
               weight_matrix <- compute_weight_matrix_empirical_uniform(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix,
-                                                                       is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs_empirical[[t]])
+                                                                       is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs_RN[[t]])
             }
             
             # # R code of previous version of the package
             # weight_matrix <- compute_weight_matrix_empirical(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)
             
             # # Raiha's code
-            # weight_matrix[,locs_empirical] <- compute_weight_matrix_empirical(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)[,locs_empirical]
+            # weight_matrix[,locs_RN] <- compute_weight_matrix_empirical(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)[,locs_RN]
             
           }else{
-            if(!is.null(locs_empirical[[t]])){
+            if(!is.null(locs_RN[[t]])){
               weight_matrix <- compute_weight_matrix_empirical_gauss(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix, 
-                                                                     sim_within_boundaries, sim_outside_boundaries, locs_empirical[[t]])
+                                                                     sim_within_boundaries, sim_outside_boundaries, locs_RN[[t]])
             }
           }
         
 
       } else {
-        if(!is.null(locs_empirical[[t]])){
+        if(!is.null(locs_RN[[t]])){
           weight_matrix <- compute_weight_matrix_empirical_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix,
-                                                                     is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs_empirical[[t]])
+                                                                     is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs_RN[[t]])
         }
         
         # # R code of previous version of the package
         # weight_matrix <- compute_weight_matrix_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)
         
         # # Raiha's code
-        # weight_matrix[,locs_empirical] <- compute_weight_matrix_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)[,locs_empirical]
+        # weight_matrix[,locs_RN] <- compute_weight_matrix_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)[,locs_RN]
         
       }
     } else {
@@ -416,7 +416,7 @@ compute_weight_matrix_histogram<-function(likelihoods, prev_sim, amis_params, we
   return(new_weights)
 }
 
-#' Compute weight matrix using Bayesian updating
+#' Compute weight matrix without using empirical Radon-Nikodym derivative
 #'
 #' Compute matrix describing the weights for each parameter sampled, for each
 #' location. One row per sample, one column per location.  Each weight

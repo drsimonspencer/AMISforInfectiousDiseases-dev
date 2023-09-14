@@ -161,15 +161,15 @@ get_locations_first_t <- function(which_valid_locs_prev_map, n_tims, n_locs) {
 #' @param locations_first_t Vector obtained by locations_first_t
 #' @param n_tims Number of time points
 #' @export
-get_locs_empirical <- function(locations_first_t, n_tims) {
-    .Call('_AMISforInfectiousDiseases_get_locs_empirical', PACKAGE = 'AMISforInfectiousDiseases', locations_first_t, n_tims)
+get_locs_RN <- function(locations_first_t, n_tims) {
+    .Call('_AMISforInfectiousDiseases_get_locs_RN', PACKAGE = 'AMISforInfectiousDiseases', locations_first_t, n_tims)
 }
 
-#' @title Determine, at which time point, which locations are updated using Bayesian method
+#' @title Determine, at which time point, which locations are updated using RN without denominator
 #' @param locations_first_t Vector obtained by locations_first_t
 #' @param n_tims Number of time points
 #' @export
-get_locs_bayesian <- function(locations_first_t, n_tims) {
-    .Call('_AMISforInfectiousDiseases_get_locs_bayesian', PACKAGE = 'AMISforInfectiousDiseases', locations_first_t, n_tims)
+get_locs_nonRN <- function(locations_first_t, n_tims) {
+    .Call('_AMISforInfectiousDiseases_get_locs_nonRN', PACKAGE = 'AMISforInfectiousDiseases', locations_first_t, n_tims)
 }
 

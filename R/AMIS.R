@@ -140,8 +140,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   n_locs <- dim(prevalence_map[[1]]$data)[1]
   which_valid_locs_prev_map <- get_which_valid_locs_prev_map(which_valid_prev_map, n_tims, n_locs)
   locations_first_t <- get_locations_first_t(which_valid_locs_prev_map, n_tims, n_locs)
-  locs_empirical <- get_locs_empirical(locations_first_t, n_tims)
-  locs_bayesian <- get_locs_bayesian(locations_first_t, n_tims)
+  locs_RN <- get_locs_RN(locations_first_t, n_tims)
+  locs_nonRN <- get_locs_nonRN(locations_first_t, n_tims)
 
   # Initialise
   if(!is.null(seed)) set.seed(seed)
@@ -190,8 +190,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       simulated_prevalences,
       amis_params,
       first_weight = rep(1-amis_params[["log"]], nsamples),
-      locs_empirical,
-      locs_bayesian,
+      locs_RN,
+      locs_nonRN,
       is_within_boundaries,
       sim_within_boundaries, 
       sim_outside_boundaries, 
@@ -311,7 +311,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       first_weight <- compute_prior_proposal_ratio(components, param, prior_density, amis_params[["df"]], amis_params[["log"]]) # Prior/proposal
       weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, 
                                              amis_params, first_weight,
-                                             locs_empirical, locs_bayesian,
+                                             locs_RN, locs_nonRN,
                                              is_within_boundaries, sim_within_boundaries, 
                                              sim_outside_boundaries, which_valid_locs_prev_map) # RN derivative (shd take all amis_params)
       if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
@@ -341,7 +341,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   # Save output
   res <- save_output()
   
-  # Calculate model evidence if using Bayesian updating (RN derivative not being used)
+  # Calculate model evidence if RN derivative not being used
   if (amis_params[["RN"]]){
     return(list(sample=res$results, evidence=NULL))
   } else {

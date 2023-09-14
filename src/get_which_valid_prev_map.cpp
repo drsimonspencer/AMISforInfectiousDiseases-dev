@@ -133,31 +133,31 @@ arma::ivec get_locations_first_t(List& which_valid_locs_prev_map,
 //' @param n_tims Number of time points
 //' @export
 // [[Rcpp::export]]
-List get_locs_empirical(arma::ivec& locations_first_t, int n_tims){
-  List locs_empirical(n_tims);
+List get_locs_RN(arma::ivec& locations_first_t, int n_tims){
+  List locs_RN(n_tims);
   for (int t=0; t<n_tims; t++) {
     arma::uvec idx = arma::find(locations_first_t == t);
     if(idx.n_elem>0L){
-      arma::uvec locs_empirical_t_arma = idx;
-      locs_empirical[t] = wrap(locs_empirical_t_arma); 
+      arma::uvec locs_RN_t_arma = idx;
+      locs_RN[t] = wrap(locs_RN_t_arma); 
     }
   }
-return(locs_empirical);
+return(locs_RN);
 }
 
-//' @title Determine, at which time point, which locations are updated using Bayesian method
+//' @title Determine, at which time point, which locations are updated using RN without denominator
 //' @param locations_first_t Vector obtained by locations_first_t
 //' @param n_tims Number of time points
 //' @export
 // [[Rcpp::export]]
-List get_locs_bayesian(arma::ivec& locations_first_t, int n_tims){
- List locs_bayesian(n_tims);
+List get_locs_nonRN(arma::ivec& locations_first_t, int n_tims){
+ List locs_nonRN(n_tims);
  for (int t=0; t<n_tims; t++) {
    arma::uvec idx = arma::find(locations_first_t < t);
    if(idx.n_elem>0L){
-     arma::uvec locs_bayesian_t_arma = idx;
-     locs_bayesian[t] = wrap(locs_bayesian_t_arma);
+     arma::uvec locs_nonRN_t_arma = idx;
+     locs_nonRN[t] = wrap(locs_nonRN_t_arma);
    }
  }
- return(locs_bayesian);
+ return(locs_nonRN);
 }

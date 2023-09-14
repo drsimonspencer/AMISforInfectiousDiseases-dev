@@ -2,7 +2,7 @@
 % Please edit documentation in R/AMIS_steps.R
 \name{compute_weight_matrix_nonRN}
 \alias{compute_weight_matrix_nonRN}
-\title{Compute weight matrix using Bayesian updating}
+\title{Compute weight matrix without using empirical Radon-Nikodym derivative}
 \usage{
 compute_weight_matrix_nonRN(likelihoods, amis_params, weight_matrix)
 }

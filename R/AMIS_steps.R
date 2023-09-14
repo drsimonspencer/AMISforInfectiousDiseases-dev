@@ -101,17 +101,16 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
 }
 
 #' Produce list containing the default AMIS parameters
-#' @param histogram optional logical indicating whether to use the histogram method.
-#' @param intermittent_output optional logical indicating whether to save output to the global workspace at each iteration of the algorithm
-#' @return list containing the default AMIS parameters
+#' 
+#' For description of AMIS parameters, see argument \code{amis_params} in \code{\link{amis}}.
+#' @return List containing the default AMIS parameters.
 #' @export
-default_amis_params <- function(histogram=FALSE,intermittent_output=FALSE) {
-  amis_params<-list(boundaries=c(0,1),
-                    delta=0.01,sigma=NULL,breaks=NULL,
-                    nsamples=500,mixture_samples=1000,df=3,
-                    target_ess=500,log=F,max_iters=12,RN=TRUE,
-                    intermittent_output=intermittent_output)
-  if (histogram) {amis_params[["breaks"]]<-0:100/100}
+default_amis_params <- function() {
+  amis_params<-list(nsamples=500, boundaries=c(0,1), RN=TRUE,
+                    delta=0.01, sigma=NULL, breaks=NULL,
+                    mixture_samples=1000, df=3,
+                    target_ess=500, log=F, max_iters=12,
+                    intermittent_output=FALSE)
   return(amis_params)
 }
 
@@ -271,8 +270,10 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
       if (is.null(amis_params[["breaks"]])){
         
           if(is.null(amis_params[["sigma"]])){
-            weight_matrix <- compute_weight_matrix_empirical_uniform(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix,
-                                                                     is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs_empirical[[t]])
+            if(!is.null(locs_empirical[[t]])){
+              weight_matrix <- compute_weight_matrix_empirical_uniform(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix,
+                                                                       is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs_empirical[[t]])
+            }
             
             # # R code of previous version of the package
             # weight_matrix <- compute_weight_matrix_empirical(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)
@@ -281,15 +282,18 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
             # weight_matrix[,locs_empirical] <- compute_weight_matrix_empirical(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)[,locs_empirical]
             
           }else{
-            weight_matrix <- compute_weight_matrix_empirical_gauss(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix, 
-                                                                   sim_within_boundaries, sim_outside_boundaries, locs_empirical[[t]])
+            if(!is.null(locs_empirical[[t]])){
+              weight_matrix <- compute_weight_matrix_empirical_gauss(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix, 
+                                                                     sim_within_boundaries, sim_outside_boundaries, locs_empirical[[t]])
+            }
           }
         
 
       } else {
-
-        weight_matrix <- compute_weight_matrix_empirical_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix,
-                                                                   is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs_empirical[[t]])
+        if(!is.null(locs_empirical[[t]])){
+          weight_matrix <- compute_weight_matrix_empirical_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix,
+                                                                     is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs_empirical[[t]])
+        }
         
         # # R code of previous version of the package
         # weight_matrix <- compute_weight_matrix_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix)

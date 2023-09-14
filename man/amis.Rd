@@ -14,51 +14,85 @@ amis(
 )
 }
 \arguments{
-\item{prevalence_map}{An L x M matrix containing samples from the fitted prevalence map, where L is the number of locations and M the number of samples.
-The location names are inherited from \code{rownames(prevalence_map)} if possible. Alternatively, a list with one entry for each timepoint.
-Each entry must be a list containing objects \code{data} (an L x M matrix of data as above);
-and \code{likelihood} a function taking arguments \code{param} (model parameters used in the simulation), \code{data} (a matrix of data as above),
-\code{prevalence} (a matrix of output from the transmission model) and optional logical \code{log}, which returns the vector of (log)-likelihoods.
-If a likelihood is not specified then it is assumed that
-the data consist of samples from a geo-statistical model and empirical methods are used.}
-
-\item{transmission_model}{A function taking a vector of n seeds and an n x d matrix of parameter vectors as inputs
-and producing a n x timepoints MATRIX of prevalences as output (it must be a matrix even when timepoints==1).}
-
-\item{prior}{A list containing the functions \code{dprior} and \code{rprior} (density and RNG).
-Argument to \code{dprior} must be a d-length vector of model parameters and binary indicator \code{log} to indicate whether to calculate log density or not.
-Argument to \code{rprior} must be a single integer \code{n} that determines the number of samples to draw.
-\code{rprior} must produce an n by d MATRIX of parameters, even when d=1.
-parameter names are inherited from the \code{colnames} from the output of \code{rprior} if possible.}
-
-\item{amis_params}{A list containing the control parameters for the AMIS algorithm
+\item{prevalence_map}{An \eqn{L \times M} matrix containing samples from the fitted prevalence map,
+where \eqn{L} is the number of locations and \eqn{M} the number of samples.
+\cr \cr Alternatively, a list with \eqn{T} elements, one for each timepoint \eqn{t=1,\dots,T}.
+Each entry must be a list containing objects
 \describe{
-\item{\code{delta} the smoothing parameter in the empirical RN derivative (usually 0.01).}{}
-\item{\code{nsamples} the number of new samples drawn within each AMIS iteration.}{}
-\item{\code{mixture_samples} the number of samples used to represent the weighted parameters in the mixture fitting.}{}
-\item{\code{df} the degrees of freedom in the t-distributions, used to yield a heavy tailed proposal.}{}
-\item{\code{target_ess} the target effective sample size.}{}
-\item{\code{log} logical indicating if calculations are to be performed on log scale.}{}
-\item{\code{max_iters} maximum number of AMIS iterations.}{}
-\item{\code{breaks} optional vector specifying the breaks for the histogram. Last entry must be strictly larger than the largest possible prevalence.}{}
-\item{\code{RN} logical for whether to divide by the induced prior
-over the simulated prevalence when calculating weights or not (default to TRUE).}{}
+\item{\code{data}}{An \eqn{L \times M} matrix as above}
+\item{\code{likelihood}}{A function taking arguments
+\itemize{
+\item \code{param}: An \eqn{n \times d} matrix with the \eqn{d}-dimensional
+model parameters, one for each of the \eqn{n} seeds, used in the simulation.
+\item \code{data}: An \eqn{L \times M} matrix as above
+\item \code{prevalence}: An \eqn{n}-length vector with the outputs from the transmission model.
+\item \code{log}: Optional logical. If set to \code{TRUE}, the function returns the log-likelihoods.
+}
+The function \code{likelihood} is expected to return an \eqn{L \times n} matrix.
+}
+}
+The location names are inherited from \code{rownames(prevalence_map)}
+if \code{prevalence_map} is a matrix, or
+from \code{rownames(prevalence_map[[1]]$data)} if \code{prevalence_map} is a list.
+\cr \cr If \code{likelihood} is not specified, then it is assumed that the data consist of
+samples from a geo-statistical model and empirical methods are used.}
+
+\item{transmission_model}{A function taking a vector of \eqn{n} seeds and
+an \eqn{n \times d} matrix of parameter vectors as inputs and producing
+an \eqn{n \times T} \bold{matrix} of prevalences as output (it must be a matrix even when \eqn{T==1}).}
+
+\item{prior}{A list containing the functions \code{dprior} and \code{rprior} (density and RNG, respectively).
+The two arguments of \code{dprior} must be:
+\itemize{
+\item a \eqn{d}-length vector of model parameters; and
+\item a logical \code{log} to indicate whether to calculate log-density or not.
+}
+The only argument of \code{rprior} must be a single integer \eqn{n} that determines the number of samples to draw.
+\code{rprior} must produce an \eqn{n \times d} \bold{matrix} of parameters, even when \eqn{d==1}.
+\cr \cr Parameter names are inherited from the \code{colnames} from the output of \code{rprior} if possible.}
+
+\item{amis_params}{A list containing the control parameters for the AMIS algorithm:
+\describe{
+\item{\code{nsamples}}{Number of new samples drawn within each AMIS iteration. Default to 500.}
+\item{\code{boundaries}}{A vector of length two with the left and right boundaries.
+Default to \code{c(0,1)}. If left boundary is zero and there is no right boundary,
+set \code{boundaries = c(0,Inf)}.}
+\item{\code{RN}}{Logical indicating whether to use empirical Radon-Nikodym (RN) derivative or not.
+Default to TRUE. If set to FALSE, likelihood is not divided by the induced prior
+over the simulated prevalences when calculating weights.}
+\item{\code{delta}}{Optional smoothing parameter in the empirical RN derivative if uniform
+kernel (default) is used. Default to 0.01. If any of \code{sigma} or \code{breaks} is supplied, then uniform kernel will not be used.}
+\item{\code{sigma}}{Optional smoothing parameter in the empirical RN derivative
+if Gaussian kernel is used (i.e. Gaussian kernel will not used). Default to NULL.
+If \code{breaks} is supplied, Gaussian kernel will not be used.}
+\item{\code{breaks}}{Optional vector specifying the breaks for the histogram.
+Default to NULL (i.e. histogram method will not used).
+For finite \code{boundaries}, the first and last entries of \code{breaks} must be
+equal to the left and right boundaries, respectively.
+For non-finite \code{boundaries}, ensure that the range of 'breaks' includes any possible prevalence value.}
+\item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
+\item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
+\item{\code{target_ess}}{Target effective sample size. Default to 500.}
+\item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to FALSE.}
+\item{\code{max_iters}}{Maximum number of AMIS iterations.}
+\item{\code{intermittent_output}}{Optional logical indicating whether to save output to
+\code{\link{amis_env}} environment at each iteration of the algorithm. Default to FALSE.}
 }}
 
-\item{seed}{Optional seed for the random number generator}
+\item{seed}{Optional seed for the random number generator.}
 
-\item{initial_amis_vals}{optional list containing the object created by setting intermittent_output=TRUE.
-Necessary to initialise the algorithm from intermittent output from a previous run (where at least one iteration was successful!)}
+\item{initial_amis_vals}{Optional list containing the object created by setting \code{intermittent_output=TRUE}.
+Necessary to initialise the algorithm from intermittent output from a previous run (where at least one iteration was successful!).}
 }
 \value{
-A dataframe of the sampled parameters, simulation seed, and weight in each location.
+A dataframe with the simulation seeds, sampled parameters, simulated prevalences, and weight in each location.
 }
 \description{
 For details of the algorithm, see
-Integrating geostatistical maps and infectious disease transmission models
-using adaptive multiple importance sampling.
+\emph{Integrating geostatistical maps and infectious disease transmission models
+using adaptive multiple importance sampling.}
 Renata Retkute, Panayiota Touloupou, Maria-Gloria Basanez,
-T. Deirdre Hollingsworth, Simon E.F. Spencer
+T. Deirdre Hollingsworth, Simon E.F. Spencer.
 Ann. Appl. Stat. 15 (4) 1980 - 1998, December 2021.
-DOI: https://doi.org/10.1214/21-AOAS1486
+DOI: \url{https://doi.org/10.1214/21-AOAS1486}
 }

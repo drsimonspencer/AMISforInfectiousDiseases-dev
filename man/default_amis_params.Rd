@@ -4,16 +4,11 @@
 \alias{default_amis_params}
 \title{Produce list containing the default AMIS parameters}
 \usage{
-default_amis_params(histogram = FALSE, intermittent_output = FALSE)
-}
-\arguments{
-\item{histogram}{optional logical indicating whether to use the histogram method.}
-
-\item{intermittent_output}{optional logical indicating whether to save output to the global workspace at each iteration of the algorithm}
+default_amis_params()
 }
 \value{
-list containing the default AMIS parameters
+List containing the default AMIS parameters.
 }
 \description{
-Produce list containing the default AMIS parameters
+For description of AMIS parameters, see argument \code{amis_params} in \code{\link{amis}}.
 }

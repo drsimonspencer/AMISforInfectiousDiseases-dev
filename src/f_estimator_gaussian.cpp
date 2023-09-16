@@ -20,29 +20,31 @@ arma::mat f_estimator_Gaussian(arma::mat& prevalence_map,
   int R = prev_sim.n_elem;
   int L = prevalence_map.n_rows;
   arma::mat f = arma::zeros<arma::mat>(L, R);
-  arma::rowvec prevalence_map_l_valid;
   arma::rowvec prevalence_map_l = prevalence_map.row(0);
   double front = -0.5/pow(sd,2);
   double res;
   double prev_sim_r;
   arma::uvec loc = arma::zeros<arma::uvec>(1L);
-  int m_i = 0L;
+  int m_i;
+  int M_l;
+  double cmax;
   for (int l=0; l<L; l++) {
     loc = l;
     arma::uvec valid_samples_t_l = which_valid_prev_map_t[l];
-    if(valid_samples_t_l.n_elem>0L){
+    M_l = valid_samples_t_l.n_elem;
+    if(M_l>0L){
       arma::vec log_norm_const_gaussian_t_valid = (log_norm_const_gaussian_t(loc, valid_samples_t_l)).t();
       prevalence_map_l = prevalence_map.row(l);
       for(auto & r : sim_within_boundaries){
         prev_sim_r = prev_sim[r];
-        arma::vec x = arma::zeros<arma::mat>(valid_samples_t_l.n_elem);
+        arma::vec x = arma::zeros<arma::vec>(M_l);
         m_i = 0L;
         for(auto & m : valid_samples_t_l){
           x[m_i] = front*pow((prev_sim_r-prevalence_map_l[m]), 2);
           m_i++;
         }
         x -= log_norm_const_gaussian_t_valid;
-        double cmax = max(x);
+        cmax = max(x);
         res = exp(cmax + log(sum(exp(x - cmax))));
         f(l,r) = res;
       }

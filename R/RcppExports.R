@@ -129,8 +129,10 @@ f_estimator_uniform <- function(prevalence_map, prev_sim, delta, sim_within_boun
     .Call('_AMISforInfectiousDiseases_f_estimator_uniform', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries)
 }
 
-#' @title Calculates likelihood matrix given user-defined vectorised likelihood function
-#' @param likelihood_fun User-defined vectorised likelihood function
+#' @title Calculates likelihood matrix given user-defined likelihood function (1st version)
+#' @param likelihood_fun User-defined likelihood function evaluated at simulation r at location l 
+#' (i.e., it is vectorised for the M valid samples and r valid simulations and 
+#' returns an M x R matrix)
 #' @param param An (n x d) matrix with the d-dimensional model parameters, 
 #' one for each of the n seeds, used in the simulation.
 #' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
@@ -138,14 +140,15 @@ f_estimator_uniform <- function(prevalence_map, prev_sim, delta, sim_within_boun
 #' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 #' @param logar Logical indicating if the outputs should be in log-scale or not
-#' @return A matrix with L rows containing the empirical estimates for the likelihood.
+#' @return An (n_locs x n_sims) matrix with the empirical estimates for the likelihood.
 #' @noRd
-f_user_defined_vectorised <- function(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar) {
-    .Call('_AMISforInfectiousDiseases_f_user_defined_vectorised', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar)
+f_user_defined_l <- function(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar) {
+    .Call('_AMISforInfectiousDiseases_f_user_defined_l', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar)
 }
 
-#' @title Calculates likelihood matrix given user-defined likelihood function evaluated pointwise
-#' @param likelihood_fun User-defined likelihood function evaluated pointwise
+#' @title Calculates likelihood matrix given user-defined likelihood function (2nd version)
+#' @param likelihood_fun User-defined likelihood function evaluated at simulation r at location l 
+#' (i.e., it is vectorised for the M valid samples and returns an M-length vector)
 #' @param param An (n x d) matrix with the d-dimensional model parameters, 
 #' one for each of the n seeds, used in the simulation.
 #' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
@@ -153,11 +156,25 @@ f_user_defined_vectorised <- function(likelihood_fun, param, prevalence_map, pre
 #' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 #' @param logar Logical indicating if the outputs should be in log-scale or not
-#' @return A matrix with L rows containing the empirical estimates for the likelihood.
-#' @return A matrix with L rows containing the empirical estimates for the likelihood.
+#' @return An (n_locs x n_sims) matrix with the empirical estimates for the likelihood.
 #' @noRd
-f_user_defined_pointwise <- function(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar) {
-    .Call('_AMISforInfectiousDiseases_f_user_defined_pointwise', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar)
+f_user_defined_l_r <- function(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar) {
+    .Call('_AMISforInfectiousDiseases_f_user_defined_l_r', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar)
+}
+
+#' @title Calculates likelihood matrix given user-defined likelihood function (3rd version)
+#' @param likelihood_fun User-defined likelihood function evaluated at simulation r for sample m at location l 
+#' @param param An (n x d) matrix with the d-dimensional model parameters, 
+#' one for each of the n seeds, used in the simulation.
+#' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
+#' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
+#' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+#' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
+#' @param logar Logical indicating if the outputs should be in log-scale or not
+#' @return An (n_locs x n_sims) matrix with the empirical estimates for the likelihood.
+#' @noRd
+f_user_defined_l_m_r <- function(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar) {
+    .Call('_AMISforInfectiousDiseases_f_user_defined_l_m_r', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar)
 }
 
 #' @title Check which prevalence samples are valid for each location at each time point.

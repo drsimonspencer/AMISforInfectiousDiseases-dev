@@ -16,12 +16,14 @@
 #' \item{\code{data}}{An \eqn{L \times M} matrix as above}
 #' \item{\code{likelihood}}{A function taking arguments 
 #' \itemize{
-#'    \item \code{param}: A \eqn{d}-length vector with the model parameters
-#'    \item \code{data}: A vector with a given number of valid samples
-#'    \item \code{sim_prev}: A numerical value simulated from the transmission model.
+#'    \item \code{param}: An \eqn{n \times d} matrix with the \eqn{d}-dimensional 
+#'    model parameter vectors, one for each of the \eqn{n} seeds used in the simulation.
+#'    \item \code{data}: A vector with a given number M_l of valid samples for a particular location l
+#'    \item \code{sim_prev}: An \eqn{n}-length vector with the prevalences simulated by the transmission model.
 #'    \item \code{log}: Optional logical. If set to \code{TRUE}, the function returns the log-likelihoods.
 #' }
-#' The function \code{likelihood} is expected to return an \eqn{L \times n} matrix.
+#' The function \code{likelihood} must return an \eqn{M_l \times n} matrix which will be used to 
+#' calculate the likelihood of observing the simulated prevalences at a particular location.
 #' }
 #' }
 #' The location names are inherited from \code{rownames(prevalence_map)} 

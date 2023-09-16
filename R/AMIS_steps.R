@@ -172,26 +172,37 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
     
     likelihood_fun <- prevalence_map$likelihood
     
-    # Here, the user-defined function 'likelihood_fun' will 
-    # calculate likelihood for all the valid M_l terms in a particular location.
-    # 'likelihood_fun' is vectorised for the M terms (and not for multiple locations).
-    f <- f_user_defined_vectorised(likelihood_fun,
-                                   param,
-                                   prevalence_map=prevalence_map$data, 
-                                   prev_sim=prev_sim, 
-                                   sim_within_boundaries=sim_within_boundaries, 
-                                   which_valid_prev_map_t=which_valid_prev_map_t, 
-                                   amis_params[["log"]])
     
-    # # # Here, 'likelihood_fun' evaluates only a single point (out of M).
-    # # # This approach can be slow because the R function has to be called from Rcpp too many times
-    # f <- f_user_defined_pointwise(likelihood_fun,
-    #                               param,
-    #                               prevalence_map=prevalence_map$data,
-    #                               prev_sim=prev_sim,
-    #                               sim_within_boundaries=sim_within_boundaries,
-    #                               which_valid_prev_map_t=which_valid_prev_map_t,
-    #                               amis_params[["log"]])
+    # Here, the user-defined 'likelihood_fun' returns an (M_l x nsims) matrix 
+    # for a particular location l
+    f <- f_user_defined_l(likelihood_fun,
+                          param,
+                          prevalence_map=prevalence_map$data, 
+                          prev_sim=prev_sim, 
+                          sim_within_boundaries=sim_within_boundaries, 
+                          which_valid_prev_map_t=which_valid_prev_map_t, 
+                          amis_params[["log"]])
+
+    # Here, the user-defined 'likelihood_fun' returns an M_l-length vector
+    # for a particular location l and a single simulated prevalence
+    f <- f_user_defined_l_r(likelihood_fun,
+                            param,
+                            prevalence_map=prevalence_map$data, 
+                            prev_sim=prev_sim, 
+                            sim_within_boundaries=sim_within_boundaries, 
+                            which_valid_prev_map_t=which_valid_prev_map_t, 
+                            amis_params[["log"]])
+    
+    # Here, the user-defined 'likelihood_fun' returns a single point:
+    # the likelihood of observing a simulated value r given a sample m at a particular location l
+    # This approach can be slow because the R function has to be called from Rcpp too many times
+    f <- f_user_defined_l_m_r(likelihood_fun,
+                              param,
+                              prevalence_map=prevalence_map$data,
+                              prev_sim=prev_sim,
+                              sim_within_boundaries=sim_within_boundaries,
+                              which_valid_prev_map_t=which_valid_prev_map_t,
+                              amis_params[["log"]])
 
     # # R code of previous version of the package
     # locs<-which(!is.na(prevalence_map$data[,1])) # if there is no data for a location, do not update weights.

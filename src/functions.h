@@ -49,21 +49,29 @@ arma::mat f_estimator_Gaussian(arma::mat& prevalence_map,
                                double left_boundary, 
                                double right_boundary);
 
-NumericMatrix f_user_defined_vectorised(Rcpp::Function likelihood_fun, 
-                                        NumericMatrix param,
-                                        NumericMatrix prevalence_map, 
-                                        NumericVector prev_sim, 
-                                        arma::uvec& sim_within_boundaries, 
-                                        List& which_valid_prev_map_t, 
-                                        bool logar);
+NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun, 
+                               NumericMatrix param,
+                               NumericMatrix prevalence_map, 
+                               NumericVector prev_sim, 
+                               IntegerVector sim_within_boundaries, 
+                               List& which_valid_prev_map_t, 
+                               bool logar);
+                               
+NumericMatrix f_user_defined_l_r(Rcpp::Function likelihood_fun, 
+                                 NumericMatrix param,
+                                 NumericMatrix prevalence_map, 
+                                 NumericVector prev_sim, 
+                                 arma::uvec& sim_within_boundaries, 
+                                 List& which_valid_prev_map_t, 
+                                 bool logar);
                                        
-arma::mat f_user_defined_pointwise(Rcpp::Function likelihood_fun, 
-                                   NumericMatrix param,
-                                   arma::mat& prevalence_map, 
-                                   arma::vec& prev_sim, 
-                                   arma::uvec& sim_within_boundaries,
-                                   List& which_valid_prev_map_t, 
-                                   bool logar);
+arma::mat f_user_defined_l_m_r(Rcpp::Function likelihood_fun, 
+                               NumericMatrix param,
+                               arma::mat& prevalence_map, 
+                               arma::vec& prev_sim, 
+                               arma::uvec& sim_within_boundaries,
+                               List& which_valid_prev_map_t, 
+                               bool logar);
                          
 arma::mat f_estimator_histogram(arma::mat& prevalence_map, 
                                 arma::vec& prev_sim, 

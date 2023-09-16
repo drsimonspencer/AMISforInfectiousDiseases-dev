@@ -139,9 +139,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// f_user_defined_vectorised
-NumericMatrix f_user_defined_vectorised(Rcpp::Function likelihood_fun, NumericMatrix param, NumericMatrix prevalence_map, NumericVector prev_sim, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t, bool logar);
-RcppExport SEXP _AMISforInfectiousDiseases_f_user_defined_vectorised(SEXP likelihood_funSEXP, SEXP paramSEXP, SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP logarSEXP) {
+// f_user_defined_l
+NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun, NumericMatrix param, NumericMatrix prevalence_map, NumericVector prev_sim, IntegerVector sim_within_boundaries, List& which_valid_prev_map_t, bool logar);
+RcppExport SEXP _AMISforInfectiousDiseases_f_user_defined_l(SEXP likelihood_funSEXP, SEXP paramSEXP, SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP logarSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::Function >::type likelihood_fun(likelihood_funSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type param(paramSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type prevalence_map(prevalence_mapSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type prev_sim(prev_simSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type sim_within_boundaries(sim_within_boundariesSEXP);
+    Rcpp::traits::input_parameter< List& >::type which_valid_prev_map_t(which_valid_prev_map_tSEXP);
+    Rcpp::traits::input_parameter< bool >::type logar(logarSEXP);
+    rcpp_result_gen = Rcpp::wrap(f_user_defined_l(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar));
+    return rcpp_result_gen;
+END_RCPP
+}
+// f_user_defined_l_r
+NumericMatrix f_user_defined_l_r(Rcpp::Function likelihood_fun, NumericMatrix param, NumericMatrix prevalence_map, NumericVector prev_sim, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t, bool logar);
+RcppExport SEXP _AMISforInfectiousDiseases_f_user_defined_l_r(SEXP likelihood_funSEXP, SEXP paramSEXP, SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP logarSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -152,13 +169,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
     Rcpp::traits::input_parameter< List& >::type which_valid_prev_map_t(which_valid_prev_map_tSEXP);
     Rcpp::traits::input_parameter< bool >::type logar(logarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f_user_defined_vectorised(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar));
+    rcpp_result_gen = Rcpp::wrap(f_user_defined_l_r(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar));
     return rcpp_result_gen;
 END_RCPP
 }
-// f_user_defined_pointwise
-arma::mat f_user_defined_pointwise(Rcpp::Function likelihood_fun, NumericMatrix param, arma::mat& prevalence_map, arma::vec& prev_sim, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t, bool logar);
-RcppExport SEXP _AMISforInfectiousDiseases_f_user_defined_pointwise(SEXP likelihood_funSEXP, SEXP paramSEXP, SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP logarSEXP) {
+// f_user_defined_l_m_r
+arma::mat f_user_defined_l_m_r(Rcpp::Function likelihood_fun, NumericMatrix param, arma::mat& prevalence_map, arma::vec& prev_sim, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t, bool logar);
+RcppExport SEXP _AMISforInfectiousDiseases_f_user_defined_l_m_r(SEXP likelihood_funSEXP, SEXP paramSEXP, SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP logarSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -169,7 +186,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
     Rcpp::traits::input_parameter< List& >::type which_valid_prev_map_t(which_valid_prev_map_tSEXP);
     Rcpp::traits::input_parameter< bool >::type logar(logarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f_user_defined_pointwise(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar));
+    rcpp_result_gen = Rcpp::wrap(f_user_defined_l_m_r(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -245,8 +262,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_AMISforInfectiousDiseases_f_estimator_Gaussian", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_Gaussian, 6},
     {"_AMISforInfectiousDiseases_f_estimator_histogram", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_histogram, 4},
     {"_AMISforInfectiousDiseases_f_estimator_uniform", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_uniform, 6},
-    {"_AMISforInfectiousDiseases_f_user_defined_vectorised", (DL_FUNC) &_AMISforInfectiousDiseases_f_user_defined_vectorised, 7},
-    {"_AMISforInfectiousDiseases_f_user_defined_pointwise", (DL_FUNC) &_AMISforInfectiousDiseases_f_user_defined_pointwise, 7},
+    {"_AMISforInfectiousDiseases_f_user_defined_l", (DL_FUNC) &_AMISforInfectiousDiseases_f_user_defined_l, 7},
+    {"_AMISforInfectiousDiseases_f_user_defined_l_r", (DL_FUNC) &_AMISforInfectiousDiseases_f_user_defined_l_r, 7},
+    {"_AMISforInfectiousDiseases_f_user_defined_l_m_r", (DL_FUNC) &_AMISforInfectiousDiseases_f_user_defined_l_m_r, 7},
     {"_AMISforInfectiousDiseases_get_which_valid_prev_map", (DL_FUNC) &_AMISforInfectiousDiseases_get_which_valid_prev_map, 2},
     {"_AMISforInfectiousDiseases_get_which_valid_locs_prev_map", (DL_FUNC) &_AMISforInfectiousDiseases_get_which_valid_locs_prev_map, 3},
     {"_AMISforInfectiousDiseases_get_locations_first_t", (DL_FUNC) &_AMISforInfectiousDiseases_get_locations_first_t, 3},

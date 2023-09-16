@@ -2,7 +2,7 @@
 % Please edit documentation in R/AMIS_steps.R
 \name{check_inputs}
 \alias{check_inputs}
-\title{Check inputs of \code{\link{amis}} function}
+\title{Check inputs of \code{amis} function}
 \usage{
 check_inputs(prevalence_map, transmission_model, prior, amis_params, seed)
 }
@@ -15,10 +15,9 @@ Each entry must be a list containing objects
 \item{\code{data}}{An \eqn{L \times M} matrix as above}
 \item{\code{likelihood}}{A function taking arguments
 \itemize{
-\item \code{param}: An \eqn{n \times d} matrix with the \eqn{d}-dimensional
-model parameters, one for each of the \eqn{n} seeds, used in the simulation.
-\item \code{data}: An \eqn{L \times M} matrix as above
-\item \code{prevalence}: An \eqn{n}-length vector with the outputs from the transmission model.
+\item \code{param}: A \eqn{d}-length vector with the model parameters
+\item \code{data}: A vector with a given number of valid samples
+\item \code{sim_prev}: A numerical value simulated from the transmission model.
 \item \code{log}: Optional logical. If set to \code{TRUE}, the function returns the log-likelihoods.
 }
 The function \code{likelihood} is expected to return an \eqn{L \times n} matrix.
@@ -75,5 +74,5 @@ For non-finite \code{boundaries}, ensure that the range of 'breaks' includes any
 \item{seed}{Optional seed for the random number generator.}
 }
 \description{
-Check inputs of \code{\link{amis}} function
+Check whether all the inputs of \code{\link{amis}} function are as expected.
 }

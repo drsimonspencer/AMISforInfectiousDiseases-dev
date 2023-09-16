@@ -37,18 +37,23 @@ arma::mat f_estimator_uniform(arma::mat& prevalence_map,
                               double delta, 
                               arma::uvec& sim_within_boundaries,
                               List& which_valid_prev_map_t,
-                              double left_boundary, 
-                              double right_boundary);
+                              arma::vec& boundaries, 
+                              bool logar);
 
 arma::mat f_estimator_Gaussian(arma::mat& prevalence_map, 
                                arma::vec& prev_sim, 
                                double sd, 
                                arma::uvec& sim_within_boundaries,
                                List& which_valid_prev_map_t,
-                               arma::mat& log_norm_const_gaussian_t,
-                               double left_boundary, 
-                               double right_boundary);
+                               arma::mat& log_norm_const_gaussian_t, 
+                               bool logar);
 
+arma::mat f_estimator_histogram(arma::mat& prevalence_map, 
+                                arma::vec& prev_sim, 
+                                arma::vec& breaks, 
+                                List& which_valid_prev_map_t, 
+                                bool logar);
+                                
 NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun, 
                                NumericMatrix param,
                                NumericMatrix prevalence_map, 
@@ -73,10 +78,6 @@ arma::mat f_user_defined_l_m_r(Rcpp::Function likelihood_fun,
                                List& which_valid_prev_map_t, 
                                bool logar);
                          
-arma::mat f_estimator_histogram(arma::mat& prevalence_map, 
-                                arma::vec& prev_sim, 
-                                arma::vec& breaks, 
-                                List& which_valid_prev_map_t);
                                 
 arma::mat compute_weight_matrix_nonRN_Rcpp(const arma::mat& likelihoods, 
                                       List amis_params,

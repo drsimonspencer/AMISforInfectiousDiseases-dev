@@ -133,15 +133,15 @@ default_amis_params <- function() {
 #' @param which_valid_prev_map List showing which prevalence map samples are valid
 #' @param log_norm_const_gaussian Normalising constant (in log scale) for the Gaussian kernel. It is only used if Gaussian kernel is used.
 #' @return A larger array with the likelihoods of the new simulations joined to the existing array \code{likelihoods}.
-compute_likelihood<-function(param, prevalence_map,simulated_prevalences,amis_params,likelihoods=NULL,
-                             sim_within_boundaries,which_valid_prev_map,log_norm_const_gaussian) {
+compute_likelihood <- function(param, prevalence_map,simulated_prevalences,amis_params,likelihoods=NULL,
+                               sim_within_boundaries,which_valid_prev_map,log_norm_const_gaussian) {
   n_tims <- length(prevalence_map)
   n_locs <- dim(prevalence_map[[1]]$data)[1]
   n_sims <- dim(simulated_prevalences)[1]
   lik <- array(NA, c(n_tims,n_locs,n_sims)) # this way around to avoid abind -- different to elsewhere
   for (t in 1:n_tims) {
-    lik[t,,]<-evaluate_likelihood(param, prevalence_map[[t]],simulated_prevalences[,t],amis_params,
-                                  sim_within_boundaries,which_valid_prev_map[[t]],log_norm_const_gaussian[t,,]) 
+    lik[t,,] <- evaluate_likelihood(param, prevalence_map[[t]],simulated_prevalences[,t],amis_params,
+                                    sim_within_boundaries,which_valid_prev_map[[t]],log_norm_const_gaussian[t,,]) 
   }
   if (!is.null(likelihoods)) {
     lik <- array(c(likelihoods,lik), c(n_tims,n_locs,dim(likelihoods)[3]+n_sims))
@@ -163,9 +163,10 @@ compute_likelihood<-function(param, prevalence_map,simulated_prevalences,amis_pa
 #' @param which_valid_prev_map_t List showing which prevalence map samples are valid at time t
 #' @param log_norm_const_gaussian_t Normalising constant (in log scale) for the Gaussian kernel at time t. It is only used if Gaussian kernel is used.
 #' @return A locations x simulations matrix of (log-)likelihoods.
-evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params, 
-                              sim_within_boundaries,which_valid_prev_map_t,log_norm_const_gaussian_t) {
-  
+evaluate_likelihood <- function(param,prevalence_map,prev_sim,amis_params, 
+                                sim_within_boundaries,which_valid_prev_map_t,log_norm_const_gaussian_t) {
+
+  logar <- amis_params[["log"]]
   # f <- matrix(NA,dim(prevalence_map$data)[1],length(prev_sim))
   
   if (!is.null(prevalence_map$likelihood)) {
@@ -181,7 +182,7 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
                           prev_sim=prev_sim, 
                           sim_within_boundaries=sim_within_boundaries, 
                           which_valid_prev_map_t=which_valid_prev_map_t, 
-                          amis_params[["log"]])
+                          logar=logar)
 
     # Here, the user-defined 'likelihood_fun' returns an M_l-length vector
     # for a particular location l and a single simulated prevalence
@@ -191,7 +192,7 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
                             prev_sim=prev_sim, 
                             sim_within_boundaries=sim_within_boundaries, 
                             which_valid_prev_map_t=which_valid_prev_map_t, 
-                            amis_params[["log"]])
+                            logar=logar)
     
     # Here, the user-defined 'likelihood_fun' returns a single point:
     # the likelihood of observing a simulated value r given a sample m at a particular location l
@@ -202,7 +203,7 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
                               prev_sim=prev_sim,
                               sim_within_boundaries=sim_within_boundaries,
                               which_valid_prev_map_t=which_valid_prev_map_t,
-                              amis_params[["log"]])
+                              logar=logar)
 
     # # R code of previous version of the package
     # locs<-which(!is.na(prevalence_map$data[,1])) # if there is no data for a location, do not update weights.
@@ -217,7 +218,8 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
                                   sd=sd, 
                                   sim_within_boundaries=sim_within_boundaries, 
                                   which_valid_prev_map_t=which_valid_prev_map_t,
-                                  log_norm_const_gaussian_t=log_norm_const_gaussian_t)
+                                  log_norm_const_gaussian_t=log_norm_const_gaussian_t, 
+                                  logar=logar)
       }else{
         delta <- amis_params[["delta"]]
         f <- f_estimator_uniform(prevalence_map=prevalence_map$data, 
@@ -225,7 +227,8 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
                                  delta=delta,
                                  sim_within_boundaries=sim_within_boundaries, 
                                  which_valid_prev_map_t=which_valid_prev_map_t,
-                                 boundaries=boundaries)
+                                 boundaries=boundaries, 
+                                 logar=logar)
         # # R code of previous version of the package
         # for (i in 1:length(prev_sim)) {
         #   # f[,i]<-rowSums(abs(prevalence_map$data[locs,,drop=FALSE]-prev_sim[i])<=delta/2)/delta
@@ -237,7 +240,8 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
       f <- f_estimator_histogram(prevalence_map=prevalence_map$data, 
                                  prev_sim=prev_sim, 
                                  breaks=breaks, 
-                                 which_valid_prev_map_t=which_valid_prev_map_t)
+                                 which_valid_prev_map_t=which_valid_prev_map_t,
+                                 logar=logar)
       # # R code of previous version of the package                                      
       # L<-length(breaks)
       # lwr<-breaks[1:(L-1)]
@@ -250,7 +254,7 @@ evaluate_likelihood<-function(param,prevalence_map,prev_sim,amis_params,
       #   }
       # }
     }
-    if (amis_params[["log"]]) {f <- log(f)}
+    # if (amis_params[["log"]]) {f <- log(f)}   # all functions already return f in the requested scale
   }
   return(f)
 }

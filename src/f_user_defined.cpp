@@ -22,7 +22,6 @@ NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun,
                                IntegerVector sim_within_boundaries, 
                                List& which_valid_prev_map_t, 
                                bool logar){
- 
  int R = prev_sim.length();
  int L = prevalence_map.nrow();
  NumericMatrix f(L, R);
@@ -82,7 +81,6 @@ NumericMatrix f_user_defined_l_r(Rcpp::Function likelihood_fun,
                                  arma::uvec& sim_within_boundaries, 
                                  List& which_valid_prev_map_t, 
                                  bool logar){
- 
  int R = prev_sim.length();
  int L = prevalence_map.nrow();
  NumericMatrix f(L, R);
@@ -134,7 +132,6 @@ arma::mat f_user_defined_l_m_r(Rcpp::Function likelihood_fun,
                                arma::uvec& sim_within_boundaries,
                                List& which_valid_prev_map_t, 
                                bool logar){
-  
   int R = prev_sim.n_elem;
   int L = prevalence_map.n_rows;
   arma::mat f = arma::zeros<arma::mat>(L, R);

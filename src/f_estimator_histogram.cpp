@@ -12,7 +12,8 @@
 arma::mat f_estimator_histogram(arma::mat& prevalence_map, 
                                 arma::vec& prev_sim, 
                                 arma::vec& breaks, 
-                                List& which_valid_prev_map_t){
+                                List& which_valid_prev_map_t, 
+                                bool logar){
   int R = prev_sim.n_elem;
   int L = prevalence_map.n_rows;
   int B = breaks.n_elem;
@@ -51,6 +52,9 @@ arma::mat f_estimator_histogram(arma::mat& prevalence_map,
         }
       }
     }
+  }
+  if(logar){
+    f = log(f);
   }
   return(f);
 }

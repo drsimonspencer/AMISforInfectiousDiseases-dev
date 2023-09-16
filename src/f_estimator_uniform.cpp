@@ -16,7 +16,8 @@ arma::mat f_estimator_uniform(arma::mat& prevalence_map,
                               double delta, 
                               arma::uvec& sim_within_boundaries,
                               List& which_valid_prev_map_t,
-                              arma::vec& boundaries){
+                              arma::vec& boundaries, 
+                              bool logar){
   double left_boundary = boundaries[0];
   double right_boundary = boundaries[1];
   int R = prev_sim.n_elem;
@@ -53,6 +54,9 @@ arma::mat f_estimator_uniform(arma::mat& prevalence_map,
         }
       }
     }
+  }
+  if(logar){
+    f = log(f);
   }
   return(f);
 }

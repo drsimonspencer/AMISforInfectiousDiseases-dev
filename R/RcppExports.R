@@ -101,8 +101,8 @@ compute_weight_matrix_nonRN_Rcpp <- function(likelihoods, amis_params, weight_ma
 #' @param log_norm_const_gaussian_t (n_locs x M) matrix showing the log normalising constant for the Gaussian kernels.
 #' @return A matrix with L rows containing the empirical estimates for the likelihood.
 #' @noRd
-f_estimator_Gaussian <- function(prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t) {
-    .Call('_AMISforInfectiousDiseases_f_estimator_Gaussian', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t)
+f_estimator_Gaussian <- function(prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t, logar) {
+    .Call('_AMISforInfectiousDiseases_f_estimator_Gaussian', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t, logar)
 }
 
 #' @title Empirical estimator for the likelihood using Uniform kernel
@@ -112,8 +112,8 @@ f_estimator_Gaussian <- function(prevalence_map, prev_sim, sd, sim_within_bounda
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 #' @return A matrix with L rows containing the empirical estimates for the likelihood.
 #' @noRd
-f_estimator_histogram <- function(prevalence_map, prev_sim, breaks, which_valid_prev_map_t) {
-    .Call('_AMISforInfectiousDiseases_f_estimator_histogram', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, breaks, which_valid_prev_map_t)
+f_estimator_histogram <- function(prevalence_map, prev_sim, breaks, which_valid_prev_map_t, logar) {
+    .Call('_AMISforInfectiousDiseases_f_estimator_histogram', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, breaks, which_valid_prev_map_t, logar)
 }
 
 #' @title Empirical estimator for the likelihood using Uniform kernel
@@ -125,8 +125,8 @@ f_estimator_histogram <- function(prevalence_map, prev_sim, breaks, which_valid_
 #' @param boundaries Vector of length two.
 #' @return A matrix with L rows containing the empirical estimates for the likelihood.
 #' @noRd
-f_estimator_uniform <- function(prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries) {
-    .Call('_AMISforInfectiousDiseases_f_estimator_uniform', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries)
+f_estimator_uniform <- function(prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries, logar) {
+    .Call('_AMISforInfectiousDiseases_f_estimator_uniform', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries, logar)
 }
 
 #' @title Calculates likelihood matrix given user-defined likelihood function (1st version)

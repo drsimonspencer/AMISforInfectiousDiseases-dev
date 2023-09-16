@@ -16,13 +16,14 @@ arma::mat f_estimator_Gaussian(arma::mat& prevalence_map,
                                double sd, 
                                arma::uvec& sim_within_boundaries,
                                List& which_valid_prev_map_t,
-                               arma::mat& log_norm_const_gaussian_t){
+                               arma::mat& log_norm_const_gaussian_t, 
+                               bool logar){
   int R = prev_sim.n_elem;
   int L = prevalence_map.n_rows;
   arma::mat f = arma::zeros<arma::mat>(L, R);
   arma::rowvec prevalence_map_l = prevalence_map.row(0);
   double front = -0.5/pow(sd,2);
-  double res;
+  double logf;
   double prev_sim_r;
   arma::uvec loc = arma::zeros<arma::uvec>(1L);
   int m_i;
@@ -45,8 +46,12 @@ arma::mat f_estimator_Gaussian(arma::mat& prevalence_map,
         }
         x -= log_norm_const_gaussian_t_valid;
         cmax = max(x);
-        res = exp(cmax + log(sum(exp(x - cmax))));
-        f(l,r) = res;
+        logf = cmax + log(sum(exp(x - cmax)));
+        if(logar){
+          f(l,r) = logf;
+        }else{
+          f(l,r) = exp(logf);  
+        }
       }
     }
   }

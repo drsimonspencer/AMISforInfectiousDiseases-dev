@@ -145,7 +145,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   locs_nonRN <- get_locs_nonRN(locations_first_t, n_tims)
 
   # Initialise
-  if(!is.null(seed)) set.seed(seed)
+  if(!is.null(seed)){set.seed(seed)}
   iter <- 1
   if(is.null(initial_amis_vals)){
     cat("AMIS iteration 1\n")
@@ -184,19 +184,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
                                       which_valid_prev_map,log_norm_const_gaussian)
     if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
     # Determine first time each location appears in the data
-
-
-    weight_matrix <- compute_weight_matrix(
-      likelihoods,
-      simulated_prevalences,
-      amis_params,
-      first_weight = rep(1-amis_params[["log"]], nsamples),
-      locs_RN,
-      locs_nonRN,
-      is_within_boundaries,
-      sim_within_boundaries, 
-      sim_outside_boundaries, 
-      which_valid_locs_prev_map)
+    weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, amis_params,
+      first_weight = rep(1-amis_params[["log"]], nsamples), locs_RN, locs_nonRN,
+      is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, which_valid_locs_prev_map)
     if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
     
     ess <- calculate_ess(weight_matrix,amis_params[["log"]])
@@ -215,58 +205,20 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       res <- save_output()
       assign(x="intermittent_output",value=res,envir=amis_env)
     }
+    
   } else {
     cat("AMIS iteration 1\n")
     message("Initialising algorithm from a previous run provided by the user. \n")
-    check_initial_vals = function(d){
-      if(!is.null(initial_amis_vals$amis_bits[[d]])){
-        initial_amis_vals$amis_bits[[d]]
-      } else {
-        stop(paste0("Cannot find object 'initial_amis_vals$amis_bits[['",d,"']]'. To initialise from a previous run, use object saved by setting amis_params[['intermittent output']]=TRUE.\n"))
-      }
-    }
-    
-    simulated_prevalences = check_initial_vals("simulated_prevalences")
-    
-    
-    
-    ## Do we need to check for Inf and NAs in data and simulations here as well?
-    
 
+    simulated_prevalences = check_initial_vals("simulated_prevalences")
     likelihoods <- check_initial_vals("likelihoods")
     weight_matrix <- check_initial_vals("weight_matrix")
     ess <- check_initial_vals("ess")
     components <- check_initial_vals("components")
     param <- check_initial_vals("param")
     prior_density <- check_initial_vals("prior_density")
-    
-    
-    
-    
-    # locations_first_t is based on data above. Is it different when user supplies likelihood?
-    
-    n_tims = dim(likelihoods)[1]
-    n_locs = dim(likelihoods)[2]
-    if (n_locs == 1) {
-      lik_matrix <- function(l) as.matrix(l)
-    } else {
-      lik_matrix <- function(l) t(l)
-    }
-    
-    locations_first_t = rep(NA,n_locs)
-    for (j in 1:n_tims) {
-      lik_mat = lik_matrix(likelihoods[j,,])
-      for (l in 1:n_locs){
-        locations_first_t[!is.na(lik_mat[1,]) & is.na(locations_first_t)] = j
-      }
-    }
-    
     seeds <- function(iter) ((iter - 2) * nsamples + 1):((iter - 1) * nsamples) + initial_amis_vals$amis_bits$last_simulation_seed #function to calculate the seeds for iteration iter.
-    
-    
-    niter <- 0 # number of completed iterations 
-    
-    
+    niter <- 0 # number of completed iterations
   }
   
   # Checking whether some locations have no data at any time point
@@ -291,9 +243,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       prior_density <- c(prior_density,new_params$prior_density)
       new_prevalences <- transmission_model(seeds(iter), new_params$params)
 
-      is_within_boundaries_iter <- (new_prevalences>=boundaries[1]) & 
-        (new_prevalences<=boundaries[2]) & 
-        is.finite(new_prevalences)
+      is_within_boundaries_iter <- (new_prevalences>=boundaries[1]) & (new_prevalences<=boundaries[2]) & is.finite(new_prevalences)
       is_within_boundaries <- c(is_within_boundaries, is_within_boundaries_iter)
       sim_within_boundaries_iter <- which(is_within_boundaries_iter)-1L
       sim_within_boundaries <- c(sim_within_boundaries, sim_within_boundaries_iter+nsamples*(iter-1))

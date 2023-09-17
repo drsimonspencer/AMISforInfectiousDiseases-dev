@@ -7,6 +7,32 @@ NULL
 amis_env <- new.env()
 
 
+#' Produce list containing the default AMIS parameters
+#' 
+#' For description of AMIS parameters, see argument \code{amis_params} in \code{\link{amis}}.
+#' @return List containing the default AMIS parameters.
+#' @export
+default_amis_params <- function() {
+  amis_params<-list(nsamples=500, boundaries=c(0,1), RN=TRUE,
+                    delta=0.01, sigma=NULL, breaks=NULL,
+                    mixture_samples=1000, df=3,
+                    target_ess=500, log=F, max_iters=12,
+                    intermittent_output=FALSE)
+  return(amis_params)
+}
+
+
+#' Check inputs of previous run provided by the user 
+#' @noRd
+check_initial_vals = function(d){
+  if(!is.null(initial_amis_vals$amis_bits[[d]])){
+    initial_amis_vals$amis_bits[[d]]
+  } else {
+    stop(paste0("Cannot find object 'initial_amis_vals$amis_bits[['",d,"']]'. To initialise from a previous run, use object saved by setting amis_params[['intermittent output']]=TRUE.\n"))
+  }
+}
+
+
 #' Check inputs of \code{amis} function
 #' 
 #' Check whether all the inputs of \code{\link{amis}} function are as expected.
@@ -102,19 +128,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   }
 }
 
-#' Produce list containing the default AMIS parameters
-#' 
-#' For description of AMIS parameters, see argument \code{amis_params} in \code{\link{amis}}.
-#' @return List containing the default AMIS parameters.
-#' @export
-default_amis_params <- function() {
-  amis_params<-list(nsamples=500, boundaries=c(0,1), RN=TRUE,
-                    delta=0.01, sigma=NULL, breaks=NULL,
-                    mixture_samples=1000, df=3,
-                    target_ess=500, log=F, max_iters=12,
-                    intermittent_output=FALSE)
-  return(amis_params)
-}
+
 
 #' Compute likelihood for each additional simulation across timepoints
 #'

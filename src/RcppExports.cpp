@@ -25,8 +25,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // compute_weight_matrix_empirical_gauss
-arma::mat compute_weight_matrix_empirical_gauss(const arma::mat& likelihoods, const arma::vec& prev_sim, List amis_params, const arma::mat& weight_matrix, arma::uvec& sim_within_boundaries, arma::uvec& sim_outside_boundaries, arma::uvec& locs);
-RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss(SEXP likelihoodsSEXP, SEXP prev_simSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP sim_within_boundariesSEXP, SEXP sim_outside_boundariesSEXP, SEXP locsSEXP) {
+arma::mat compute_weight_matrix_empirical_gauss(const arma::mat& likelihoods, const arma::vec& prev_sim, List amis_params, const arma::mat& weight_matrix, arma::uvec& which_valid_sim_prev, arma::uvec& which_invalid_sim_prev, arma::uvec& locs);
+RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss(SEXP likelihoodsSEXP, SEXP prev_simSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP which_valid_sim_prevSEXP, SEXP which_invalid_sim_prevSEXP, SEXP locsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -34,16 +34,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type prev_sim(prev_simSEXP);
     Rcpp::traits::input_parameter< List >::type amis_params(amis_paramsSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type weight_matrix(weight_matrixSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_outside_boundaries(sim_outside_boundariesSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_valid_sim_prev(which_valid_sim_prevSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_invalid_sim_prev(which_invalid_sim_prevSEXP);
     Rcpp::traits::input_parameter< arma::uvec& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_weight_matrix_empirical_gauss(likelihoods, prev_sim, amis_params, weight_matrix, sim_within_boundaries, sim_outside_boundaries, locs));
+    rcpp_result_gen = Rcpp::wrap(compute_weight_matrix_empirical_gauss(likelihoods, prev_sim, amis_params, weight_matrix, which_valid_sim_prev, which_invalid_sim_prev, locs));
     return rcpp_result_gen;
 END_RCPP
 }
 // compute_weight_matrix_empirical_histogram
-arma::mat compute_weight_matrix_empirical_histogram(const arma::mat& likelihoods, const arma::vec& prev_sim, List amis_params, const arma::mat& weight_matrix, arma::uvec& is_within_boundaries, arma::uvec& sim_within_boundaries, arma::uvec& sim_outside_boundaries, arma::uvec& locs);
-RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_empirical_histogram(SEXP likelihoodsSEXP, SEXP prev_simSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP is_within_boundariesSEXP, SEXP sim_within_boundariesSEXP, SEXP sim_outside_boundariesSEXP, SEXP locsSEXP) {
+arma::mat compute_weight_matrix_empirical_histogram(const arma::mat& likelihoods, const arma::vec& prev_sim, List amis_params, const arma::mat& weight_matrix, arma::uvec& bool_valid_sim_prev, arma::uvec& which_valid_sim_prev, arma::uvec& which_invalid_sim_prev, arma::uvec& locs);
+RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_empirical_histogram(SEXP likelihoodsSEXP, SEXP prev_simSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP bool_valid_sim_prevSEXP, SEXP which_valid_sim_prevSEXP, SEXP which_invalid_sim_prevSEXP, SEXP locsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -51,17 +51,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type prev_sim(prev_simSEXP);
     Rcpp::traits::input_parameter< List >::type amis_params(amis_paramsSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type weight_matrix(weight_matrixSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type is_within_boundaries(is_within_boundariesSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_outside_boundaries(sim_outside_boundariesSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type bool_valid_sim_prev(bool_valid_sim_prevSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_valid_sim_prev(which_valid_sim_prevSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_invalid_sim_prev(which_invalid_sim_prevSEXP);
     Rcpp::traits::input_parameter< arma::uvec& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_weight_matrix_empirical_histogram(likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs));
+    rcpp_result_gen = Rcpp::wrap(compute_weight_matrix_empirical_histogram(likelihoods, prev_sim, amis_params, weight_matrix, bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, locs));
     return rcpp_result_gen;
 END_RCPP
 }
 // compute_weight_matrix_empirical_uniform
-arma::mat compute_weight_matrix_empirical_uniform(const arma::mat& likelihoods, const arma::vec& prev_sim, List amis_params, const arma::mat& weight_matrix, arma::uvec& is_within_boundaries, arma::uvec& sim_within_boundaries, arma::uvec& sim_outside_boundaries, arma::uvec& locs);
-RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform(SEXP likelihoodsSEXP, SEXP prev_simSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP is_within_boundariesSEXP, SEXP sim_within_boundariesSEXP, SEXP sim_outside_boundariesSEXP, SEXP locsSEXP) {
+arma::mat compute_weight_matrix_empirical_uniform(const arma::mat& likelihoods, const arma::vec& prev_sim, List amis_params, const arma::mat& weight_matrix, arma::uvec& bool_valid_sim_prev, arma::uvec& which_valid_sim_prev, arma::uvec& which_invalid_sim_prev, arma::uvec& locs);
+RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform(SEXP likelihoodsSEXP, SEXP prev_simSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP bool_valid_sim_prevSEXP, SEXP which_valid_sim_prevSEXP, SEXP which_invalid_sim_prevSEXP, SEXP locsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -69,44 +69,44 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type prev_sim(prev_simSEXP);
     Rcpp::traits::input_parameter< List >::type amis_params(amis_paramsSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type weight_matrix(weight_matrixSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type is_within_boundaries(is_within_boundariesSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_outside_boundaries(sim_outside_boundariesSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type bool_valid_sim_prev(bool_valid_sim_prevSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_valid_sim_prev(which_valid_sim_prevSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_invalid_sim_prev(which_invalid_sim_prevSEXP);
     Rcpp::traits::input_parameter< arma::uvec& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_weight_matrix_empirical_uniform(likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs));
+    rcpp_result_gen = Rcpp::wrap(compute_weight_matrix_empirical_uniform(likelihoods, prev_sim, amis_params, weight_matrix, bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, locs));
     return rcpp_result_gen;
 END_RCPP
 }
 // compute_weight_matrix_nonRN_Rcpp
-arma::mat compute_weight_matrix_nonRN_Rcpp(const arma::mat& likelihoods, List amis_params, const arma::mat& weight_matrix, arma::uvec& sim_within_boundaries, arma::uvec& sim_outside_boundaries, arma::uvec& locs);
-RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_nonRN_Rcpp(SEXP likelihoodsSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP sim_within_boundariesSEXP, SEXP sim_outside_boundariesSEXP, SEXP locsSEXP) {
+arma::mat compute_weight_matrix_nonRN_Rcpp(const arma::mat& likelihoods, List amis_params, const arma::mat& weight_matrix, arma::uvec& which_valid_sim_prev, arma::uvec& which_invalid_sim_prev, arma::uvec& locs);
+RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_nonRN_Rcpp(SEXP likelihoodsSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP which_valid_sim_prevSEXP, SEXP which_invalid_sim_prevSEXP, SEXP locsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type likelihoods(likelihoodsSEXP);
     Rcpp::traits::input_parameter< List >::type amis_params(amis_paramsSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type weight_matrix(weight_matrixSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_outside_boundaries(sim_outside_boundariesSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_valid_sim_prev(which_valid_sim_prevSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_invalid_sim_prev(which_invalid_sim_prevSEXP);
     Rcpp::traits::input_parameter< arma::uvec& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_weight_matrix_nonRN_Rcpp(likelihoods, amis_params, weight_matrix, sim_within_boundaries, sim_outside_boundaries, locs));
+    rcpp_result_gen = Rcpp::wrap(compute_weight_matrix_nonRN_Rcpp(likelihoods, amis_params, weight_matrix, which_valid_sim_prev, which_invalid_sim_prev, locs));
     return rcpp_result_gen;
 END_RCPP
 }
 // f_estimator_Gaussian
-arma::mat f_estimator_Gaussian(arma::mat& prevalence_map, arma::vec& prev_sim, double sd, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t, arma::mat& log_norm_const_gaussian_t, bool logar);
-RcppExport SEXP _AMISforInfectiousDiseases_f_estimator_Gaussian(SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP sdSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP log_norm_const_gaussian_tSEXP, SEXP logarSEXP) {
+arma::mat f_estimator_Gaussian(arma::mat& prevalence_map, arma::vec& prev_sim, double sd, arma::uvec& which_valid_sim_prev_iter, List& which_valid_prev_map_t, arma::mat& log_norm_const_gaussian_t, bool logar);
+RcppExport SEXP _AMISforInfectiousDiseases_f_estimator_Gaussian(SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP sdSEXP, SEXP which_valid_sim_prev_iterSEXP, SEXP which_valid_prev_map_tSEXP, SEXP log_norm_const_gaussian_tSEXP, SEXP logarSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat& >::type prevalence_map(prevalence_mapSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type prev_sim(prev_simSEXP);
     Rcpp::traits::input_parameter< double >::type sd(sdSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_valid_sim_prev_iter(which_valid_sim_prev_iterSEXP);
     Rcpp::traits::input_parameter< List& >::type which_valid_prev_map_t(which_valid_prev_map_tSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type log_norm_const_gaussian_t(log_norm_const_gaussian_tSEXP);
     Rcpp::traits::input_parameter< bool >::type logar(logarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f_estimator_Gaussian(prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t, logar));
+    rcpp_result_gen = Rcpp::wrap(f_estimator_Gaussian(prevalence_map, prev_sim, sd, which_valid_sim_prev_iter, which_valid_prev_map_t, log_norm_const_gaussian_t, logar));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -126,25 +126,25 @@ BEGIN_RCPP
 END_RCPP
 }
 // f_estimator_uniform
-arma::mat f_estimator_uniform(arma::mat& prevalence_map, arma::vec& prev_sim, double delta, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t, arma::vec& boundaries, bool logar);
-RcppExport SEXP _AMISforInfectiousDiseases_f_estimator_uniform(SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP deltaSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP boundariesSEXP, SEXP logarSEXP) {
+arma::mat f_estimator_uniform(arma::mat& prevalence_map, arma::vec& prev_sim, double delta, arma::uvec& which_valid_sim_prev_iter, List& which_valid_prev_map_t, arma::vec& boundaries, bool logar);
+RcppExport SEXP _AMISforInfectiousDiseases_f_estimator_uniform(SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP deltaSEXP, SEXP which_valid_sim_prev_iterSEXP, SEXP which_valid_prev_map_tSEXP, SEXP boundariesSEXP, SEXP logarSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat& >::type prevalence_map(prevalence_mapSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type prev_sim(prev_simSEXP);
     Rcpp::traits::input_parameter< double >::type delta(deltaSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_valid_sim_prev_iter(which_valid_sim_prev_iterSEXP);
     Rcpp::traits::input_parameter< List& >::type which_valid_prev_map_t(which_valid_prev_map_tSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type boundaries(boundariesSEXP);
     Rcpp::traits::input_parameter< bool >::type logar(logarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f_estimator_uniform(prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries, logar));
+    rcpp_result_gen = Rcpp::wrap(f_estimator_uniform(prevalence_map, prev_sim, delta, which_valid_sim_prev_iter, which_valid_prev_map_t, boundaries, logar));
     return rcpp_result_gen;
 END_RCPP
 }
 // f_user_defined_l
-NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun, NumericMatrix param, NumericMatrix prevalence_map, NumericVector prev_sim, IntegerVector sim_within_boundaries, List& which_valid_prev_map_t, bool logar);
-RcppExport SEXP _AMISforInfectiousDiseases_f_user_defined_l(SEXP likelihood_funSEXP, SEXP paramSEXP, SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP logarSEXP) {
+NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun, NumericMatrix param, NumericMatrix prevalence_map, NumericVector prev_sim, IntegerVector which_valid_sim_prev_iter, List& which_valid_prev_map_t, bool logar);
+RcppExport SEXP _AMISforInfectiousDiseases_f_user_defined_l(SEXP likelihood_funSEXP, SEXP paramSEXP, SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP which_valid_sim_prev_iterSEXP, SEXP which_valid_prev_map_tSEXP, SEXP logarSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -152,16 +152,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type param(paramSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type prevalence_map(prevalence_mapSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type prev_sim(prev_simSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type sim_within_boundaries(sim_within_boundariesSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type which_valid_sim_prev_iter(which_valid_sim_prev_iterSEXP);
     Rcpp::traits::input_parameter< List& >::type which_valid_prev_map_t(which_valid_prev_map_tSEXP);
     Rcpp::traits::input_parameter< bool >::type logar(logarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f_user_defined_l(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar));
+    rcpp_result_gen = Rcpp::wrap(f_user_defined_l(likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar));
     return rcpp_result_gen;
 END_RCPP
 }
 // f_user_defined_l_r
-NumericMatrix f_user_defined_l_r(Rcpp::Function likelihood_fun, NumericMatrix param, NumericMatrix prevalence_map, NumericVector prev_sim, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t, bool logar);
-RcppExport SEXP _AMISforInfectiousDiseases_f_user_defined_l_r(SEXP likelihood_funSEXP, SEXP paramSEXP, SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP logarSEXP) {
+NumericMatrix f_user_defined_l_r(Rcpp::Function likelihood_fun, NumericMatrix param, NumericMatrix prevalence_map, NumericVector prev_sim, arma::uvec& which_valid_sim_prev_iter, List& which_valid_prev_map_t, bool logar);
+RcppExport SEXP _AMISforInfectiousDiseases_f_user_defined_l_r(SEXP likelihood_funSEXP, SEXP paramSEXP, SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP which_valid_sim_prev_iterSEXP, SEXP which_valid_prev_map_tSEXP, SEXP logarSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -169,16 +169,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type param(paramSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type prevalence_map(prevalence_mapSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type prev_sim(prev_simSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_valid_sim_prev_iter(which_valid_sim_prev_iterSEXP);
     Rcpp::traits::input_parameter< List& >::type which_valid_prev_map_t(which_valid_prev_map_tSEXP);
     Rcpp::traits::input_parameter< bool >::type logar(logarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f_user_defined_l_r(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar));
+    rcpp_result_gen = Rcpp::wrap(f_user_defined_l_r(likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar));
     return rcpp_result_gen;
 END_RCPP
 }
 // f_user_defined_l_m_r
-arma::mat f_user_defined_l_m_r(Rcpp::Function likelihood_fun, NumericMatrix param, arma::mat& prevalence_map, arma::vec& prev_sim, arma::uvec& sim_within_boundaries, List& which_valid_prev_map_t, bool logar);
-RcppExport SEXP _AMISforInfectiousDiseases_f_user_defined_l_m_r(SEXP likelihood_funSEXP, SEXP paramSEXP, SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP sim_within_boundariesSEXP, SEXP which_valid_prev_map_tSEXP, SEXP logarSEXP) {
+arma::mat f_user_defined_l_m_r(Rcpp::Function likelihood_fun, NumericMatrix param, arma::mat& prevalence_map, arma::vec& prev_sim, arma::uvec& which_valid_sim_prev_iter, List& which_valid_prev_map_t, bool logar);
+RcppExport SEXP _AMISforInfectiousDiseases_f_user_defined_l_m_r(SEXP likelihood_funSEXP, SEXP paramSEXP, SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP which_valid_sim_prev_iterSEXP, SEXP which_valid_prev_map_tSEXP, SEXP logarSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -186,10 +186,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type param(paramSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type prevalence_map(prevalence_mapSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type prev_sim(prev_simSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type sim_within_boundaries(sim_within_boundariesSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_valid_sim_prev_iter(which_valid_sim_prev_iterSEXP);
     Rcpp::traits::input_parameter< List& >::type which_valid_prev_map_t(which_valid_prev_map_tSEXP);
     Rcpp::traits::input_parameter< bool >::type logar(logarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f_user_defined_l_m_r(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar));
+    rcpp_result_gen = Rcpp::wrap(f_user_defined_l_m_r(likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar));
     return rcpp_result_gen;
 END_RCPP
 }

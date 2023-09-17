@@ -12,9 +12,9 @@
 //' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 //' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
 //' @param weight_matrix An n_sims x n_locs matrix containing the current values of the weights.
-//' @param is_within_boundaries Logical vector showing which simulated values are within boundaries.
-//' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
-//' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
+//' @param bool_valid_sim_prev Logical vector showing which simulated values are valid.
+//' @param which_valid_sim_prev Vector showing which simulated values are valid.
+//' @param which_invalid_sim_prev Vector showing which simulated values are invalid.
 //' @param locs Vector showing which locations have data.
 //' @return An updated weight matrix.
 //' @noRd
@@ -23,9 +23,9 @@ arma::mat compute_weight_matrix_empirical_histogram(const arma::mat& likelihoods
                                                     const arma::vec& prev_sim, 
                                                     List amis_params,
                                                     const arma::mat& weight_matrix,
-                                                    arma::uvec& is_within_boundaries,
-                                                    arma::uvec& sim_within_boundaries,
-                                                    arma::uvec& sim_outside_boundaries,
+                                                    arma::uvec& bool_valid_sim_prev,
+                                                    arma::uvec& which_valid_sim_prev,
+                                                    arma::uvec& which_invalid_sim_prev,
                                                     arma::uvec& locs){
 
   int n_sims = likelihoods.n_rows;
@@ -47,7 +47,7 @@ arma::mat compute_weight_matrix_empirical_histogram(const arma::mat& likelihoods
   arma::vec norm_const = arma::zeros<arma::vec>(n_sims);
   norm_const.fill(arma::datum::inf);
   
-  if(sim_within_boundaries.n_elem>0){
+  if(which_valid_sim_prev.n_elem>0){
 
     arma::vec g_weight = arma::zeros<arma::vec>(n_sims);
     double sum_g_l = 0.0;
@@ -67,14 +67,14 @@ arma::mat compute_weight_matrix_empirical_histogram(const arma::mat& likelihoods
     }
 
     int b;
-    for(auto & i : sim_within_boundaries){
+    for(auto & i : which_valid_sim_prev){
       i_row = i;
       kern.fill(0.0);
       b = bin_prev_sim[i];
       lwr_r = lwr[b];
       upr_r = upr[b];
 
-      arma::uvec wh = arma::find(is_within_boundaries && (prev_sim>=lwr_r) && (prev_sim<upr_r));
+      arma::uvec wh = arma::find(bool_valid_sim_prev && (prev_sim>=lwr_r) && (prev_sim<upr_r));
       if(wh.n_elem==0){
         Rcout << "-------- " << std::endl;
         Rcout << "A prevalence value within boundaries does not belong to any bin of the histogram: " << std::endl;
@@ -109,11 +109,11 @@ arma::mat compute_weight_matrix_empirical_histogram(const arma::mat& likelihoods
     }
   }
   
-  if(sim_outside_boundaries.n_elem>0){
+  if(which_invalid_sim_prev.n_elem>0){
     if(logar){
-      (new_weights(sim_outside_boundaries,locs)).fill(-arma::datum::inf);
+      (new_weights(which_invalid_sim_prev,locs)).fill(-arma::datum::inf);
     }else{
-      (new_weights(sim_outside_boundaries,locs)).fill(0.0);
+      (new_weights(which_invalid_sim_prev,locs)).fill(0.0);
     }
   }
   

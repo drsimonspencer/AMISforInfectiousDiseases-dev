@@ -5,7 +5,7 @@
 //' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
 //' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 //' @param sd Bandwith value.
-//' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+//' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
 //' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 //' @param log_norm_const_gaussian_t (n_locs x M) matrix showing the log normalising constant for the Gaussian kernels.
 //' @return A matrix with L rows containing the empirical estimates for the likelihood.
@@ -14,7 +14,7 @@
 arma::mat f_estimator_Gaussian(arma::mat& prevalence_map, 
                                arma::vec& prev_sim, 
                                double sd, 
-                               arma::uvec& sim_within_boundaries,
+                               arma::uvec& which_valid_sim_prev_iter,
                                List& which_valid_prev_map_t,
                                arma::mat& log_norm_const_gaussian_t, 
                                bool logar){
@@ -36,7 +36,7 @@ arma::mat f_estimator_Gaussian(arma::mat& prevalence_map,
     if(M_l>0L){
       arma::vec log_norm_const_gaussian_t_valid = (log_norm_const_gaussian_t(loc, valid_samples_t_l)).t();
       prevalence_map_l = prevalence_map.row(l);
-      for(auto & r : sim_within_boundaries){
+      for(auto & r : which_valid_sim_prev_iter){
         prev_sim_r = prev_sim[r];
         arma::vec x = arma::zeros<arma::vec>(M_l);
         m_i = 0L;
@@ -116,8 +116,8 @@ arma::mat f_estimator_Gaussian(arma::mat& prevalence_map,
 
 
 // int M = prevalence_map.n_cols;
-// if(sim_within_boundaries.n_elem>0){ // c++ indexing
-//   sim_within_boundaries -= 1L;
+// if(which_valid_sim_prev_iter.n_elem>0){ // c++ indexing
+//   which_valid_sim_prev_iter -= 1L;
 // }
 
 // int M_l = 1L;
@@ -145,7 +145,7 @@ arma::mat f_estimator_Gaussian(arma::mat& prevalence_map,
 //     }
 //     norm_const *= sd*(double)M_l*sqrt(2*M_PI);
 //     // for (int r=0; r<R; r++) {
-//     for(auto & r : sim_within_boundaries){
+//     for(auto & r : which_valid_sim_prev_iter){
 //       for (int mv=0; mv<M_l; mv++) {
 //         f(l,r) += exp(-0.5*pow((prev_sim[r]-prevalence_map_l_valid[mv])/sd, 2))/norm_const[mv];
 //       }

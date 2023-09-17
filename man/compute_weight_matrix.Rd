@@ -11,9 +11,9 @@ compute_weight_matrix(
   first_weight,
   locs_RN,
   locs_nonRN,
-  is_within_boundaries,
-  sim_within_boundaries,
-  sim_outside_boundaries,
+  bool_valid_sim_prev,
+  which_valid_sim_prev,
+  which_invalid_sim_prev,
   which_valid_locs_prev_map
 )
 }
@@ -32,11 +32,11 @@ the weight expression. Should be of the same length as the rows in \code{simulat
 
 \item{locs_nonRN}{List showing, at each time, which locations are updated without using the RN derivative.}
 
-\item{is_within_boundaries}{Logical vector showing which simulated prevalences are valid.}
+\item{bool_valid_sim_prev}{Logical vector showing which simulated prevalences are valid.}
 
-\item{sim_within_boundaries}{Vector showing which simulated prevalences are valid.}
+\item{which_valid_sim_prev}{Vector showing which simulated prevalences are valid.}
 
-\item{sim_outside_boundaries}{Vector showing which simulated prevalences are invalid}
+\item{which_invalid_sim_prev}{Vector showing which simulated prevalences are invalid}
 
 \item{which_valid_locs_prev_map}{List showing which locations have valid data at each time}
 }

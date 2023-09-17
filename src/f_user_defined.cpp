@@ -9,7 +9,7 @@
 //' one for each of the n seeds, used in the simulation.
 //' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
 //' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
-//' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+//' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
 //' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 //' @param logar Logical indicating if the outputs should be in log-scale or not
 //' @return An (n_locs x n_sims) matrix with the empirical estimates for the likelihood.
@@ -19,7 +19,7 @@ NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun,
                                NumericMatrix param,
                                NumericMatrix prevalence_map, 
                                NumericVector prev_sim, 
-                               IntegerVector sim_within_boundaries, 
+                               IntegerVector which_valid_sim_prev_iter, 
                                List& which_valid_prev_map_t, 
                                bool logar){
  int R = prev_sim.length();
@@ -28,11 +28,11 @@ NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun,
  NumericVector prevalence_map_l = prevalence_map(0,_);
  double logf;
  int M_l;
- int R_l = sim_within_boundaries.length();
+ int R_l = which_valid_sim_prev_iter.length();
  int r_valid_idx;
  double cmax;
  if(R_l>0){
-   NumericVector prev_sim_valid = prev_sim[sim_within_boundaries];
+   NumericVector prev_sim_valid = prev_sim[which_valid_sim_prev_iter];
    for (int l=0; l<L; l++) {
      IntegerVector valid_samples_t_l = which_valid_prev_map_t[l];
      M_l = valid_samples_t_l.length();
@@ -41,7 +41,7 @@ NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun,
        NumericVector prevalence_map_l_valid = prevalence_map_l[valid_samples_t_l];
        NumericMatrix xMat = likelihood_fun(param, prevalence_map_l_valid, prev_sim_valid, logar);
        for (int r=0; r<R_l; r++) {
-         r_valid_idx = sim_within_boundaries[r];
+         r_valid_idx = which_valid_sim_prev_iter[r];
          NumericVector x = xMat(_,r);
          if(logar){
            cmax = max(x);
@@ -68,7 +68,7 @@ NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun,
 //' one for each of the n seeds, used in the simulation.
 //' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
 //' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
-//' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+//' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
 //' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 //' @param logar Logical indicating if the outputs should be in log-scale or not
 //' @return An (n_locs x n_sims) matrix with the empirical estimates for the likelihood.
@@ -78,7 +78,7 @@ NumericMatrix f_user_defined_l_r(Rcpp::Function likelihood_fun,
                                  NumericMatrix param,
                                  NumericMatrix prevalence_map, 
                                  NumericVector prev_sim, 
-                                 arma::uvec& sim_within_boundaries, 
+                                 arma::uvec& which_valid_sim_prev_iter, 
                                  List& which_valid_prev_map_t, 
                                  bool logar){
  int R = prev_sim.length();
@@ -94,7 +94,7 @@ NumericMatrix f_user_defined_l_r(Rcpp::Function likelihood_fun,
    if(M_l>0L){
      prevalence_map_l = prevalence_map(l, _);
      NumericVector prevalence_map_l_valid = prevalence_map_l[valid_samples_t_l];
-     for(auto & r : sim_within_boundaries){
+     for(auto & r : which_valid_sim_prev_iter){
        NumericVector x = likelihood_fun(param(r,_), prevalence_map_l_valid, prev_sim[r], logar);
        if(logar){
          cmax = max(x);
@@ -119,7 +119,7 @@ NumericMatrix f_user_defined_l_r(Rcpp::Function likelihood_fun,
 //' one for each of the n seeds, used in the simulation.
 //' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
 //' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
-//' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+//' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
 //' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 //' @param logar Logical indicating if the outputs should be in log-scale or not
 //' @return An (n_locs x n_sims) matrix with the empirical estimates for the likelihood.
@@ -129,7 +129,7 @@ arma::mat f_user_defined_l_m_r(Rcpp::Function likelihood_fun,
                                NumericMatrix param,
                                arma::mat& prevalence_map, 
                                arma::vec& prev_sim, 
-                               arma::uvec& sim_within_boundaries,
+                               arma::uvec& which_valid_sim_prev_iter,
                                List& which_valid_prev_map_t, 
                                bool logar){
   int R = prev_sim.n_elem;
@@ -146,7 +146,7 @@ arma::mat f_user_defined_l_m_r(Rcpp::Function likelihood_fun,
     M_l = valid_samples_t_l.n_elem;
     if(M_l>0L){
       prevalence_map_l = prevalence_map.row(l);
-      for(auto & r : sim_within_boundaries){
+      for(auto & r : which_valid_sim_prev_iter){
         prev_sim_r = prev_sim[r];
         arma::vec x = arma::zeros<arma::vec>(M_l);
         m_i = 0L;

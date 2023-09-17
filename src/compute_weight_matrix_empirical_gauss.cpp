@@ -12,8 +12,8 @@
 //' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 //' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
 //' @param weight_matrix An n_sims x n_locs matrix containing the current values of the weights.
-//' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
-//' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
+//' @param which_valid_sim_prev Vector showing which simulated values are valid.
+//' @param which_invalid_sim_prev Vector showing which simulated values are invalid.
 //' @param locs Vector showing which locations have data.
 //' @return An updated weight matrix.
 //' @noRd
@@ -22,8 +22,8 @@ arma::mat compute_weight_matrix_empirical_gauss(const arma::mat& likelihoods,
                                                 const arma::vec& prev_sim, 
                                                 List amis_params,
                                                 const arma::mat& weight_matrix,
-                                                arma::uvec& sim_within_boundaries,
-                                                arma::uvec& sim_outside_boundaries,
+                                                arma::uvec& which_valid_sim_prev,
+                                                arma::uvec& which_invalid_sim_prev,
                                                 arma::uvec& locs){
   
   int n_sims = likelihoods.n_rows;
@@ -37,7 +37,7 @@ arma::mat compute_weight_matrix_empirical_gauss(const arma::mat& likelihoods,
   arma::mat new_weights = weight_matrix;
   arma::vec norm_const = arma::zeros<arma::vec>(n_sims);
   norm_const.fill(arma::datum::inf);
-  for(auto & r : sim_within_boundaries){
+  for(auto & r : which_valid_sim_prev){
       norm_const[r] = R::pnorm(right_boundary, prev_sim[r], sd, 1, 0) -
         R::pnorm(left_boundary, prev_sim[r], sd, 1, 0);
   }
@@ -48,18 +48,18 @@ arma::mat compute_weight_matrix_empirical_gauss(const arma::mat& likelihoods,
   double M = 0.0;
   double se = 0.0;
   
-  if(sim_within_boundaries.n_elem>0){
+  if(which_valid_sim_prev.n_elem>0){
     arma::uvec i_row = arma::zeros<arma::uvec>(1L);
     arma::uvec l_col = arma::zeros<arma::uvec>(1L);
-    for(auto & i : sim_within_boundaries){
+    for(auto & i : which_valid_sim_prev){
       i_row = i;
-      for(auto & r : sim_within_boundaries){
+      for(auto & r : which_valid_sim_prev){
         kern[r] = exp(-0.5*pow((prev_sim[i]-prev_sim[r])/sd, 2))/norm_const[r];
       }
       kern = c*kern; 
 // Here we have the same prior for each location. ----------------
       if(logar){
-        g_weight = log(kern(sim_within_boundaries)) + weight_matrix(sim_within_boundaries,l_col);
+        g_weight = log(kern(which_valid_sim_prev)) + weight_matrix(which_valid_sim_prev,l_col);
         M = max(g_weight);
         if(!(M == -arma::datum::inf)){
           se = sum(exp(g_weight-M));
@@ -68,7 +68,7 @@ arma::mat compute_weight_matrix_empirical_gauss(const arma::mat& likelihoods,
           (new_weights(i_row,locs)).fill(-arma::datum::inf);
         }
       }else{
-        sum_g_l = dot(kern(sim_within_boundaries), weight_matrix(sim_within_boundaries,l_col));
+        sum_g_l = dot(kern(which_valid_sim_prev), weight_matrix(which_valid_sim_prev,l_col));
         if(sum_g_l>0){
           new_weights(i_row,locs) = weight_matrix(i_row,locs) % likelihoods(i_row,locs)/sum_g_l;
         }else{
@@ -79,11 +79,11 @@ arma::mat compute_weight_matrix_empirical_gauss(const arma::mat& likelihoods,
     }
   }
   
-  if(sim_outside_boundaries.n_elem>0){
+  if(which_invalid_sim_prev.n_elem>0){
     if(logar){
-      (new_weights(sim_outside_boundaries,locs)).fill(-arma::datum::inf);
+      (new_weights(which_invalid_sim_prev,locs)).fill(-arma::datum::inf);
     }else{
-      (new_weights(sim_outside_boundaries,locs)).fill(0.0);
+      (new_weights(which_invalid_sim_prev,locs)).fill(0.0);
     }
   }
 
@@ -96,7 +96,7 @@ arma::mat compute_weight_matrix_empirical_gauss(const arma::mat& likelihoods,
 // for(auto & l : locs){
 //   l_col = l;
 //   if(logar){
-//     g_weight = log(kern(sim_within_boundaries)) + weight_matrix.submat(sim_within_boundaries,l_col);
+//     g_weight = log(kern(which_valid_sim_prev)) + weight_matrix.submat(which_valid_sim_prev,l_col);
 //     M = max(g_weight);
 //     if(!(M == -arma::datum::inf)){
 //       se = sum(exp(g_weight-M));
@@ -105,7 +105,7 @@ arma::mat compute_weight_matrix_empirical_gauss(const arma::mat& likelihoods,
 //       new_weights(i,l) = -arma::datum::inf;
 //     }
 //   }else{
-//     sum_g_l = dot(kern(sim_within_boundaries), weight_matrix.submat(sim_within_boundaries,l_col));
+//     sum_g_l = dot(kern(which_valid_sim_prev), weight_matrix.submat(which_valid_sim_prev,l_col));
 //     if(sum_g_l>0){
 //       new_weights(i,l) = weight_matrix(i,l)*likelihoods(i,l)/sum_g_l;
 //     }else{

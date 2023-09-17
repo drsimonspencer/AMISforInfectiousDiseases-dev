@@ -22,13 +22,13 @@ calc_log_norm_const_gaussian <- function(prevalence_map, boundaries, sd) {
 #' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
 #' @param weight_matrix An n_sims x n_locs matrix containing the current values of the weights.
-#' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
-#' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
+#' @param which_valid_sim_prev Vector showing which simulated values are valid.
+#' @param which_invalid_sim_prev Vector showing which simulated values are invalid.
 #' @param locs Vector showing which locations have data.
 #' @return An updated weight matrix.
 #' @noRd
-compute_weight_matrix_empirical_gauss <- function(likelihoods, prev_sim, amis_params, weight_matrix, sim_within_boundaries, sim_outside_boundaries, locs) {
-    .Call('_AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, prev_sim, amis_params, weight_matrix, sim_within_boundaries, sim_outside_boundaries, locs)
+compute_weight_matrix_empirical_gauss <- function(likelihoods, prev_sim, amis_params, weight_matrix, which_valid_sim_prev, which_invalid_sim_prev, locs) {
+    .Call('_AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, prev_sim, amis_params, weight_matrix, which_valid_sim_prev, which_invalid_sim_prev, locs)
 }
 
 #' @title  Compute weight matrix using empirical Radon-Nikodym derivative (Rcpp version)
@@ -42,14 +42,14 @@ compute_weight_matrix_empirical_gauss <- function(likelihoods, prev_sim, amis_pa
 #' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
 #' @param weight_matrix An n_sims x n_locs matrix containing the current values of the weights.
-#' @param is_within_boundaries Logical vector showing which simulated values are within boundaries.
-#' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
-#' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
+#' @param bool_valid_sim_prev Logical vector showing which simulated values are valid.
+#' @param which_valid_sim_prev Vector showing which simulated values are valid.
+#' @param which_invalid_sim_prev Vector showing which simulated values are invalid.
 #' @param locs Vector showing which locations have data.
 #' @return An updated weight matrix.
 #' @noRd
-compute_weight_matrix_empirical_histogram <- function(likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs) {
-    .Call('_AMISforInfectiousDiseases_compute_weight_matrix_empirical_histogram', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs)
+compute_weight_matrix_empirical_histogram <- function(likelihoods, prev_sim, amis_params, weight_matrix, bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, locs) {
+    .Call('_AMISforInfectiousDiseases_compute_weight_matrix_empirical_histogram', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, prev_sim, amis_params, weight_matrix, bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, locs)
 }
 
 #' @title  Compute weight matrix using empirical Radon-Nikodym derivative (Rcpp version)
@@ -63,14 +63,14 @@ compute_weight_matrix_empirical_histogram <- function(likelihoods, prev_sim, ami
 #' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
 #' @param weight_matrix An n_sims x n_locs matrix containing the current values of the weights.
-#' @param is_within_boundaries Logical vector showing which simulated values are within boundaries.
-#' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
-#' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
+#' @param bool_valid_sim_prev Logical vector showing which simulated values are valid.
+#' @param which_valid_sim_prev Vector showing which simulated values are valid.
+#' @param which_invalid_sim_prev Vector showing which simulated values are invalid.
 #' @param locs Vector showing which locations have data.
 #' @return An updated weight matrix.
 #' @noRd
-compute_weight_matrix_empirical_uniform <- function(likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs) {
-    .Call('_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, prev_sim, amis_params, weight_matrix, is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, locs)
+compute_weight_matrix_empirical_uniform <- function(likelihoods, prev_sim, amis_params, weight_matrix, bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, locs) {
+    .Call('_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, prev_sim, amis_params, weight_matrix, bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, locs)
 }
 
 #' @title  Compute weight matrix without using empirical Radon-Nikodym derivative
@@ -83,26 +83,26 @@ compute_weight_matrix_empirical_uniform <- function(likelihoods, prev_sim, amis_
 #' NB: transpose of slice of array. 
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
 #' @param weight_matrix An n_sims x n_locs matrix containing the current values of the weights.
-#' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
-#' @param sim_outside_boundaries Vector showing which simulated values are outside boundaries.
+#' @param which_valid_sim_prev Vector showing which simulated values are valid.
+#' @param which_invalid_sim_prev Vector showing which simulated values are invalid.
 #' @param locs Vector showing which locations have data.
 #' @return An updated weight matrix.
 #' @noRd
-compute_weight_matrix_nonRN_Rcpp <- function(likelihoods, amis_params, weight_matrix, sim_within_boundaries, sim_outside_boundaries, locs) {
-    .Call('_AMISforInfectiousDiseases_compute_weight_matrix_nonRN_Rcpp', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, amis_params, weight_matrix, sim_within_boundaries, sim_outside_boundaries, locs)
+compute_weight_matrix_nonRN_Rcpp <- function(likelihoods, amis_params, weight_matrix, which_valid_sim_prev, which_invalid_sim_prev, locs) {
+    .Call('_AMISforInfectiousDiseases_compute_weight_matrix_nonRN_Rcpp', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, amis_params, weight_matrix, which_valid_sim_prev, which_invalid_sim_prev, locs)
 }
 
 #' @title Empirical estimator for the likelihood using Gaussian kernel
 #' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
 #' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 #' @param sd Bandwith value.
-#' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+#' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 #' @param log_norm_const_gaussian_t (n_locs x M) matrix showing the log normalising constant for the Gaussian kernels.
 #' @return A matrix with L rows containing the empirical estimates for the likelihood.
 #' @noRd
-f_estimator_Gaussian <- function(prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t, logar) {
-    .Call('_AMISforInfectiousDiseases_f_estimator_Gaussian', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, sd, sim_within_boundaries, which_valid_prev_map_t, log_norm_const_gaussian_t, logar)
+f_estimator_Gaussian <- function(prevalence_map, prev_sim, sd, which_valid_sim_prev_iter, which_valid_prev_map_t, log_norm_const_gaussian_t, logar) {
+    .Call('_AMISforInfectiousDiseases_f_estimator_Gaussian', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, sd, which_valid_sim_prev_iter, which_valid_prev_map_t, log_norm_const_gaussian_t, logar)
 }
 
 #' @title Empirical estimator for the likelihood using Uniform kernel
@@ -120,13 +120,13 @@ f_estimator_histogram <- function(prevalence_map, prev_sim, breaks, which_valid_
 #' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
 #' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 #' @param delta Bandwidth value.
-#' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+#' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 #' @param boundaries Vector of length two.
 #' @return A matrix with L rows containing the empirical estimates for the likelihood.
 #' @noRd
-f_estimator_uniform <- function(prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries, logar) {
-    .Call('_AMISforInfectiousDiseases_f_estimator_uniform', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, delta, sim_within_boundaries, which_valid_prev_map_t, boundaries, logar)
+f_estimator_uniform <- function(prevalence_map, prev_sim, delta, which_valid_sim_prev_iter, which_valid_prev_map_t, boundaries, logar) {
+    .Call('_AMISforInfectiousDiseases_f_estimator_uniform', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, delta, which_valid_sim_prev_iter, which_valid_prev_map_t, boundaries, logar)
 }
 
 #' @title Calculates likelihood matrix given user-defined likelihood function (1st version)
@@ -137,13 +137,13 @@ f_estimator_uniform <- function(prevalence_map, prev_sim, delta, sim_within_boun
 #' one for each of the n seeds, used in the simulation.
 #' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
 #' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
-#' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+#' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 #' @param logar Logical indicating if the outputs should be in log-scale or not
 #' @return An (n_locs x n_sims) matrix with the empirical estimates for the likelihood.
 #' @noRd
-f_user_defined_l <- function(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar) {
-    .Call('_AMISforInfectiousDiseases_f_user_defined_l', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar)
+f_user_defined_l <- function(likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar) {
+    .Call('_AMISforInfectiousDiseases_f_user_defined_l', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar)
 }
 
 #' @title Calculates likelihood matrix given user-defined likelihood function (2nd version)
@@ -153,13 +153,13 @@ f_user_defined_l <- function(likelihood_fun, param, prevalence_map, prev_sim, si
 #' one for each of the n seeds, used in the simulation.
 #' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
 #' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
-#' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+#' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 #' @param logar Logical indicating if the outputs should be in log-scale or not
 #' @return An (n_locs x n_sims) matrix with the empirical estimates for the likelihood.
 #' @noRd
-f_user_defined_l_r <- function(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar) {
-    .Call('_AMISforInfectiousDiseases_f_user_defined_l_r', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar)
+f_user_defined_l_r <- function(likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar) {
+    .Call('_AMISforInfectiousDiseases_f_user_defined_l_r', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar)
 }
 
 #' @title Calculates likelihood matrix given user-defined likelihood function (3rd version)
@@ -168,13 +168,13 @@ f_user_defined_l_r <- function(likelihood_fun, param, prevalence_map, prev_sim, 
 #' one for each of the n seeds, used in the simulation.
 #' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
 #' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
-#' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+#' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
 #' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 #' @param logar Logical indicating if the outputs should be in log-scale or not
 #' @return An (n_locs x n_sims) matrix with the empirical estimates for the likelihood.
 #' @noRd
-f_user_defined_l_m_r <- function(likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar) {
-    .Call('_AMISforInfectiousDiseases_f_user_defined_l_m_r', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, sim_within_boundaries, which_valid_prev_map_t, logar)
+f_user_defined_l_m_r <- function(likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar) {
+    .Call('_AMISforInfectiousDiseases_f_user_defined_l_m_r', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar)
 }
 
 #' @title Check which prevalence samples are valid for each location at each time point.

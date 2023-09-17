@@ -126,7 +126,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   boundaries <- amis_params[["boundaries"]]
   nsamples <- amis_params[["nsamples"]]
 
-  # Check which prevalence map samples are valid (non-NA and within boundaries); and 
+  # Check which prevalence map samples are valid (non-NA, finite, and within boundaries); and 
   # calculate normalising constant for truncated Gaussian kernel
   which_valid_prev_map <- get_which_valid_prev_map(prevalence_map, boundaries)
   
@@ -167,26 +167,24 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     if(nrow(param) != nrow(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of rows in matrices from transmission_model and rprior functions must be equal (#simulations). \n")}
     if(length(prevalence_map) != ncol(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of timepoints in prevalence_map and the number of columns in output from transmission_model function must be equal to #timepoints. \n")}
 
-    is_within_boundaries <- (simulated_prevalences>=boundaries[1]) & 
-      (simulated_prevalences<=boundaries[2]) &
-      is.finite(simulated_prevalences)
-    sim_within_boundaries <- which(is_within_boundaries)-1L
-    sim_outside_boundaries <- which(!is_within_boundaries)-1L
-    if(length(sim_within_boundaries)<length(simulated_prevalences)){
+    bool_valid_sim_prev <- (simulated_prevalences>=boundaries[1]) & (simulated_prevalences<=boundaries[2]) & is.finite(simulated_prevalences)
+    which_valid_sim_prev <- which(bool_valid_sim_prev)-1L
+    which_invalid_sim_prev <- which(!bool_valid_sim_prev)-1L
+    if(length(which_valid_sim_prev)<length(simulated_prevalences)){
       warning(paste0("At iteration ",iter, ", transmission_model produced ", 
-             length(simulated_prevalences)-length(sim_within_boundaries), 
+             length(simulated_prevalences)-length(which_valid_sim_prev), 
              " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
     }
     
     # to avoid duplication, evaluate likelihood now.
     likelihoods <- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params,
-                                      likelihoods=NULL, sim_within_boundaries,
+                                      likelihoods=NULL, which_valid_sim_prev,
                                       which_valid_prev_map,log_norm_const_gaussian)
     if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
     # Determine first time each location appears in the data
     weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, amis_params,
       first_weight = rep(1-amis_params[["log"]], nsamples), locs_RN, locs_nonRN,
-      is_within_boundaries, sim_within_boundaries, sim_outside_boundaries, which_valid_locs_prev_map)
+      bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, which_valid_locs_prev_map)
     if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
     
     ess <- calculate_ess(weight_matrix,amis_params[["log"]])
@@ -210,6 +208,15 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     cat("AMIS iteration 1\n")
     message("Initialising algorithm from a previous run provided by the user. \n")
 
+    # Check inputs of previous run provided by the user 
+    check_initial_vals = function(d){
+      if(!is.null(initial_amis_vals$amis_bits[[d]])){
+        initial_amis_vals$amis_bits[[d]]
+      } else {
+        stop(paste0("Cannot find object 'initial_amis_vals$amis_bits[['",d,"']]'. To initialise from a previous run, use object saved by setting amis_params[['intermittent output']]=TRUE.\n"))
+      }
+    }
+    
     simulated_prevalences = check_initial_vals("simulated_prevalences")
     likelihoods <- check_initial_vals("likelihoods")
     weight_matrix <- check_initial_vals("weight_matrix")
@@ -243,28 +250,28 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       prior_density <- c(prior_density,new_params$prior_density)
       new_prevalences <- transmission_model(seeds(iter), new_params$params)
 
-      is_within_boundaries_iter <- (new_prevalences>=boundaries[1]) & (new_prevalences<=boundaries[2]) & is.finite(new_prevalences)
-      is_within_boundaries <- c(is_within_boundaries, is_within_boundaries_iter)
-      sim_within_boundaries_iter <- which(is_within_boundaries_iter)-1L
-      sim_within_boundaries <- c(sim_within_boundaries, sim_within_boundaries_iter+nsamples*(iter-1))
-      sim_outside_boundaries <- c(sim_outside_boundaries, which(!is_within_boundaries_iter)-1L+nsamples*(iter-1))
-      if(sum(is_within_boundaries_iter)<length(new_prevalences)){
+      bool_valid_sim_prev_iter <- (new_prevalences>=boundaries[1]) & (new_prevalences<=boundaries[2]) & is.finite(new_prevalences)
+      bool_valid_sim_prev <- c(bool_valid_sim_prev, bool_valid_sim_prev_iter)
+      which_valid_sim_prev_iter <- which(bool_valid_sim_prev_iter)-1L
+      which_valid_sim_prev <- c(which_valid_sim_prev, which_valid_sim_prev_iter+nsamples*(iter-1))
+      which_invalid_sim_prev <- c(which_invalid_sim_prev, which(!bool_valid_sim_prev_iter)-1L+nsamples*(iter-1))
+      if(sum(bool_valid_sim_prev_iter)<length(new_prevalences)){
         warning(paste0("At iteration iter=",iter, ", transmission_model produced ", 
-               length(new_prevalences)-sum(is_within_boundaries_iter), 
+               length(new_prevalences)-sum(bool_valid_sim_prev_iter), 
                " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
       }
             
       simulated_prevalences <- rbind(simulated_prevalences,new_prevalences)
       likelihoods <- compute_likelihood(new_params$params,prevalence_map,new_prevalences,amis_params, 
-                                        likelihoods,sim_within_boundaries_iter,
+                                        likelihoods,which_valid_sim_prev_iter,
                                         which_valid_prev_map,log_norm_const_gaussian)
       if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
       first_weight <- compute_prior_proposal_ratio(components, param, prior_density, amis_params[["df"]], amis_params[["log"]]) # Prior/proposal
       weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, 
                                              amis_params, first_weight,
                                              locs_RN, locs_nonRN,
-                                             is_within_boundaries, sim_within_boundaries, 
-                                             sim_outside_boundaries, which_valid_locs_prev_map) # RN derivative (shd take all amis_params)
+                                             bool_valid_sim_prev, which_valid_sim_prev, 
+                                             which_invalid_sim_prev, which_valid_locs_prev_map) # RN derivative (shd take all amis_params)
       if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
       
       ess <- calculate_ess(weight_matrix,amis_params[["log"]])

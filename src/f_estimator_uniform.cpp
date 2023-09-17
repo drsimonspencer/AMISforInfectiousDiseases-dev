@@ -5,7 +5,7 @@
 //' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
 //' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 //' @param delta Bandwidth value.
-//' @param sim_within_boundaries Vector showing which simulated values are within boundaries.
+//' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
 //' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
 //' @param boundaries Vector of length two.
 //' @return A matrix with L rows containing the empirical estimates for the likelihood.
@@ -14,7 +14,7 @@
 arma::mat f_estimator_uniform(arma::mat& prevalence_map, 
                               arma::vec& prev_sim, 
                               double delta, 
-                              arma::uvec& sim_within_boundaries,
+                              arma::uvec& which_valid_sim_prev_iter,
                               List& which_valid_prev_map_t,
                               arma::vec& boundaries, 
                               bool logar){
@@ -38,7 +38,7 @@ arma::mat f_estimator_uniform(arma::mat& prevalence_map,
     if(M_l>0L){
       prevalence_map_l_valid = prevalence_map(loc, valid_samples_t_l);
       c = 1.0/(delta*(double)M_l);
-      for(auto & r : sim_within_boundaries){
+      for(auto & r : which_valid_sim_prev_iter){
         count = 0L;
         for (int m=0; m<M_l; m++) {
           if((prev_sim_up[r] >= prevalence_map_l_valid[m])&&(prev_sim_lo[r] <= prevalence_map_l_valid[m])){
@@ -110,7 +110,7 @@ arma::mat f_estimator_uniform(arma::mat& prevalence_map,
 //     prevalence_map_l_valid = prevalence_map(loc, idx);
 //     c = 1.0/(delta*(double)M_l);
 //     // for (int r=0; r<R; r++) {
-//     for(auto & r : sim_within_boundaries){
+//     for(auto & r : which_valid_sim_prev_iter){
 //       f(l,r) = c*sum((prev_sim_up[r] >= prevalence_map_l_valid) && (prev_sim_lo[r] <= prevalence_map_l_valid));
 //       if(prev_sim_lo[r]<left_boundary){
 //         delta_adj = delta - (left_boundary - prev_sim_lo[r]);

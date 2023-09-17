@@ -9,7 +9,7 @@ evaluate_likelihood(
   prevalence_map,
   prev_sim,
   amis_params,
-  sim_within_boundaries,
+  which_valid_sim_prev_iter,
   which_valid_prev_map_t,
   log_norm_const_gaussian_t
 )
@@ -25,7 +25,7 @@ and \code{likelihood} a function taking arguments \code{data} (a matrix of data 
 
 \item{amis_params}{A list of parameters, e.g. from \code{\link{default_amis_params}}.}
 
-\item{sim_within_boundaries}{Vector showing which simulated prevalences are valid.}
+\item{which_valid_sim_prev_iter}{Vector showing which simulated prevalences are valid at the current iteration.}
 
 \item{which_valid_prev_map_t}{List showing which prevalence map samples are valid at time t}
 

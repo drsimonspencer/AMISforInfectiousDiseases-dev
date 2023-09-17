@@ -59,7 +59,7 @@ arma::mat f_estimator_histogram(arma::mat& prevalence_map,
   return(f);
 }
 
-// for(auto & r : sim_within_boundaries){
+// for(auto & r : which_valid_sim_prev_iter){
 //   bin = max(arma::find(prev_sim>=lwr));   // this is wrong
 //   lwr_r = lwr[bin];
 //   upr_r = upr[bin];

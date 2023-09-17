@@ -38,9 +38,14 @@ from \code{rownames(prevalence_map[[1]]$data)} if \code{prevalence_map} is a lis
 \cr \cr If \code{likelihood} is not specified, then it is assumed that the data consist of
 samples from a geo-statistical model and empirical methods are used.}
 
-\item{transmission_model}{A function taking a vector of \eqn{n} seeds and
-an \eqn{n \times d} matrix of parameter vectors as inputs and producing
-an \eqn{n \times T} \bold{matrix} of prevalences as output (it must be a matrix even when \eqn{T==1}).}
+\item{transmission_model}{A function taking arguments:
+\itemize{
+\item \code{seeds}: a vector of \eqn{n} seeds;
+\item \code{params}: an \eqn{n \times d} matrix of parameter vectors as inputs;
+\item \code{n_tims}: number of time points
+}
+This function must return an \eqn{n \times T} \bold{matrix} of prevalences
+(it must be a matrix even when \eqn{T==1}.}
 
 \item{prior}{A list containing the functions \code{dprior} and \code{rprior} (density and RNG, respectively).
 The two arguments of \code{dprior} must be:

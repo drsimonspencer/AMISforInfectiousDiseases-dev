@@ -31,9 +31,14 @@
 #' from \code{rownames(prevalence_map[[1]]$data)} if \code{prevalence_map} is a list.
 #' \cr \cr If \code{likelihood} is not specified, then it is assumed that the data consist of 
 #' samples from a geo-statistical model and empirical methods are used.  
-#' @param transmission_model A function taking a vector of \eqn{n} seeds and 
-#' an \eqn{n \times d} matrix of parameter vectors as inputs and producing 
-#' an \eqn{n \times T} \bold{matrix} of prevalences as output (it must be a matrix even when \eqn{T==1}).
+#' @param transmission_model A function taking arguments:
+#' \itemize{
+#'    \item \code{seeds}: a vector of \eqn{n} seeds;
+#'    \item \code{params}: an \eqn{n \times d} matrix of parameter vectors as inputs;
+#'    \item \code{n_tims}: number of time points
+#'  }
+#' This function must return an \eqn{n \times T} \bold{matrix} of prevalences 
+#' (it must be a matrix even when \eqn{T==1}.
 #' @param prior A list containing the functions \code{dprior} and \code{rprior} (density and RNG, respectively).
 #' The two arguments of \code{dprior} must be:
 #' \itemize{
@@ -162,7 +167,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     if(length(prior_density)!=nsamples) {stop("Output from dprior function must have length 1. \n")}
     if(any(is.na(prior_density))){warning("At least one prior density evaluation was NA or NaN. \n")}
     # Simulate from transmission model
-    simulated_prevalences <- transmission_model(seeds = 1:nsamples, param)
+    simulated_prevalences <- transmission_model(seeds = 1:nsamples, param, n_tims)
     if(!is.matrix(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, transmission_model function should produce a MATRIX of size #simulations by #timepoints, even when #timepoints is equal to 1. \n")}
     if(nrow(param) != nrow(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of rows in matrices from transmission_model and rprior functions must be equal (#simulations). \n")}
     if(length(prevalence_map) != ncol(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of timepoints in prevalence_map and the number of columns in output from transmission_model function must be equal to #timepoints. \n")}
@@ -257,7 +262,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       if(any(is.na(new_params$params))){warning("At least one sample from the proposal after the first iteration of AMIS was NA or NaN. \n")}
       param <- rbind(param, new_params$params)
       prior_density <- c(prior_density,new_params$prior_density)
-      new_prevalences <- transmission_model(seeds(iter), new_params$params)
+      new_prevalences <- transmission_model(seeds(iter), new_params$params, n_tims)
 
       bool_valid_sim_prev_iter <- (new_prevalences>=boundaries[1]) & (new_prevalences<=boundaries[2]) & is.finite(new_prevalences)
       bool_valid_sim_prev <- rbind(bool_valid_sim_prev, bool_valid_sim_prev_iter)

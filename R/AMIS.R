@@ -126,10 +126,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   boundaries <- amis_params[["boundaries"]]
   nsamples <- amis_params[["nsamples"]]
 
-  # Check which prevalence map samples are valid (non-NA, finite, and within boundaries); and 
-  # calculate normalising constant for truncated Gaussian kernel
+  # Check which prevalence map samples are valid (non-NA, finite, and within boundaries)
   which_valid_prev_map <- get_which_valid_prev_map(prevalence_map, boundaries)
   
+  # calculate normalising constant for truncated Gaussian kernel
   log_norm_const_gaussian <- array(NA, c(1,1,1))  # for the Gaussian kernel case only, but needs to be declared
   if(use_gaussian_kernel){
     log_norm_const_gaussian <- calc_log_norm_const_gaussian(prevalence_map=prevalence_map, 
@@ -168,13 +168,22 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     if(length(prevalence_map) != ncol(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of timepoints in prevalence_map and the number of columns in output from transmission_model function must be equal to #timepoints. \n")}
 
     bool_valid_sim_prev <- (simulated_prevalences>=boundaries[1]) & (simulated_prevalences<=boundaries[2]) & is.finite(simulated_prevalences)
-    which_valid_sim_prev <- which(bool_valid_sim_prev)-1L
-    which_invalid_sim_prev <- which(!bool_valid_sim_prev)-1L
-    if(length(which_valid_sim_prev)<length(simulated_prevalences)){
+    
+    which_valid_sim_prev <- lapply(1:n_tims, function(t) which(bool_valid_sim_prev[,t])-1L)
+    which_invalid_sim_prev <- lapply(1:n_tims, function(t) which(!bool_valid_sim_prev[,t])-1L)
+    if(sum(bool_valid_sim_prev)<length(simulated_prevalences)){
       warning(paste0("At iteration ",iter, ", transmission_model produced ", 
-             length(simulated_prevalences)-length(which_valid_sim_prev), 
-             " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
+                     length(simulated_prevalences)-sum(bool_valid_sim_prev), 
+                     " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
     }
+    
+    # which_valid_sim_prev <- which(bool_valid_sim_prev)-1L
+    # which_invalid_sim_prev <- which(!bool_valid_sim_prev)-1L
+    # if(length(which_valid_sim_prev)<length(simulated_prevalences)){
+    #   warning(paste0("At iteration ",iter, ", transmission_model produced ", 
+    #          length(simulated_prevalences)-length(which_valid_sim_prev), 
+    #          " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
+    # }
     
     # to avoid duplication, evaluate likelihood now.
     likelihoods <- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params,
@@ -251,16 +260,17 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       new_prevalences <- transmission_model(seeds(iter), new_params$params)
 
       bool_valid_sim_prev_iter <- (new_prevalences>=boundaries[1]) & (new_prevalences<=boundaries[2]) & is.finite(new_prevalences)
-      bool_valid_sim_prev <- c(bool_valid_sim_prev, bool_valid_sim_prev_iter)
-      which_valid_sim_prev_iter <- which(bool_valid_sim_prev_iter)-1L
-      which_valid_sim_prev <- c(which_valid_sim_prev, which_valid_sim_prev_iter+nsamples*(iter-1))
-      which_invalid_sim_prev <- c(which_invalid_sim_prev, which(!bool_valid_sim_prev_iter)-1L+nsamples*(iter-1))
+      bool_valid_sim_prev <- rbind(bool_valid_sim_prev, bool_valid_sim_prev_iter)
+      which_valid_sim_prev_iter <- lapply(1:n_tims, function(t) which(bool_valid_sim_prev_iter[,t])-1L)
+      which_valid_sim_prev <- lapply(1:n_tims, function(t) c(which_valid_sim_prev[[t]], which_valid_sim_prev_iter[[t]]+nsamples*(iter-1)))
+      which_invalid_sim_prev_iter <- lapply(1:n_tims, function(t) which(!bool_valid_sim_prev_iter[,t])-1L)
+      which_invalid_sim_prev <- lapply(1:n_tims, function(t) c(which_invalid_sim_prev[[t]], which_invalid_sim_prev_iter[[t]]+nsamples*(iter-1)))
       if(sum(bool_valid_sim_prev_iter)<length(new_prevalences)){
-        warning(paste0("At iteration iter=",iter, ", transmission_model produced ", 
-               length(new_prevalences)-sum(bool_valid_sim_prev_iter), 
-               " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
+        warning(paste0("At iteration ",iter, ", transmission_model produced ", 
+                       length(new_prevalences)-sum(bool_valid_sim_prev_iter), 
+                       " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
       }
-            
+
       simulated_prevalences <- rbind(simulated_prevalences,new_prevalences)
       likelihoods <- compute_likelihood(new_params$params,prevalence_map,new_prevalences,amis_params, 
                                         likelihoods,which_valid_sim_prev_iter,

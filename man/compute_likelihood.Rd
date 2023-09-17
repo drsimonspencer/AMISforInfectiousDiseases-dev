@@ -31,7 +31,7 @@ the data consist of samples from a geo-statistical model and empirical methods a
 
 \item{likelihoods}{An array with dimension n_tims,n_locs,n_sims -- ie timepoints x locations x simulations (optional).}
 
-\item{which_valid_sim_prev_iter}{Vector showing which simulated prevalences are valid at the current iteration}
+\item{which_valid_sim_prev_iter}{List of T elements, where each one indicates which simulated prevalences are valid at the current iteration}
 
 \item{which_valid_prev_map}{List showing which prevalence map samples are valid}
 

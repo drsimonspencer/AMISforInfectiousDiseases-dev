@@ -28,15 +28,15 @@ parameter samples. (double)}
 \item{first_weight}{A vector containing the values for the right hand side of
 the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.}
 
-\item{locs_RN}{List showing, at each time, which locations are updated using the RN derivative.}
+\item{locs_RN}{List indicating, at each time, which locations are updated using the RN derivative.}
 
-\item{locs_nonRN}{List showing, at each time, which locations are updated without using the RN derivative.}
+\item{locs_nonRN}{List indicating, at each time, which locations are updated without using the RN derivative.}
 
-\item{bool_valid_sim_prev}{Logical vector showing which simulated prevalences are valid.}
+\item{bool_valid_sim_prev}{Matrix of n_tims columns, where column is a logical vector indicating which simulated prevalences are valid.}
 
-\item{which_valid_sim_prev}{Vector showing which simulated prevalences are valid.}
+\item{which_valid_sim_prev}{List indicating, at each time, which simulated prevalences are valid.}
 
-\item{which_invalid_sim_prev}{Vector showing which simulated prevalences are invalid}
+\item{which_invalid_sim_prev}{List indicating, at each time, which simulated prevalences are invalid}
 
 \item{which_valid_locs_prev_map}{List showing which locations have valid data at each time}
 }

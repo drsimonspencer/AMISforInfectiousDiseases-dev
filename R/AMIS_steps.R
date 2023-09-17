@@ -135,7 +135,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
 #' @param simulated_prevalences An n x timepoints matrix of prevalences simulated from the transmission model.
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
 #' @param likelihoods An array with dimension n_tims,n_locs,n_sims -- ie timepoints x locations x simulations (optional).
-#' @param which_valid_sim_prev_iter Vector showing which simulated prevalences are valid at the current iteration
+#' @param which_valid_sim_prev_iter List of T elements, where each one indicates which simulated prevalences are valid at the current iteration
 #' @param which_valid_prev_map List showing which prevalence map samples are valid
 #' @param log_norm_const_gaussian Normalising constant (in log scale) for the Gaussian kernel. It is only used if Gaussian kernel is used.
 #' @return A larger array with the likelihoods of the new simulations joined to the existing array \code{likelihoods}.
@@ -147,7 +147,7 @@ compute_likelihood <- function(param,prevalence_map,simulated_prevalences,amis_p
   lik <- array(NA, c(n_tims,n_locs,n_sims)) # this way around to avoid abind -- different to elsewhere
   for (t in 1:n_tims) {
     lik[t,,] <- evaluate_likelihood(param,prevalence_map[[t]],simulated_prevalences[,t],amis_params,
-                                    which_valid_sim_prev_iter,which_valid_prev_map[[t]],log_norm_const_gaussian[t,,]) 
+                                    which_valid_sim_prev_iter[[t]],which_valid_prev_map[[t]],log_norm_const_gaussian[t,,]) 
   }
   if (!is.null(likelihoods)) {
     lik <- array(c(likelihoods,lik), c(n_tims,n_locs,dim(likelihoods)[3]+n_sims))
@@ -165,8 +165,8 @@ compute_likelihood <- function(param,prevalence_map,simulated_prevalences,amis_p
 #' \code{prevalence} (a matrix of output from the transmission model) and optional logical \code{log}, which returns the vector of (log)-likelihoods.    
 #' @param prev_sim A vector of simulated prevalences
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
-#' @param which_valid_sim_prev_iter Vector showing which simulated prevalences are valid at the current iteration.
-#' @param which_valid_prev_map_t List showing which prevalence map samples are valid at time t
+#' @param which_valid_sim_prev_iter Vector showing which simulated prevalences are valid at the current iteration at time t.
+#' @param which_valid_prev_map_t List showing which prevalence map samples are valid at time t.
 #' @param log_norm_const_gaussian_t Normalising constant (in log scale) for the Gaussian kernel at time t. It is only used if Gaussian kernel is used.
 #' @return A locations x simulations matrix of (log-)likelihoods.
 evaluate_likelihood <- function(param,prevalence_map,prev_sim,amis_params, 
@@ -274,11 +274,11 @@ evaluate_likelihood <- function(param,prevalence_map,prev_sim,amis_params,
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
 #' @param first_weight A vector containing the values for the right hand side of
 #'     the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.
-#' @param locs_RN List showing, at each time, which locations are updated using the RN derivative.
-#' @param locs_nonRN List showing, at each time, which locations are updated without using the RN derivative.
-#' @param bool_valid_sim_prev Logical vector showing which simulated prevalences are valid.
-#' @param which_valid_sim_prev Vector showing which simulated prevalences are valid.
-#' @param which_invalid_sim_prev Vector showing which simulated prevalences are invalid
+#' @param locs_RN List indicating, at each time, which locations are updated using the RN derivative.
+#' @param locs_nonRN List indicating, at each time, which locations are updated without using the RN derivative.
+#' @param bool_valid_sim_prev Matrix of n_tims columns, where column is a logical vector indicating which simulated prevalences are valid.
+#' @param which_valid_sim_prev List indicating, at each time, which simulated prevalences are valid.
+#' @param which_invalid_sim_prev List indicating, at each time, which simulated prevalences are invalid
 #' @param which_valid_locs_prev_map List showing which locations have valid data at each time
 #' @return normalised weight matrix.
 compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params, first_weight, 
@@ -313,7 +313,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
       
       if(!is.null(locs_nonRN[[t]])){
         weight_matrix <- compute_weight_matrix_nonRN_Rcpp(lik_mat, amis_params, weight_matrix,
-                                                          which_valid_sim_prev, which_invalid_sim_prev, 
+                                                          which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], 
                                                           locs_nonRN[[t]])
       }
 
@@ -322,7 +322,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
           if(is.null(amis_params[["sigma"]])){
             if(!is.null(locs_RN[[t]])){
               weight_matrix <- compute_weight_matrix_empirical_uniform(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix,
-                                                                       bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, locs_RN[[t]])
+                                                                       bool_valid_sim_prev[,t], which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], locs_RN[[t]])
             }
             
             # # R code of previous version of the package
@@ -334,7 +334,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
           }else{
             if(!is.null(locs_RN[[t]])){
               weight_matrix <- compute_weight_matrix_empirical_gauss(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix, 
-                                                                     which_valid_sim_prev, which_invalid_sim_prev, locs_RN[[t]])
+                                                                     which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], locs_RN[[t]])
             }
           }
         
@@ -342,7 +342,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
       } else {
         if(!is.null(locs_RN[[t]])){
           weight_matrix <- compute_weight_matrix_empirical_histogram(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix,
-                                                                     bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, locs_RN[[t]])
+                                                                     bool_valid_sim_prev[,t], which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], locs_RN[[t]])
         }
         
         # # R code of previous version of the package
@@ -358,7 +358,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
       # weight_matrix <- compute_weight_matrix_nonRN(lik_mat,amis_params,weight_matrix)  # Argument which_valid_locs_prev_map must be used here
       
       weight_matrix <- compute_weight_matrix_nonRN_Rcpp(lik_mat, amis_params, weight_matrix,
-                                                        which_valid_sim_prev, which_invalid_sim_prev, 
+                                                        which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], 
                                                         which_valid_locs_prev_map[[t]])
       
     }

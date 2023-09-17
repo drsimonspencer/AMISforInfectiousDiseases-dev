@@ -25,9 +25,9 @@ and \code{likelihood} a function taking arguments \code{data} (a matrix of data 
 
 \item{amis_params}{A list of parameters, e.g. from \code{\link{default_amis_params}}.}
 
-\item{which_valid_sim_prev_iter}{Vector showing which simulated prevalences are valid at the current iteration.}
+\item{which_valid_sim_prev_iter}{Vector showing which simulated prevalences are valid at the current iteration at time t.}
 
-\item{which_valid_prev_map_t}{List showing which prevalence map samples are valid at time t}
+\item{which_valid_prev_map_t}{List showing which prevalence map samples are valid at time t.}
 
 \item{log_norm_const_gaussian_t}{Normalising constant (in log scale) for the Gaussian kernel at time t. It is only used if Gaussian kernel is used.}
 }

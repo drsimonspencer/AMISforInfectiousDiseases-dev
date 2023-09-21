@@ -189,26 +189,26 @@ evaluate_likelihood <- function(param,prevalence_map,prev_sim,amis_params,
                           which_valid_prev_map_t=which_valid_prev_map_t, 
                           logar=logar)
 
-    # Here, the user-defined 'likelihood_fun' returns an M_l-length vector
-    # for a particular location l and a single simulated prevalence
-    f <- f_user_defined_l_r(likelihood_fun,
-                            param,
-                            prevalence_map=prevalence_map$data, 
-                            prev_sim=prev_sim, 
-                            which_valid_sim_prev_iter=which_valid_sim_prev_iter, 
-                            which_valid_prev_map_t=which_valid_prev_map_t, 
-                            logar=logar)
-    
-    # Here, the user-defined 'likelihood_fun' returns a single point:
-    # the likelihood of observing a simulated value r given a sample m at a particular location l
-    # This approach can be slow because the R function has to be called from Rcpp too many times
-    f <- f_user_defined_l_m_r(likelihood_fun,
-                              param,
-                              prevalence_map=prevalence_map$data,
-                              prev_sim=prev_sim,
-                              which_valid_sim_prev_iter=which_valid_sim_prev_iter,
-                              which_valid_prev_map_t=which_valid_prev_map_t,
-                              logar=logar)
+    # # Here, the user-defined 'likelihood_fun' returns an M_l-length vector
+    # # for a particular location l and a single simulated prevalence
+    # f <- f_user_defined_l_r(likelihood_fun,
+    #                         param,
+    #                         prevalence_map=prevalence_map$data, 
+    #                         prev_sim=prev_sim, 
+    #                         which_valid_sim_prev_iter=which_valid_sim_prev_iter, 
+    #                         which_valid_prev_map_t=which_valid_prev_map_t, 
+    #                         logar=logar)
+    # 
+    # # Here, the user-defined 'likelihood_fun' returns a single point:
+    # # the likelihood of observing a simulated value r given a sample m at a particular location l
+    # # This approach can be slow because the R function has to be called from Rcpp too many times
+    # f <- f_user_defined_l_m_r(likelihood_fun,
+    #                           param,
+    #                           prevalence_map=prevalence_map$data,
+    #                           prev_sim=prev_sim,
+    #                           which_valid_sim_prev_iter=which_valid_sim_prev_iter,
+    #                           which_valid_prev_map_t=which_valid_prev_map_t,
+    #                           logar=logar)
 
     # # R code of previous version of the package
     # locs<-which(!is.na(prevalence_map$data[,1])) # if there is no data for a location, do not update weights.
@@ -289,15 +289,10 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
   n_locs <- dim(likelihoods)[2]
   n_sims <- dim(likelihoods)[3]
   weight_matrix <- matrix(rep(first_weight,n_locs), nrow = n_sims, ncol = n_locs)
-  ## If n_locs = 1, likelihood matrix for given timepoint is an atomic
-  ## vector and doesn't need to be transposed.
-  if (n_locs == 1) {
-    lik_matrix <- function(l) as.matrix(l)
-  } else {
-    lik_matrix <- function(l) t(l)
-  }
   for (t in 1:n_tims) {
-    lik_mat <- lik_matrix(likelihoods[t,,])
+
+    lik_mat <- t(array(likelihoods[t,,], dim=c(n_locs, n_sims)))
+    
     # Update the weights by the latest likelihood (filtering)
     if (!amis_params[["bayesian"]]){
       
@@ -686,15 +681,17 @@ compute_model_evidence <- function(likelihoods, amis_params, first_weight){
   n_locs <- dim(likelihoods)[2]
   n_sims <- dim(likelihoods)[3]
   weight_matrix <- matrix(rep(first_weight,n_locs), nrow = n_sims, ncol = n_locs)
-  ## If n_locs = 1, likelihood matrix for given timepoint is an atomic
-  ## vector and doesn't need to be transposed.
-  if (n_locs == 1) {
-    lik_matrix <- function(l) as.matrix(l)
-  } else {
-    lik_matrix <- function(l) t(l)
-  }
+  # ## If n_locs = 1, likelihood matrix for given timepoint is an atomic
+  # ## vector and doesn't need to be transposed.
+  # if (n_locs == 1) {
+  #   lik_matrix <- function(l) as.matrix(l)
+  # } else {
+  #   lik_matrix <- function(l) t(l)
+  # }
   for (t in 1:n_tims) {
-    lik_mat <- lik_matrix(likelihoods[t,,])
+    # lik_mat <- lik_matrix(likelihoods[t,,])
+    lik_mat <- t(array(likelihoods[t,,], dim=c(n_locs, n_sims)))
+    
     # Update the weights by the latest likelihood (filtering)
     weight_matrix <- compute_weight_matrix_bayesian(lik_mat,amis_params,weight_matrix)
   }

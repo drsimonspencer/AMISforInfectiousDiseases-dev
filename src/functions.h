@@ -32,7 +32,7 @@ arma::mat compute_weight_matrix_empirical_uniform(const arma::mat& likelihoods,
                                                   arma::uvec& which_invalid_sim_prev,
                                                   arma::uvec& locs);
 
-arma::mat compute_weight_matrix_nonRN_Rcpp(const arma::mat& likelihoods, 
+arma::mat compute_weight_matrix_bayesian_Rcpp(const arma::mat& likelihoods, 
                                            List amis_params,
                                            const arma::mat& weight_matrix,
                                            arma::uvec& which_valid_sim_prev,
@@ -94,7 +94,7 @@ List get_which_valid_locs_prev_map(List& which_valid_prev_map,
 arma::ivec get_locations_first_t(List& which_valid_locs_prev_map, 
                                  int n_tims, int n_locs);
                                  
-List get_locs_RN(arma::ivec& locations_first_t, int n_tims);
+List get_locs_empirical(arma::ivec& locations_first_t, int n_tims);
                                  
 List get_locs_nonRN(arma::ivec& locations_first_t, int n_tims);
 

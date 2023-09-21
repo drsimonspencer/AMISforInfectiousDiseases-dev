@@ -11,6 +11,25 @@ calc_log_norm_const_gaussian <- function(prevalence_map, boundaries, sd) {
     .Call('_AMISforInfectiousDiseases_calc_log_norm_const_gaussian', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, boundaries, sd)
 }
 
+#' @title  Compute weight matrix without using empirical Radon-Nikodym derivative
+#' @description Compute matrix describing the weights for each parameter sampled, for each
+#' location. One row per sample, one column per location.  Each weight 
+#' is computed based on the empirical Radon-Nikodym derivative, taking into account 
+#' geostatistical prevalence data for the specific location and the prevalence values 
+#' computed from the transmission model for the specific parameter sample.
+#' @param likelihoods An n_sims x n_locs matrix of (log-)likelihoods
+#' NB: transpose of slice of array. 
+#' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
+#' @param weight_matrix An n_sims x n_locs matrix containing the current values of the weights.
+#' @param which_valid_sim_prev Vector showing which simulated values are valid.
+#' @param which_invalid_sim_prev Vector showing which simulated values are invalid.
+#' @param locs Vector showing which locations have data.
+#' @return An updated weight matrix.
+#' @noRd
+compute_weight_matrix_bayesian_Rcpp <- function(likelihoods, amis_params, weight_matrix, which_valid_sim_prev, which_invalid_sim_prev, locs) {
+    .Call('_AMISforInfectiousDiseases_compute_weight_matrix_bayesian_Rcpp', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, amis_params, weight_matrix, which_valid_sim_prev, which_invalid_sim_prev, locs)
+}
+
 #' @title  Compute weight matrix using empirical Radon-Nikodym derivative (Rcpp version) and Gaussian kernel
 #' @description Compute matrix describing the weights for each parameter sampled, for each
 #' location. One row per sample, one column per location.  Each weight 
@@ -71,25 +90,6 @@ compute_weight_matrix_empirical_histogram <- function(likelihoods, prev_sim, ami
 #' @noRd
 compute_weight_matrix_empirical_uniform <- function(likelihoods, prev_sim, amis_params, weight_matrix, bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, locs) {
     .Call('_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, prev_sim, amis_params, weight_matrix, bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, locs)
-}
-
-#' @title  Compute weight matrix without using empirical Radon-Nikodym derivative
-#' @description Compute matrix describing the weights for each parameter sampled, for each
-#' location. One row per sample, one column per location.  Each weight 
-#' is computed based on the empirical Radon-Nikodym derivative, taking into account 
-#' geostatistical prevalence data for the specific location and the prevalence values 
-#' computed from the transmission model for the specific parameter sample.
-#' @param likelihoods An n_sims x n_locs matrix of (log-)likelihoods
-#' NB: transpose of slice of array. 
-#' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}
-#' @param weight_matrix An n_sims x n_locs matrix containing the current values of the weights.
-#' @param which_valid_sim_prev Vector showing which simulated values are valid.
-#' @param which_invalid_sim_prev Vector showing which simulated values are invalid.
-#' @param locs Vector showing which locations have data.
-#' @return An updated weight matrix.
-#' @noRd
-compute_weight_matrix_nonRN_Rcpp <- function(likelihoods, amis_params, weight_matrix, which_valid_sim_prev, which_invalid_sim_prev, locs) {
-    .Call('_AMISforInfectiousDiseases_compute_weight_matrix_nonRN_Rcpp', PACKAGE = 'AMISforInfectiousDiseases', likelihoods, amis_params, weight_matrix, which_valid_sim_prev, which_invalid_sim_prev, locs)
 }
 
 #' @title Empirical estimator for the likelihood using Gaussian kernel
@@ -205,19 +205,19 @@ get_locations_first_t <- function(which_valid_locs_prev_map, n_tims, n_locs) {
     .Call('_AMISforInfectiousDiseases_get_locations_first_t', PACKAGE = 'AMISforInfectiousDiseases', which_valid_locs_prev_map, n_tims, n_locs)
 }
 
-#' @title Determine, at which time point, which locations are updated using an empirical method
+#' @title Determine, at which time point, which locations are updated without using Bayesian method
 #' @param locations_first_t Vector obtained by locations_first_t
 #' @param n_tims Number of time points
 #' @noRd
-get_locs_RN <- function(locations_first_t, n_tims) {
-    .Call('_AMISforInfectiousDiseases_get_locs_RN', PACKAGE = 'AMISforInfectiousDiseases', locations_first_t, n_tims)
+get_locs_empirical <- function(locations_first_t, n_tims) {
+    .Call('_AMISforInfectiousDiseases_get_locs_empirical', PACKAGE = 'AMISforInfectiousDiseases', locations_first_t, n_tims)
 }
 
-#' @title Determine, at which time point, which locations are updated using RN without denominator
+#' @title Determine, at which time point, which locations are updated using Bayesian method
 #' @param locations_first_t Vector obtained by locations_first_t
 #' @param n_tims Number of time points
 #' @noRd
-get_locs_nonRN <- function(locations_first_t, n_tims) {
-    .Call('_AMISforInfectiousDiseases_get_locs_nonRN', PACKAGE = 'AMISforInfectiousDiseases', locations_first_t, n_tims)
+get_locs_bayesian <- function(locations_first_t, n_tims) {
+    .Call('_AMISforInfectiousDiseases_get_locs_bayesian', PACKAGE = 'AMISforInfectiousDiseases', locations_first_t, n_tims)
 }
 

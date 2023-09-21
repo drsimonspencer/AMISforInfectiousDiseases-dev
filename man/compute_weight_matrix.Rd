@@ -9,8 +9,8 @@ compute_weight_matrix(
   simulated_prevalence,
   amis_params,
   first_weight,
-  locs_RN,
-  locs_nonRN,
+  locs_empirical,
+  locs_bayesian,
   bool_valid_sim_prev,
   which_valid_sim_prev,
   which_invalid_sim_prev,
@@ -28,9 +28,9 @@ parameter samples. (double)}
 \item{first_weight}{A vector containing the values for the right hand side of
 the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.}
 
-\item{locs_RN}{List indicating, at each time, which locations are updated using the RN derivative.}
+\item{locs_empirical}{List indicating, at each time, which locations are updated without using Bayesian method.}
 
-\item{locs_nonRN}{List indicating, at each time, which locations are updated without using the RN derivative.}
+\item{locs_bayesian}{List indicating, at each time, which locations are updated using Bayesian method.}
 
 \item{bool_valid_sim_prev}{Matrix of n_tims columns, where column is a logical vector indicating which simulated prevalences are valid.}
 

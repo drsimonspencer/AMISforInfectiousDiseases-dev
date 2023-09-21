@@ -17,7 +17,7 @@
 //' @return An updated weight matrix.
 //' @noRd
 // [[Rcpp::export]]
-arma::mat compute_weight_matrix_nonRN_Rcpp(const arma::mat& likelihoods, 
+arma::mat compute_weight_matrix_bayesian_Rcpp(const arma::mat& likelihoods, 
                                            List amis_params,
                                            const arma::mat& weight_matrix,
                                            arma::uvec& which_valid_sim_prev,

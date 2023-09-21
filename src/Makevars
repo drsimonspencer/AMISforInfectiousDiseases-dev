@@ -19,6 +19,9 @@ MY_CPPFLAGS=-g0 -O3
 calc_log_norm_const_gaussian.o: calc_log_norm_const_gaussian.cpp
 	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
 
+compute_weight_matrix_bayesian.o: compute_weight_matrix_bayesian.cpp
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@	
+	
 compute_weight_matrix_empirical_gauss.o: compute_weight_matrix_empirical_gauss.cpp
 	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@	
 
@@ -45,4 +48,4 @@ get_which_valid_prev_map.o: get_which_valid_prev_map.cpp
 	
 RcppExports.o: RcppExports.cpp
 	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
-	
+

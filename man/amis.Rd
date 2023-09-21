@@ -63,19 +63,9 @@ The only argument of \code{rprior} must be a single integer \eqn{n} that determi
 \item{\code{boundaries}}{A vector of length two with the left and right boundaries.
 Default to \code{c(0,1)}. If left boundary is zero and there is no right boundary,
 set \code{boundaries = c(0,Inf)}.}
-\item{\code{RN}}{Logical indicating whether to use empirical Radon-Nikodym (RN) derivative or not.
-Default to TRUE. If set to FALSE, likelihood is not divided by the induced prior
-over the simulated prevalences when calculating weights.}
-\item{\code{delta}}{Optional smoothing parameter in the empirical RN derivative if uniform
-kernel (default) is used. Default to 0.01. If any of \code{sigma} or \code{breaks} is supplied, then uniform kernel will not be used.}
-\item{\code{sigma}}{Optional smoothing parameter in the empirical RN derivative
-if Gaussian kernel is used (i.e. Gaussian kernel will not used). Default to NULL.
-If \code{breaks} is supplied, Gaussian kernel will not be used.}
-\item{\code{breaks}}{Optional vector specifying the breaks for the histogram.
-Default to NULL (i.e. histogram method will not used).
-For finite \code{boundaries}, the first and last entries of \code{breaks} must be
-equal to the left and right boundaries, respectively.
-For non-finite \code{boundaries}, ensure that the range of 'breaks' includes any possible prevalence value.}
+\item{\code{bayesian}}{Logical indicating whether update of weights is Bayesian or not.
+Default to FALSE. If set to TRUE, the likelihood is not divided by the induced prior
+over the simulated prevalences when updating weights.}
 \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
 \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
 \item{\code{target_ess}}{Target effective sample size. Default to 500.}
@@ -83,6 +73,15 @@ For non-finite \code{boundaries}, ensure that the range of 'breaks' includes any
 \item{\code{max_iters}}{Maximum number of AMIS iterations.}
 \item{\code{intermittent_output}}{Optional logical indicating whether to save output to
 \code{\link{amis_env}} environment at each iteration of the algorithm. Default to FALSE.}
+\item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to 0.01.}
+\item{\code{sigma}}{Optional smoothing parameter if Gaussian kernel is used. Default to NULL.}
+\item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to NULL.
+For finite \code{boundaries}, the first and last entries of \code{breaks} must be
+equal to the left and right boundaries, respectively.
+For non-finite \code{boundaries}, ensure that the range of 'breaks' includes any possible prevalence value.}
+Uniform kernel is the default method for the density estimator of the likelihood.
+If \code{sigma} is supplied, then Gaussian kernel will be used instead.
+If \code{breaks} is supplied, then histogram-based method will supersede all the other methods.
 }}
 
 \item{seed}{Optional seed for the random number generator.}

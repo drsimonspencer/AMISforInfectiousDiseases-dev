@@ -54,19 +54,9 @@
 #' \item{\code{boundaries}}{A vector of length two with the left and right boundaries. 
 #' Default to \code{c(0,1)}. If left boundary is zero and there is no right boundary, 
 #' set \code{boundaries = c(0,Inf)}.}
-#' \item{\code{RN}}{Logical indicating whether to use empirical Radon-Nikodym (RN) derivative or not. 
-#' Default to TRUE. If set to FALSE, likelihood is not divided by the induced prior 
-#' over the simulated prevalences when calculating weights.}
-#' \item{\code{delta}}{Optional smoothing parameter in the empirical RN derivative if uniform 
-#' kernel (default) is used. Default to 0.01. If any of \code{sigma} or \code{breaks} is supplied, then uniform kernel will not be used.}
-#' \item{\code{sigma}}{Optional smoothing parameter in the empirical RN derivative 
-#' if Gaussian kernel is used (i.e. Gaussian kernel will not used). Default to NULL. 
-#' If \code{breaks} is supplied, Gaussian kernel will not be used.}
-#' \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. 
-#' Default to NULL (i.e. histogram method will not used).
-#' For finite \code{boundaries}, the first and last entries of \code{breaks} must be 
-#' equal to the left and right boundaries, respectively.
-#' For non-finite \code{boundaries}, ensure that the range of 'breaks' includes any possible prevalence value.}
+#' \item{\code{bayesian}}{Logical indicating whether update of weights is Bayesian or not. 
+#' Default to FALSE. If set to TRUE, the likelihood is not divided by the induced prior 
+#' over the simulated prevalences when updating weights.}
 #' \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
 #' \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
 #' \item{\code{target_ess}}{Target effective sample size. Default to 500.}
@@ -74,6 +64,15 @@
 #' \item{\code{max_iters}}{Maximum number of AMIS iterations.}
 #' \item{\code{intermittent_output}}{Optional logical indicating whether to save output to 
 #' \code{\link{amis_env}} environment at each iteration of the algorithm. Default to FALSE.}
+#' \item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to 0.01.}
+#' \item{\code{sigma}}{Optional smoothing parameter if Gaussian kernel is used. Default to NULL.}
+#' \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to NULL.
+#' For finite \code{boundaries}, the first and last entries of \code{breaks} must be 
+#' equal to the left and right boundaries, respectively.
+#' For non-finite \code{boundaries}, ensure that the range of 'breaks' includes any possible prevalence value.}
+#' Uniform kernel is the default method for the density estimator of the likelihood. 
+#' If \code{sigma} is supplied, then Gaussian kernel will be used instead. 
+#' If \code{breaks} is supplied, then histogram-based method will supersede all the other methods.
 #' }
 #' @param seed Optional seed for the random number generator.
 #' @param initial_amis_vals Optional list containing the object created by setting \code{intermittent_output=TRUE}. 
@@ -146,8 +145,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   n_locs <- dim(prevalence_map[[1]]$data)[1]
   which_valid_locs_prev_map <- get_which_valid_locs_prev_map(which_valid_prev_map, n_tims, n_locs)
   locations_first_t <- get_locations_first_t(which_valid_locs_prev_map, n_tims, n_locs)
-  locs_RN <- get_locs_RN(locations_first_t, n_tims)
-  locs_nonRN <- get_locs_nonRN(locations_first_t, n_tims)
+  locs_empirical <- get_locs_empirical(locations_first_t, n_tims)
+  locs_bayesian <- get_locs_bayesian(locations_first_t, n_tims)
 
   # Initialise
   if(!is.null(seed)){set.seed(seed)}
@@ -159,9 +158,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     param <- prior$rprior(nsamples)
     if(!is.matrix(param)) {stop("rprior function must produce a MATRIX of size #simulations by #parameters, even when #parameters is equal to 1. \n")}
     if(any(is.na(param))){warning("At least one sample from the prior was NA or NaN. \n")}
-    if(ncol(param)==1 && amis_params[["RN"]]) {warning("Currently running with amis_params[['RN']]==TRUE. 
-                                                          For models with only one parameter it is recommended to set 
-                                                          amis_params[['RN']] = FALSE for prior to influence the weights calculation.\n")}
+    if(ncol(param)==1 && amis_params[["bayesian"]]==F) {warning("Currently running with amis_params[['bayesian']]==FALSE. 
+                                                                For models with only one parameter it is recommended to set 
+                                                                amis_params[['bayesian']] = TRUE for prior to influence the weights calculation.\n")}
     # to avoid duplication, evaluate prior density now.
     prior_density<-sapply(1:nsamples,function(b) {prior$dprior(param[b,],log=amis_params[["log"]])})
     if(length(prior_density)!=nsamples) {stop("Output from dprior function must have length 1. \n")}
@@ -197,11 +196,19 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
     # Determine first time each location appears in the data
     weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, amis_params,
-      first_weight = rep(1-amis_params[["log"]], nsamples), locs_RN, locs_nonRN,
+      first_weight = rep(1-amis_params[["log"]], nsamples), locs_empirical, locs_bayesian,
       bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, which_valid_locs_prev_map)
     if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
     
     ess <- calculate_ess(weight_matrix,amis_params[["log"]])
+    
+    # first_weight = rep(1-amis_params[["log"]], nsamples)
+    # saveRDS(simulated_prevalences, file = "/home/evandro/gitreps/myNTD/AmisCode/TestingEquivalence/SRE/simulated_prevalences.rds")
+    # saveRDS(likelihoods, file = "/home/evandro/gitreps/myNTD/AmisCode/TestingEquivalence/SRE/likelihoods.rds")
+    # saveRDS(first_weight, file = "/home/evandro/gitreps/myNTD/AmisCode/TestingEquivalence/SRE/first_weight.rds")
+    # saveRDS(weight_matrix, file = "/home/evandro/gitreps/myNTD/AmisCode/TestingEquivalence/SRE/weight_matrix.rds")
+    # saveRDS(ess, file = "/home/evandro/gitreps/myNTD/AmisCode/TestingEquivalence/SRE/ess.rds")
+    
     cat("  min ESS:",round(min(ess))," mean ESS:",round(mean(ess))," max ESS:",round(max(ess)),"\n")
     cat(" ",length(which(ess<amis_params[["target_ess"]])),"locations are below the target ESS.\n")
     # Make object to store the components of the AMIS mixture.
@@ -247,6 +254,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     warning(paste0(sum(locations_first_t==-1L), " location(s) provided with no data. Using prior information to determine weights for these locations.\n"))
   }
   
+  # stop("STOP at first iteration for testing.")
+  
+  
   # Define first_weight object in case target_ess reached in first iteration
   first_weight = rep(1-amis_params[["log"]], nsamples)
   # Continue if target_ess not yet reached
@@ -284,9 +294,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       first_weight <- compute_prior_proposal_ratio(components, param, prior_density, amis_params[["df"]], amis_params[["log"]]) # Prior/proposal
       weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, 
                                              amis_params, first_weight,
-                                             locs_RN, locs_nonRN,
+                                             locs_empirical, locs_bayesian,
                                              bool_valid_sim_prev, which_valid_sim_prev, 
-                                             which_invalid_sim_prev, which_valid_locs_prev_map) # RN derivative (shd take all amis_params)
+                                             which_invalid_sim_prev, which_valid_locs_prev_map)
       if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
       
       ess <- calculate_ess(weight_matrix,amis_params[["log"]])
@@ -314,15 +324,13 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   # Save output
   res <- save_output()
   
-  # Calculate model evidence if RN derivative not being used
-  if (amis_params[["RN"]]){
-    return(list(sample=res$results, evidence=NULL))
-  } else {
-    
+  # Calculate model evidence only if bayesian==TRUE
+  if (amis_params[["bayesian"]]){
     model_evidence <- NULL
     warning("model_evidence not calculated. Function compute_model_evidence() is under development.")
     # model_evidence <- compute_model_evidence(likelihoods, amis_params, first_weight)
-    
     return(list(sample=res$results, evidence=model_evidence))
+  } else {
+    return(list(sample=res$results, evidence=NULL))
   }
 }

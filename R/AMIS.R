@@ -11,15 +11,15 @@
 #' @param prevalence_map An \eqn{L \times M} matrix containing samples from the fitted prevalence map, 
 #' where \eqn{L} is the number of locations and \eqn{M} the number of samples.
 #' \cr \cr Alternatively, a list with \eqn{T} elements, one for each timepoint \eqn{t=1,\dots,T}.
-#' Each entry must be a list containing objects 
+#' Each entry must be a list with: 
 #' \describe{
 #' \item{\code{data}}{An \eqn{L \times M} matrix as above}
-#' \item{\code{likelihood}}{A function taking arguments 
+#' \item{\code{likelihood}}{(optional) A function taking arguments:
 #' \itemize{
 #'    \item \code{param}: An \eqn{n \times d} matrix with the \eqn{d}-dimensional 
-#'    model parameter vectors, one for each of the \eqn{n} seeds used in the simulation.
-#'    \item \code{data}: A vector with a given number M_l of valid samples for a particular location l
-#'    \item \code{sim_prev}: An \eqn{n}-length vector with the prevalences simulated by the transmission model.
+#'    model parameter vectors, one for each of the \eqn{n} seeds used in the simulation;
+#'    \item \code{data}: A vector with a given number \eqn{M_l} of valid samples for a particular location \eqn{l};
+#'    \item \code{sim_prev}: An \eqn{n}-length vector with the prevalences simulated by the transmission model;
 #'    \item \code{log}: Optional logical. If set to \code{TRUE}, the function returns the log-likelihoods.
 #' }
 #' The function \code{likelihood} must return an \eqn{M_l \times n} matrix which will be used to 
@@ -27,18 +27,19 @@
 #' }
 #' }
 #' The location names are inherited from \code{rownames(prevalence_map)} 
-#' if \code{prevalence_map} is a matrix, or 
+#' if \code{prevalence_map} is a matrix, and 
 #' from \code{rownames(prevalence_map[[1]]$data)} if \code{prevalence_map} is a list.
 #' \cr \cr If \code{likelihood} is not specified, then it is assumed that the data consist of 
-#' samples from a geo-statistical model and empirical methods are used.  
+#' samples from a geo-statistical model and empirical methods are used.
+#' \cr \cr
 #' @param transmission_model A function taking arguments:
 #' \itemize{
 #'    \item \code{seeds}: a vector of \eqn{n} seeds;
-#'    \item \code{params}: an \eqn{n \times d} matrix of parameter vectors as inputs;
+#'    \item \code{params}: an \eqn{n \times d} matrix of parameter vectors;
 #'    \item \code{n_tims}: number of time points.
 #'  }
 #' This function must return an \eqn{n \times T} \bold{matrix} of prevalences 
-#' (it must be a matrix even when \eqn{T==1}).
+#' (it must be a matrix even when \eqn{T=1}).
 #' @param prior A list containing the functions \code{dprior} and \code{rprior} (density and RNG, respectively).
 #' The two arguments of \code{dprior} must be:
 #' \itemize{
@@ -46,15 +47,15 @@
 #'   \item a logical \code{log} to indicate whether to calculate log-density or not. 
 #' }
 #' The only argument of \code{rprior} must be a single integer \eqn{n} that determines the number of samples to draw. 
-#' \code{rprior} must produce an \eqn{n \times d} \bold{matrix} of parameters, even when \eqn{d==1}.
-#' \cr \cr Parameter names are inherited from the \code{colnames} from the output of \code{rprior} if possible.
+#' \code{rprior} must produce an \eqn{n \times d} \bold{matrix} of parameters, even when \eqn{d=1}.
+#' Parameter names are inherited from the \code{colnames} from the output of \code{rprior} if possible.
 #' @param amis_params A list containing the control parameters for the AMIS algorithm:
 #' \describe{
 #' \item{\code{nsamples}}{Number of new samples drawn within each AMIS iteration. Default to 500.}
-#' \item{\code{boundaries}}{A vector of length two with the left and right boundaries. 
+#' \item{\code{boundaries}}{A vector of length two with the left and right boundaries for prevalences. 
 #' Default to \code{c(0,1)}. If left boundary is zero and there is no right boundary, 
 #' set \code{boundaries = c(0,Inf)}.}
-#' \item{\code{bayesian}}{Logical indicating whether update of weights is Bayesian or not. 
+#' \item{\code{bayesian}}{Logical indicating whether the update of weights is Bayesian or not. 
 #' Default to FALSE. If set to TRUE, the likelihood is not divided by the induced prior 
 #' over the simulated prevalences when updating weights.}
 #' \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
@@ -69,15 +70,15 @@
 #' \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to NULL.
 #' For finite \code{boundaries}, the first and last entries of \code{breaks} must be 
 #' equal to the left and right boundaries, respectively.
-#' For non-finite \code{boundaries}, ensure that the range of 'breaks' includes any possible prevalence value.}
+#' For non-finite \code{boundaries}, ensure that the range of \code{breaks} includes any possible prevalence value.}
+#' }
 #' Uniform kernel is the default method for the density estimator of the likelihood. 
 #' If \code{sigma} is provided, then Gaussian kernel will be used instead. 
 #' If \code{breaks} is provided, then histogram-based method will supersede all the other methods.
-#' }
 #' @param seed Optional seed for the random number generator.
 #' @param initial_amis_vals Optional list containing the object created by setting \code{intermittent_output=TRUE}. 
 #' Necessary to initialise the algorithm from intermittent output from a previous run (where at least one iteration was successful!).
-#' @return A dataframe with the simulation seeds, sampled parameters, simulated prevalences, and weight in each location.
+#' @return A dataframe with the simulation seeds and the corresponding sampled parameters, simulated prevalences, and weight in each location.
 #' @export
 amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = NULL, initial_amis_vals = NULL) {
 
@@ -152,15 +153,14 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   if(!is.null(seed)){set.seed(seed)}
   iter <- 1
   if(is.null(initial_amis_vals)){
+    cat("----------------------- \n")
     cat("AMIS iteration 1\n")
-    message("Initialising algorithm by sampling the first set of parameters from the prior. \n")
+    cat("Initialising algorithm by sampling the first set of parameters from the prior. \n")
     # Sample first set of parameters from the prior
     param <- prior$rprior(nsamples)
     if(!is.matrix(param)) {stop("rprior function must produce a MATRIX of size #simulations by #parameters, even when #parameters is equal to 1. \n")}
     if(any(is.na(param))){warning("At least one sample from the prior was NA or NaN. \n")}
-    if(ncol(param)==1 && amis_params[["bayesian"]]==F) {warning("Currently running with amis_params[['bayesian']]==FALSE. 
-                                                                For models with only one parameter it is recommended to set 
-                                                                amis_params[['bayesian']] = TRUE for prior to influence the weights calculation.\n")}
+    if(ncol(param)==1 && amis_params[["bayesian"]]==F) {warning("Currently running with amis_params[['bayesian']]==FALSE. For models with only one parameter it is recommended to set amis_params[['bayesian']] = TRUE for prior to influence the weights calculation.\n")}
     # to avoid duplication, evaluate prior density now.
     prior_density<-sapply(1:nsamples,function(b) {prior$dprior(param[b,],log=amis_params[["log"]])})
     if(length(prior_density)!=nsamples) {stop("Output from dprior function must have length 1. \n")}
@@ -175,11 +175,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     
     which_valid_sim_prev <- lapply(1:n_tims, function(t) which(bool_valid_sim_prev[,t])-1L)
     which_invalid_sim_prev <- lapply(1:n_tims, function(t) which(!bool_valid_sim_prev[,t])-1L)
-    if(sum(bool_valid_sim_prev)<length(simulated_prevalences)){
-      warning(paste0("At iteration ",iter, ", transmission_model produced ", 
-                     length(simulated_prevalences)-sum(bool_valid_sim_prev), 
-                     " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
-    }
 
     # to avoid duplication, evaluate likelihood now.
     likelihoods <- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params,
@@ -194,8 +189,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     
     ess <- calculate_ess(weight_matrix,amis_params[["log"]])
     
-    cat("  min ESS:",round(min(ess))," mean ESS:",round(mean(ess))," max ESS:",round(max(ess)),"\n")
-    cat(" ",length(which(ess<amis_params[["target_ess"]])),"locations are below the target ESS.\n")
+    cat(paste0("  min ESS: ",round(min(ess)),", mean ESS: ",round(mean(ess)),", max ESS: ",round(max(ess)),"\n"))
+    cat(paste0("  ",sum(ess<amis_params[["target_ess"]])," locations are below the target ESS.\n"))
     # Make object to store the components of the AMIS mixture.
     components <- list(
       G = c(0), # number of mixture components from proposal for each iteration (zero is for prior)
@@ -211,8 +206,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     }
     
   } else {
+    cat("----------------------- \n")
     cat("AMIS iteration 1\n")
-    message("Initialising algorithm from a previous run provided by the user. \n")
+    cat("Initialising algorithm from a previous run provided by the user. \n")
 
     # Check inputs of previous run provided by the user 
     check_initial_vals = function(d){
@@ -242,8 +238,11 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   # Define first_weight object in case target_ess reached in first iteration
   first_weight = rep(1-amis_params[["log"]], nsamples)
   # Continue if target_ess not yet reached
-  if (min(ess) < amis_params[["target_ess"]]){
+  if (min(ess) >= amis_params[["target_ess"]]){
+    cat("Algorithm finished after the first iteration with all locations below the target ESS. \n")
+  }else{
     for (iter in 2:amis_params[["max_iters"]]) {
+      cat("----------------------- \n")
       cat("AMIS iteration ",iter,"\n")
       mean_weights <- update_according_to_ess_value(weight_matrix, ess, amis_params[["target_ess"]],amis_params[["log"]])
       if ((amis_params[["log"]] && max(mean_weights)==-Inf) || (!amis_params[["log"]] && max(mean_weights)==0)) {stop("No weight on any particles for locations in the active set.\n")}
@@ -262,17 +261,12 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       which_valid_sim_prev <- lapply(1:n_tims, function(t) c(which_valid_sim_prev[[t]], which_valid_sim_prev_iter[[t]]+nsamples*(iter-1)))
       which_invalid_sim_prev_iter <- lapply(1:n_tims, function(t) which(!bool_valid_sim_prev_iter[,t])-1L)
       which_invalid_sim_prev <- lapply(1:n_tims, function(t) c(which_invalid_sim_prev[[t]], which_invalid_sim_prev_iter[[t]]+nsamples*(iter-1)))
-      if(sum(bool_valid_sim_prev_iter)<length(new_prevalences)){
-        warning(paste0("At iteration ",iter, ", transmission_model produced ", 
-                       length(new_prevalences)-sum(bool_valid_sim_prev_iter), 
-                       " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
-      }
 
       simulated_prevalences <- rbind(simulated_prevalences,new_prevalences)
       likelihoods <- compute_likelihood(new_params$params,prevalence_map,new_prevalences,amis_params, 
                                         likelihoods,which_valid_sim_prev_iter,
                                         which_valid_prev_map,log_norm_const_gaussian)
-      if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
+      if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least one NaN value. \n")}
       first_weight <- compute_prior_proposal_ratio(components, param, prior_density, amis_params[["df"]], amis_params[["log"]]) # Prior/proposal
       weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, 
                                              amis_params, first_weight,
@@ -282,8 +276,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
       
       ess <- calculate_ess(weight_matrix,amis_params[["log"]])
-      cat("  min ESS:",round(min(ess))," mean ESS:",round(mean(ess))," max ESS:",round(max(ess)),"\n")
-      cat(" ",length(which(ess<amis_params[["target_ess"]])),"locations are below the target ESS.\n")
+      cat(paste0("  min ESS:", round(min(ess)),", mean ESS:", round(mean(ess)),", max ESS:", round(max(ess)),"\n"))
+      cat(paste0("  ",sum(ess<amis_params[["target_ess"]])," locations are below the target ESS.\n"))
       niter <- niter + 1
       if (amis_params[["intermittent_output"]]){
         res <- save_output()
@@ -291,8 +285,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       }
       if (min(ess) >= amis_params[["target_ess"]]) break
     }
-  }else{
-    cat("Algorithm finished after the first iteration with all locations below the target ESS. \n")
   }
 
   if(niter == amis_params[["max_iters"]] && min(ess) < amis_params[["target_ess"]]) {

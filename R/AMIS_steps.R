@@ -6,7 +6,6 @@ NULL
 #' @export
 amis_env <- new.env()
 
-
 #' Produce list containing the default AMIS parameters
 #' 
 #' For description of AMIS parameters, see argument \code{amis_params} in \code{\link{amis}}.
@@ -15,15 +14,11 @@ amis_env <- new.env()
 default_amis_params <- function() {
   amis_params<-list(nsamples=500, boundaries=c(0,1), bayesian=FALSE,
                     mixture_samples=1000, df=3,
-                    target_ess=500, log=F, max_iters=12,
+                    target_ess=500, log=FALSE, max_iters=12,
                     intermittent_output=FALSE, 
                     delta=0.01, sigma=NULL, breaks=NULL)
   return(amis_params)
 }
-
-
-
-
 
 #' Check inputs of \code{amis} function
 #' 
@@ -33,14 +28,12 @@ default_amis_params <- function() {
 check_inputs <- function(prevalence_map, transmission_model, prior, amis_params, seed) {
 
   if (!(is.matrix(prevalence_map) || is.data.frame(prevalence_map) || is.list(prevalence_map))) {
-    stop(("prevalence_map must be \n - a matrix or data frame of size #locations by #samples (for one timepoint); or \n - a list with n_tims timepoints, each one with a matrix named 'data'."))
+    stop(("prevalence_map must be either \n - a matrix or data frame of size #locations by #samples (for one timepoint); or \n - a list with n_tims timepoints, each one with a matrix named 'data'."))
     }
   if(is.list(prevalence_map)){
     dims <- lapply(prevalence_map, dim)
     if(!all(sapply(dims, FUN = identical, dims[[1]]))){
-      stop("'prevalence_map' must have the same dimension 
-      (number of spatial units and number of samples) at each time point.
-      If data for some locations are missing at a timepoint set to NA.")
+      stop("'prevalence_map' must have the same dimension (number of spatial units and number of samples) at each time point. If data for some locations are missing at a timepoint, set to NA.")
     }
     num_time_points <- length(prevalence_map)
   }
@@ -137,7 +130,6 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   }
   
 }
-
 
 
 #' Compute likelihood for each additional simulation across timepoints

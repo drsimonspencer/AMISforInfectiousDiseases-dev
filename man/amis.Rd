@@ -17,15 +17,15 @@ amis(
 \item{prevalence_map}{An \eqn{L \times M} matrix containing samples from the fitted prevalence map,
 where \eqn{L} is the number of locations and \eqn{M} the number of samples.
 \cr \cr Alternatively, a list with \eqn{T} elements, one for each timepoint \eqn{t=1,\dots,T}.
-Each entry must be a list containing objects
+Each entry must be a list with:
 \describe{
 \item{\code{data}}{An \eqn{L \times M} matrix as above}
-\item{\code{likelihood}}{A function taking arguments
+\item{\code{likelihood}}{(optional) A function taking arguments:
 \itemize{
 \item \code{param}: An \eqn{n \times d} matrix with the \eqn{d}-dimensional
-model parameter vectors, one for each of the \eqn{n} seeds used in the simulation.
-\item \code{data}: A vector with a given number M_l of valid samples for a particular location l
-\item \code{sim_prev}: An \eqn{n}-length vector with the prevalences simulated by the transmission model.
+model parameter vectors, one for each of the \eqn{n} seeds used in the simulation;
+\item \code{data}: A vector with a given number \eqn{M_l} of valid samples for a particular location \eqn{l};
+\item \code{sim_prev}: An \eqn{n}-length vector with the prevalences simulated by the transmission model;
 \item \code{log}: Optional logical. If set to \code{TRUE}, the function returns the log-likelihoods.
 }
 The function \code{likelihood} must return an \eqn{M_l \times n} matrix which will be used to
@@ -33,19 +33,20 @@ calculate the likelihood of observing the simulated prevalences at a particular 
 }
 }
 The location names are inherited from \code{rownames(prevalence_map)}
-if \code{prevalence_map} is a matrix, or
+if \code{prevalence_map} is a matrix, and
 from \code{rownames(prevalence_map[[1]]$data)} if \code{prevalence_map} is a list.
 \cr \cr If \code{likelihood} is not specified, then it is assumed that the data consist of
-samples from a geo-statistical model and empirical methods are used.}
+samples from a geo-statistical model and empirical methods are used.
+\cr \cr}
 
 \item{transmission_model}{A function taking arguments:
 \itemize{
 \item \code{seeds}: a vector of \eqn{n} seeds;
-\item \code{params}: an \eqn{n \times d} matrix of parameter vectors as inputs;
+\item \code{params}: an \eqn{n \times d} matrix of parameter vectors;
 \item \code{n_tims}: number of time points.
 }
 This function must return an \eqn{n \times T} \bold{matrix} of prevalences
-(it must be a matrix even when \eqn{T==1}).}
+(it must be a matrix even when \eqn{T=1}).}
 
 \item{prior}{A list containing the functions \code{dprior} and \code{rprior} (density and RNG, respectively).
 The two arguments of \code{dprior} must be:
@@ -54,16 +55,16 @@ The two arguments of \code{dprior} must be:
 \item a logical \code{log} to indicate whether to calculate log-density or not.
 }
 The only argument of \code{rprior} must be a single integer \eqn{n} that determines the number of samples to draw.
-\code{rprior} must produce an \eqn{n \times d} \bold{matrix} of parameters, even when \eqn{d==1}.
-\cr \cr Parameter names are inherited from the \code{colnames} from the output of \code{rprior} if possible.}
+\code{rprior} must produce an \eqn{n \times d} \bold{matrix} of parameters, even when \eqn{d=1}.
+Parameter names are inherited from the \code{colnames} from the output of \code{rprior} if possible.}
 
 \item{amis_params}{A list containing the control parameters for the AMIS algorithm:
 \describe{
 \item{\code{nsamples}}{Number of new samples drawn within each AMIS iteration. Default to 500.}
-\item{\code{boundaries}}{A vector of length two with the left and right boundaries.
+\item{\code{boundaries}}{A vector of length two with the left and right boundaries for prevalences.
 Default to \code{c(0,1)}. If left boundary is zero and there is no right boundary,
 set \code{boundaries = c(0,Inf)}.}
-\item{\code{bayesian}}{Logical indicating whether update of weights is Bayesian or not.
+\item{\code{bayesian}}{Logical indicating whether the update of weights is Bayesian or not.
 Default to FALSE. If set to TRUE, the likelihood is not divided by the induced prior
 over the simulated prevalences when updating weights.}
 \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
@@ -78,11 +79,11 @@ over the simulated prevalences when updating weights.}
 \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to NULL.
 For finite \code{boundaries}, the first and last entries of \code{breaks} must be
 equal to the left and right boundaries, respectively.
-For non-finite \code{boundaries}, ensure that the range of 'breaks' includes any possible prevalence value.}
+For non-finite \code{boundaries}, ensure that the range of \code{breaks} includes any possible prevalence value.}
+}
 Uniform kernel is the default method for the density estimator of the likelihood.
 If \code{sigma} is provided, then Gaussian kernel will be used instead.
-If \code{breaks} is provided, then histogram-based method will supersede all the other methods.
-}}
+If \code{breaks} is provided, then histogram-based method will supersede all the other methods.}
 
 \item{seed}{Optional seed for the random number generator.}
 
@@ -90,7 +91,7 @@ If \code{breaks} is provided, then histogram-based method will supersede all the
 Necessary to initialise the algorithm from intermittent output from a previous run (where at least one iteration was successful!).}
 }
 \value{
-A dataframe with the simulation seeds, sampled parameters, simulated prevalences, and weight in each location.
+A dataframe with the simulation seeds and the corresponding sampled parameters, simulated prevalences, and weight in each location.
 }
 \description{
 For details of the algorithm, see

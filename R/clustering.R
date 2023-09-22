@@ -17,38 +17,38 @@
 #' }
 #' @import mclust
 fit_mixture<-function(dat,max.components=10) {
-  n<-nrow(dat)
-  d<-ncol(dat)
-  colnames(dat)<-NULL # remove colnames to prevent instigating bug in mclust
+  n <- nrow(dat)
+  d <- ncol(dat)
+  colnames(dat) <- NULL # remove colnames to prevent instigating bug in mclust
   if (n<d+1) {stop("Not enough observations to fit mixture model.\n")}
-  max.components<-min(max.components,floor(n/(d+1)))
+  max.components <- min(max.components,floor(n/(d+1)))
   # Start by fitting one group
-  G<-1 # number of groups
+  G <- 1 # number of groups
   if (d==1) {
-    modelName<-"X" 
+    modelName <- "X" 
   } else {
-    modelName<-"XXX"
+    modelName <- "XXX"
   }
-  clustering<-mclust::mvn(modelName=modelName,data=dat)
+  clustering <- mclust::mvn(modelName=modelName,data=dat)
   BIC <- mclust::bic(modelName=modelName,loglik=clustering$loglik,n=n,d=d,G=1)
-  print(BIC)
+  cat("  BIC:", BIC,"\n")
   # fit agglomerative clustering model
   if (d==1) {
-    modelName<-"V"
+    modelName <- "V"
   } else {
     modelName <- "VVV"
   }
   hcPairs <- mclust::hc(modelName=modelName,data=dat)
   cut.tree <- mclust::hclass(hcPairs=hcPairs,G=2:max.components)
   for (g in 2:max.components) {
-    z<-mclust::unmap(cut.tree[,g-1]) # extract cluster indices
+    z <- mclust::unmap(cut.tree[,g-1]) # extract cluster indices
     # Run EM algorithm
     em <- mclust::me(modelName=modelName,data=dat,z=z)
     em$BIC <- mclust::bic(modelName=modelName,loglik=em$loglik,n=n,d=d,G=g) 
     if (!is.na(em$BIC) && em$BIC>BIC) { #mclust:::bic calculates the negative BIC
-      clustering<-em
-      G<-g
-      BIC<-em$BIC
+      clustering <- em
+      G <- g
+      BIC <- em$BIC
     }
   }
   return(list(G=G,probs=clustering$parameters$pro,Mean=matrix(clustering$parameters$mean,d,G),

@@ -33,8 +33,7 @@ default_amis_params <- function() {
 check_inputs <- function(prevalence_map, transmission_model, prior, amis_params, seed) {
 
   if (!(is.matrix(prevalence_map) || is.data.frame(prevalence_map) || is.list(prevalence_map))) {
-    stop(("prevalence_map must be a matrix or data frame of size 
-    #locations by #samples (for one timepoint) or a list of matrices (for >1 timepoints)."))
+    stop(("prevalence_map must be \n - a matrix or data frame of size #locations by #samples (for one timepoint); or \n - a list with n_tims timepoints, each one with a matrix named 'data'."))
     }
   if(is.list(prevalence_map)){
     dims <- lapply(prevalence_map, dim)
@@ -91,32 +90,52 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   stopifnot("'target_ess' must be a single numeric value greater than 0" = (length(target_ess)==1 && is.numeric(target_ess) && target_ess>0))
   stopifnot("'max_iters' must be a single numeric value greater than 1" = (length(max_iters)==1 && is.numeric(max_iters) && max_iters>1))
   stopifnot("'seed' must be either NULL or a single numeric value" = ((length(seed)==1 && is.numeric(seed)) || is.null(seed)))
-  if(is.null(c(amis_params[["delta"]], amis_params[["sigma"]], amis_params[["breaks"]]))){
-    stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL.")
+  if(is.null(prevalence_map[[1]]$likelihood) && is.null(c(amis_params[["delta"]], amis_params[["sigma"]], amis_params[["breaks"]]))){
+    stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL if a likelihood function is not provided.")
   }
-  if(!amis_params[["bayesian"]]){
+  if(!amis_params[["bayesian"]] && is.null(c(amis_params[["delta"]], amis_params[["sigma"]], amis_params[["breaks"]]))){
+    stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL if 'bayesian' is set to FALSE.")
+  }
+  if(!is.null(prevalence_map[[1]]$likelihood)){
+    cat("Likelihood function was provided and will be used to calculate likelihood terms. \n")
+  }
+  if(is.null(prevalence_map[[1]]$likelihood) && amis_params[["bayesian"]]){
     if(!is.null(amis_params[["breaks"]])){
-      cat("Histogram method will be used in the approximation for the likelihood and in the update of the weight matrix as 'breaks' was supplied. \n")
+      cat("Histogram method will be used in the estimation of the likelihood as 'breaks' was provided. \n")
     }else{
       if(!is.null(amis_params[["sigma"]])){
-        cat("Gaussian kernel will be used in the approximation for the likelihood and in the update of the weight matrix as 'sigma' was supplied. \n")
+        cat("Gaussian kernel will be used in the estimation of the likelihood as 'sigma' was provided. \n")
       }else{
-        cat("Uniform kernel will be used in the approximation for the likelihood and in the update of the weight matrix. \n")
+        cat("Uniform kernel will be used in the estimation of the likelihood. \n")
       }
     }
-  }else{
+  }
+  if(amis_params[["bayesian"]]){
     cat("Bayesian update of the weights will be implemented as 'bayesian' was set to TRUE. \n")
-    ## and then specifically for f -----
-    if(!is.null(amis_params[["breaks"]])){
-      cat("Histogram method will be used in the approximation for the likelihood as 'breaks' was supplied. \n")
-    }else{
-      if(!is.null(amis_params[["sigma"]])){
-        cat("Gaussian kernel will be used in the approximation for the likelihood as 'sigma' was supplied. \n")
+  }else{
+    if(is.null(prevalence_map[[1]]$likelihood)){
+      if(!is.null(amis_params[["breaks"]])){
+        cat("Histogram method will be used in the empirical Radon-Nikodym derivative as 'breaks' was provided. \n")
       }else{
-        cat("Uniform kernel will be used in the approximation for the likelihood. \n")
+        if(!is.null(amis_params[["sigma"]])){
+          cat("Gaussian kernel will be used in the empirical Radon-Nikodym derivative as 'sigma' was provided. \n")
+        }else{
+          cat("Uniform kernel will be used in the empirical Radon-Nikodym derivative. \n")
+        }
+      }
+    }else{
+      if(!is.null(amis_params[["breaks"]])){
+        cat("Histogram method will be used in the denominator of the empirical Radon-Nikodym derivative as 'breaks' was provided. \n")
+      }else{
+        if(!is.null(amis_params[["sigma"]])){
+          cat("Gaussian kernel will be used in the denominator of the empirical Radon-Nikodym derivative as 'sigma' was provided. \n")
+        }else{
+          cat("Uniform kernel will be used in the denominator of the empirical Radon-Nikodym derivative. \n")
+        }
       }
     }
   }
+  
 }
 
 

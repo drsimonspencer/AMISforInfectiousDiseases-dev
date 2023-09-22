@@ -35,10 +35,10 @@
 #' \itemize{
 #'    \item \code{seeds}: a vector of \eqn{n} seeds;
 #'    \item \code{params}: an \eqn{n \times d} matrix of parameter vectors as inputs;
-#'    \item \code{n_tims}: number of time points
+#'    \item \code{n_tims}: number of time points.
 #'  }
 #' This function must return an \eqn{n \times T} \bold{matrix} of prevalences 
-#' (it must be a matrix even when \eqn{T==1}.
+#' (it must be a matrix even when \eqn{T==1}).
 #' @param prior A list containing the functions \code{dprior} and \code{rprior} (density and RNG, respectively).
 #' The two arguments of \code{dprior} must be:
 #' \itemize{
@@ -71,8 +71,8 @@
 #' equal to the left and right boundaries, respectively.
 #' For non-finite \code{boundaries}, ensure that the range of 'breaks' includes any possible prevalence value.}
 #' Uniform kernel is the default method for the density estimator of the likelihood. 
-#' If \code{sigma} is supplied, then Gaussian kernel will be used instead. 
-#' If \code{breaks} is supplied, then histogram-based method will supersede all the other methods.
+#' If \code{sigma} is provided, then Gaussian kernel will be used instead. 
+#' If \code{breaks} is provided, then histogram-based method will supersede all the other methods.
 #' }
 #' @param seed Optional seed for the random number generator.
 #' @param initial_amis_vals Optional list containing the object created by setting \code{intermittent_output=TRUE}. 
@@ -180,15 +180,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
                      length(simulated_prevalences)-sum(bool_valid_sim_prev), 
                      " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
     }
-    
-    # which_valid_sim_prev <- which(bool_valid_sim_prev)-1L
-    # which_invalid_sim_prev <- which(!bool_valid_sim_prev)-1L
-    # if(length(which_valid_sim_prev)<length(simulated_prevalences)){
-    #   warning(paste0("At iteration ",iter, ", transmission_model produced ", 
-    #          length(simulated_prevalences)-length(which_valid_sim_prev), 
-    #          " invalid samples which will not be used.")) # invalid means -Inf, Inf, NA, NaN and values outside of boundaries
-    # }
-    
+
     # to avoid duplication, evaluate likelihood now.
     likelihoods <- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params,
                                       likelihoods=NULL, which_valid_sim_prev,
@@ -201,13 +193,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
     
     ess <- calculate_ess(weight_matrix,amis_params[["log"]])
-    
-    # first_weight = rep(1-amis_params[["log"]], nsamples)
-    # saveRDS(simulated_prevalences, file = "/home/evandro/gitreps/myNTD/AmisCode/TestingEquivalence/SRE/simulated_prevalences.rds")
-    # saveRDS(likelihoods, file = "/home/evandro/gitreps/myNTD/AmisCode/TestingEquivalence/SRE/likelihoods.rds")
-    # saveRDS(first_weight, file = "/home/evandro/gitreps/myNTD/AmisCode/TestingEquivalence/SRE/first_weight.rds")
-    # saveRDS(weight_matrix, file = "/home/evandro/gitreps/myNTD/AmisCode/TestingEquivalence/SRE/weight_matrix.rds")
-    # saveRDS(ess, file = "/home/evandro/gitreps/myNTD/AmisCode/TestingEquivalence/SRE/ess.rds")
     
     cat("  min ESS:",round(min(ess))," mean ESS:",round(mean(ess))," max ESS:",round(max(ess)),"\n")
     cat(" ",length(which(ess<amis_params[["target_ess"]])),"locations are below the target ESS.\n")
@@ -253,9 +238,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   if(any(locations_first_t==-1L)){
     warning(paste0(sum(locations_first_t==-1L), " location(s) provided with no data. Using prior information to determine weights for these locations.\n"))
   }
-  
-  # stop("STOP at first iteration for testing.")
-  
   
   # Define first_weight object in case target_ess reached in first iteration
   first_weight = rep(1-amis_params[["log"]], nsamples)

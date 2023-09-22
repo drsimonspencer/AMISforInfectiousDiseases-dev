@@ -42,10 +42,10 @@ samples from a geo-statistical model and empirical methods are used.}
 \itemize{
 \item \code{seeds}: a vector of \eqn{n} seeds;
 \item \code{params}: an \eqn{n \times d} matrix of parameter vectors as inputs;
-\item \code{n_tims}: number of time points
+\item \code{n_tims}: number of time points.
 }
 This function must return an \eqn{n \times T} \bold{matrix} of prevalences
-(it must be a matrix even when \eqn{T==1}.}
+(it must be a matrix even when \eqn{T==1}).}
 
 \item{prior}{A list containing the functions \code{dprior} and \code{rprior} (density and RNG, respectively).
 The two arguments of \code{dprior} must be:
@@ -80,8 +80,8 @@ For finite \code{boundaries}, the first and last entries of \code{breaks} must b
 equal to the left and right boundaries, respectively.
 For non-finite \code{boundaries}, ensure that the range of 'breaks' includes any possible prevalence value.}
 Uniform kernel is the default method for the density estimator of the likelihood.
-If \code{sigma} is supplied, then Gaussian kernel will be used instead.
-If \code{breaks} is supplied, then histogram-based method will supersede all the other methods.
+If \code{sigma} is provided, then Gaussian kernel will be used instead.
+If \code{breaks} is provided, then histogram-based method will supersede all the other methods.
 }}
 
 \item{seed}{Optional seed for the random number generator.}

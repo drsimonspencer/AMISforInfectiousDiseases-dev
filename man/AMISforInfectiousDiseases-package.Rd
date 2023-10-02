@@ -13,6 +13,8 @@ Fits infectious disease models to prevalence maps using the Adaptive Multiple Im
 
 Authors:
 \itemize{
+  \item Evandro Konzen
+  \item Raiha Browning
   \item Renata Retkute
   \item Thilbault Lestang
 }

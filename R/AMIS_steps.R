@@ -135,19 +135,20 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   locs_no_data <- NULL
   n_locs <- dim(prevalence_map[[1]]$data)[1]
   for(l in 1:n_locs){
-    num <- 0L
+    num_valid_datapts <- 0L
     for(t in 1:n_tims){
-      num <- num + sum(is.finite(prevalence_map[[t]]$data[l,]))
+      data_l_t <- prevalence_map[[t]]$data[l,]
+      num_valid_datapts <- num_valid_datapts + sum(is.finite(data_l_t) & (data_l_t>=boundaries[1]) & (data_l_t<=boundaries[2]))
     }
-    if(num==0L){
+    if(num_valid_datapts==0L){
       locs_no_data <- c(locs_no_data, l)
     }
   }
   if(!is.null(locs_no_data)){
     if(length(locs_no_data)==1L){
-      message(paste0("Location ", shQuote(locs_no_data), " has no finite map samples. Its corresponding posterior samples will therefore be driven by the prior."))
+      message(paste0("Location ", shQuote(locs_no_data), " has no valid map samples. Its corresponding posterior samples will therefore be driven by the prior."))
     }else{
-      message(paste0("Locations ", paste(shQuote(locs_no_data), collapse=","), " have no finite map samples. Their corresponding posterior samples will therefore be driven by the prior."))
+      message(paste0("Locations ", paste(shQuote(locs_no_data), collapse=","), " have no valid map samples. Their corresponding posterior samples will therefore be driven by the prior."))
     }
   }
   

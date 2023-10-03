@@ -129,6 +129,28 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     }
   }
   
+  if (is.matrix(prevalence_map) || is.data.frame(prevalence_map)) {
+    prevalence_map=list(list(data=prevalence_map))  }
+  n_tims <- length(prevalence_map)
+  locs_no_data <- NULL
+  n_locs <- dim(prevalence_map[[1]]$data)[1]
+  for(l in 1:n_locs){
+    num <- 0L
+    for(t in 1:n_tims){
+      num <- num + sum(is.finite(prevalence_map[[t]]$data[l,]))
+    }
+    if(num==0L){
+      locs_no_data <- c(locs_no_data, l)
+    }
+  }
+  if(!is.null(locs_no_data)){
+    if(length(locs_no_data)==1L){
+      message(paste0("Location ", shQuote(locs_no_data), " has no finite map samples. Its corresponding posterior samples will therefore be driven by the prior."))
+    }else{
+      message(paste0("Locations ", paste(shQuote(locs_no_data), collapse=","), " have no finite map samples. Their corresponding posterior samples will therefore be driven by the prior."))
+    }
+  }
+  
 }
 
 

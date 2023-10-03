@@ -126,17 +126,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // f_estimator_uniform
-arma::mat f_estimator_uniform(arma::mat& prevalence_map, arma::vec& prev_sim, double delta, arma::uvec& which_valid_sim_prev_iter, List& which_valid_prev_map_t, arma::vec& boundaries, bool logar);
+NumericMatrix f_estimator_uniform(NumericMatrix prevalence_map, NumericVector prev_sim, double delta, NumericVector which_valid_sim_prev_iter, List& which_valid_prev_map_t, NumericVector boundaries, bool logar);
 RcppExport SEXP _AMISforInfectiousDiseases_f_estimator_uniform(SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP deltaSEXP, SEXP which_valid_sim_prev_iterSEXP, SEXP which_valid_prev_map_tSEXP, SEXP boundariesSEXP, SEXP logarSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat& >::type prevalence_map(prevalence_mapSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type prev_sim(prev_simSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type prevalence_map(prevalence_mapSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type prev_sim(prev_simSEXP);
     Rcpp::traits::input_parameter< double >::type delta(deltaSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type which_valid_sim_prev_iter(which_valid_sim_prev_iterSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type which_valid_sim_prev_iter(which_valid_sim_prev_iterSEXP);
     Rcpp::traits::input_parameter< List& >::type which_valid_prev_map_t(which_valid_prev_map_tSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type boundaries(boundariesSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type boundaries(boundariesSEXP);
     Rcpp::traits::input_parameter< bool >::type logar(logarSEXP);
     rcpp_result_gen = Rcpp::wrap(f_estimator_uniform(prevalence_map, prev_sim, delta, which_valid_sim_prev_iter, which_valid_prev_map_t, boundaries, logar));
     return rcpp_result_gen;

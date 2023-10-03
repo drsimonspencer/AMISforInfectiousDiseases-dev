@@ -39,14 +39,14 @@ arma::mat compute_weight_matrix_bayesian_Rcpp(const arma::mat& likelihoods,
                                            arma::uvec& which_invalid_sim_prev,
                                            arma::uvec& locs);
                                       
-arma::mat f_estimator_uniform(arma::mat& prevalence_map, 
-                              arma::vec& prev_sim, 
-                              double delta, 
-                              arma::uvec& which_valid_sim_prev_iter,
-                              List& which_valid_prev_map_t,
-                              arma::vec& boundaries, 
-                              bool logar);
-
+NumericMatrix f_estimator_uniform(NumericMatrix prevalence_map, 
+                                  NumericVector prev_sim, 
+                                  double delta, 
+                                  NumericVector which_valid_sim_prev_iter,
+                                  List& which_valid_prev_map_t,
+                                  NumericVector boundaries, 
+                                  bool logar);
+                              
 arma::mat f_estimator_Gaussian(arma::mat& prevalence_map, 
                                arma::vec& prev_sim, 
                                double sd, 
@@ -54,7 +54,7 @@ arma::mat f_estimator_Gaussian(arma::mat& prevalence_map,
                                List& which_valid_prev_map_t,
                                arma::mat& log_norm_const_gaussian_t, 
                                bool logar);
-
+                                    
 arma::mat f_estimator_histogram(arma::mat& prevalence_map, 
                                 arma::vec& prev_sim, 
                                 arma::vec& breaks, 

@@ -38,6 +38,8 @@ NumericMatrix f_estimator_uniform(NumericMatrix prevalence_map,
   }
   NumericVector prevalence_map_l(M);
   NumericVector prevalence_map_l_valid;
+  double prev_sim_up_r;
+  double prev_sim_lo_r;
   double c; 
   int M_l;
   int count;
@@ -49,9 +51,11 @@ NumericMatrix f_estimator_uniform(NumericMatrix prevalence_map,
       prevalence_map_l_valid = prevalence_map_l[valid_samples_t_l];
       c = 1.0/(delta*(double)M_l);
       for(auto & r : which_valid_sim_prev_iter){
+        prev_sim_up_r = prev_sim_up[r];
+        prev_sim_lo_r = prev_sim_lo[r];
         count = 0L;
         for (int m=0; m<M_l; m++) {
-          if((prev_sim_up[r] >= prevalence_map_l_valid[m])&&(prev_sim_lo[r] <= prevalence_map_l_valid[m])){
+          if((prev_sim_up_r >= prevalence_map_l_valid[m])&&(prev_sim_lo_r <= prevalence_map_l_valid[m])){
             count++;
           }
         }

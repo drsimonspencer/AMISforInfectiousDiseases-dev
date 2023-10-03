@@ -58,6 +58,59 @@ arma::mat f_estimator_Gaussian(arma::mat& prevalence_map,
   return(f);
 }
 
+// // // Rcpp version without arma is actually slower:
+// // [[Rcpp::export]]
+// NumericMatrix f_estimator_Gaussian(NumericMatrix prevalence_map, 
+//                                     NumericVector prev_sim, 
+//                                     double sd, 
+//                                     NumericVector which_valid_sim_prev_iter,
+//                                     List& which_valid_prev_map_t,
+//                                     NumericMatrix log_norm_const_gaussian_t, 
+//                                     bool logar){
+//   int R = prev_sim.length();
+//   int L = prevalence_map.nrow();
+//   int M = prevalence_map.ncol();
+//   NumericMatrix f(L, R);
+//   NumericVector prevalence_map_l(M);
+//   int int2 = 2L;
+//   double front = -0.5/pow(sd,int2);
+//   double logf;
+//   double prev_sim_r;
+//   NumericVector log_norm_const_gaussian_t_l(M);
+//   int m_i;
+//   int M_l;
+//   double cmax;
+//   for (int l=0; l<L; l++) {
+//     IntegerVector valid_samples_t_l = which_valid_prev_map_t[l];
+//     M_l = valid_samples_t_l.length();
+//     if(M_l>0L){
+//       log_norm_const_gaussian_t_l = log_norm_const_gaussian_t(l,_);
+//       NumericVector log_norm_const_gaussian_t_valid = log_norm_const_gaussian_t_l[valid_samples_t_l];
+//       prevalence_map_l = prevalence_map(l,_);
+//       for(auto & r : which_valid_sim_prev_iter){
+//         prev_sim_r = prev_sim[r];
+//         NumericVector x(M_l);
+//         m_i = 0L;
+//         for(auto & m : valid_samples_t_l){
+//           x[m_i] = front*pow((prev_sim_r-prevalence_map_l[m]), int2);
+//           m_i++;
+//         }
+//         // NumericVector prev_sim_r_vec = rep(prev_sim_r, M_l);
+//         // NumericVector prevalence_map_l_valid = prevalence_map_l[valid_samples_t_l];
+//         // NumericVector x = front*pow((prev_sim_r_vec - prevalence_map_l_valid), int2);
+//         x = x - log_norm_const_gaussian_t_valid;
+//         cmax = max(x);
+//         logf = cmax + log(sum(exp(x - cmax)));
+//         if(logar){
+//           f(l,r) = logf;
+//         }else{
+//           f(l,r) = exp(logf);  
+//         }
+//       }
+//     }
+//   }
+//   return(f);
+// }
 
 
 // Other ways to use norm_const_gauss (NOT in log scale, so log must not be taken in calc_log_norm_const_gaussian)

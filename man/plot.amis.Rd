@@ -2,39 +2,28 @@
 % Please edit documentation in R/AMIS_outputs.R
 \name{plot.amis}
 \alias{plot.amis}
-\title{Plot weighted simulated prevalences for a given an object of class 'amis'.}
+\title{Plot weighted simulated prevalences for a given an object of class \code{amis}.}
 \usage{
-\method{plot}{amis}(
-  x,
-  location = 1,
-  main = NULL,
-  cex.points = NULL,
-  lwd.points = NULL,
-  pch = NULL,
-  lwd = NULL,
-  ...
-)
+\method{plot}{amis}(x, location = 1, time = 1, main = NULL, breaks = 500, xlim = NULL, ...)
 }
 \arguments{
-\item{x}{The output from the function \code{\link{amis}()}}
+\item{x}{The output from the function \code{\link{amis}()}.}
 
-\item{location}{Location to be plotted}
+\item{location}{Integer identifying the location. Default to 1.}
 
-\item{main}{Title for the plot}
+\item{time}{Integer identifying the timepoint. Default to 1.}
 
-\item{cex.points}{Graphical parameter}
+\item{main}{Title for the plot.}
 
-\item{lwd.points}{Graphical parameter}
+\item{breaks}{Argument passed to \code{\link{wtd.hist}()}. Default to 500.}
 
-\item{pch}{Graphical parameter}
+\item{xlim}{Argument passed to \code{\link{wtd.hist}()}. Default to NULL.}
 
-\item{lwd}{Graphical parameter}
-
-\item{...}{Graphical parameters passed to plot().}
+\item{...}{Other graphical parameters passed to \code{\link{wtd.hist}()}.}
 }
 \value{
-A plot
+A plot.
 }
 \description{
-Plot weighted simulated prevalences for a given an object of class 'amis'.
+Plot weighted simulated prevalences for a given an object of class \code{amis}.
 }

@@ -1,39 +1,40 @@
-#' Plot weighted simulated prevalences for a given an object of class 'amis'.
+#' Plot weighted simulated prevalences for a given an object of class \code{amis}.
 #'
-#' @param x The output from the function \code{\link{amis}()}
-#' @param cex.points Graphical parameter
-#' @param location Location to be plotted
-#' @param lwd.points Graphical parameter
-#' @param pch Graphical parameter
-#' @param lwd Graphical parameter
-#' @param main Title for the plot
-#' @param ... Graphical parameters passed to plot().
+#' @param x The output from the function \code{\link{amis}()}.
+#' @param location Integer identifying the location. Default to 1.
+#' @param time Integer identifying the timepoint. Default to 1.
+#' @param breaks Argument passed to \code{\link{wtd.hist}()}. Default to 500.
+#' @param xlim Argument passed to \code{\link{wtd.hist}()}. Default to NULL.
+#' @param main Title for the plot.
+#' @param ... Other graphical parameters passed to \code{\link{wtd.hist}()}.
 #' @importFrom  weights wtd.hist
-#' @return A plot
+#' @return A plot.
 #' @export
-plot.amis <- function(x, location=1, main=NULL, cex.points=NULL, 
-                      lwd.points=NULL, pch=NULL, lwd=NULL, ...){
+plot.amis <- function(x, location=1, time=1, main=NULL, 
+                      breaks=500, xlim=NULL, ...){
   if(!inherits(x, "amis")){
     stop("'x' must be of type amis")
   }
   amis_params <- x$amis_params
-  obj <- x$sample
-  seeds <- obj$seeds
-  W <- obj$W
-  k <- obj$k
-  kprev1 <- obj$prev1
-  kprev2 <- obj$prev2
-  kprev3 <- obj$prev3
-  kprev4 <- obj$prev4
-  
-  # L <- 
-  weights <- obj[,(ncol(obj)-L+1):ncol(obj)]
-  
-  print(amis_params)
+  weights <- x$weight_matrix
+  sim_prev <- x$simulated_prevalences[,time]
+
   if(amis_params$log){weights <- exp(weights)}
-  weights::wtd.hist(kprev1,breaks=500,weight=weights[,location],
-                    probability=T,
-                    xlab = "weighted prevalence",
-                    main = paste0("Location: ", location), ...)
+  
+  if(is.null(xlim)){
+    if(all(is.finite(amis_params$boundaries))){
+      xlim <- amis_params$boundaries
+    }else{
+      xlim <- range(sim_prev)
+    }
+  }
+  if(is.null(main)){
+    main <- paste0("Location ", location, " at time ", time)
+  }
+  weights::wtd.hist(x=sim_prev, breaks=breaks, 
+                    weight=weights[,location],
+                    probability=T, xlim=xlim,
+                    xlab="Weighted prevalence",
+                    main=main, ...)
   
 }

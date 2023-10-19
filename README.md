@@ -18,25 +18,28 @@ devtools::install_github("drsimonspencer/AMISforInfectiousDiseases")
 
 # Usage
 
-The package exports a single function `amis` that takes a
-geostatistical map, a model and returns sampled parameters and their
-associated weights.
+`amis` is the main function of the package. It takes a
+geostatistical map, a transmission model and a prior distribution for parameters, 
+and returns sampled parameters and their associated weights 
+in each location at each time point.
 
 ```R
-param_and_weights <- AMISforInfectiousDiseases::amis(geo_map, model, prior, amis_params)
+amis_output <- AMISforInfectiousDiseases::amis(prevalence_map, transmission_model, prior, amis_params)
 ```
 
-- `geo_map`: A matrix representing the geostatistical map, with one
-  row per pixel.
-- `model`: A function implementing the model. It can be anything, as
+- `prevalence_map`: A matrix representing the geostatistical map, with one
+  row per pixel (if there is one time point); or a list with matrices, 
+  each one representing the geostatistical map for a time point.
+- `transmission_model`: A function implementing the model. It can be anything, as
   long as it conforms to a specific interface. See defining a model
   function.
-- `amis_params`: A list containing the parameters for the AMIS algorithm.
+- `amis_params`: A list containing the parameters for the AMIS algorithm, such as:
   - `nsamples`: The number of sample parameters to draw at each iteration.
+  - `boundaries`: Lower and upper boundaries for prevalences.
   - `mixture_samples`: The number of samples drawn from the weighted distribution to fit a new mixture to.
   - `target_ess`: The target effective sample size.
   - `max_iters`: The maximum number of iterations.
-  - `delta`: The Randon-Nikodym derivative smoothing parameter.
+  - `delta`, `sigma`, `breaks`: Options for density estimation used in the Randon-Nikodym derivative.
   - `log`: logical indicating whether to work with log weights. 
   
 ## Defining a model function
@@ -45,11 +48,12 @@ The `amis` function expects its argument `model_func` to be a function with the
 following interface
 
 ```
-observables <- model_func(seeds, parameters)
+observables <- model_func(seeds, params, n_tims)
 ```
 
-- `parameters`: A matrix of parameter values (`double`) 
+- `params`: A matrix of parameter values (`double`) 
 - `seeds`: A vector of seeds (`integer`)
+- `n_tims`: Number of time points (`integer`)
 
 Function `model_func` is expected to run the model for each pair
 (`seed`, `parameter`) and return the corresponding values for the

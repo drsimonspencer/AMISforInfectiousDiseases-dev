@@ -97,27 +97,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     if (is.null(initial_amis_vals)){
       allseeds <- 1:(niter * nsamples)
     } else {
-      allseeds <- c(1:(initial_amis_vals$amis_bits$last_simulation_seed + (niter * nsamples)))
+      allseeds <- c(1:(initial_amis_vals$last_simulation_seed + (niter * nsamples)))
     }
-    
-    which_locs_no_valid_data <- apply(weight_matrix, 2, function(x) all(x==0))
-    
-    if(any(which_locs_no_valid_data)){
-      for(l in which(which_locs_no_valid_data)){
-        unif_weights <- rep(0,nrow(weight_matrix))
-        for(i in 1:nrow(weight_matrix)){
-          if(all((simulated_prevalences[i,] >= amis_params$boundaries[1]) & 
-            (simulated_prevalences[i,] <= amis_params$boundaries[2]))){
-            unif_weights[i] <- 1
-          }
-        }
-        print(unif_weights)
-        unif_weights <- unif_weights/sum(unif_weights)
-        weight_matrix[,l] <- unif_weights
-      }
-    }
-
-    ret <- data.frame(allseeds, param, simulated_prevalences, weight_matrix)
     if (is.null(rownames(prevalence_map[[1]]$data))) {
       iunames <- sapply(1:dim(weight_matrix)[2], function(idx) sprintf("iu%g", idx))
     } else {
@@ -133,16 +114,20 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     } else {
       prevnames <- paste0("prev",colnames(simulated_prevalences))
     }
-    colnames(ret) <- c("seeds",paramnames,prevnames,iunames)
+    colnames(weight_matrix) <- iunames
+    colnames(simulated_prevalences) <- prevnames
     
-    return(list(results=ret, amis_bits = list(simulated_prevalences=simulated_prevalences, 
-                                              likelihoods=likelihoods, 
-                                              weight_matrix=weight_matrix, 
-                                              ess=ess, 
-                                              components=components, 
-                                              param=param, 
-                                              prior_density=prior_density,
-                                              last_simulation_seed=max(allseeds))))
+    return(list(seeds=allseeds,
+                paramnames=param,
+                simulated_prevalences=simulated_prevalences, 
+                weight_matrix=weight_matrix, 
+                likelihoods=likelihoods, 
+                ess=ess, 
+                components=components, 
+                param=param, 
+                prior_density=prior_density,
+                last_simulation_seed=max(allseeds)))
+
   }
   
   # Formatting
@@ -170,9 +155,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   locs_bayesian <- get_locs_bayesian(locations_first_t, n_tims)
 
   # toc()
-  
-  
-  
   
   # Initialise
   if(!is.null(seed)){set.seed(seed)}
@@ -221,7 +203,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       first_weight = rep(1-amis_params[["log"]], nsamples), locs_empirical, locs_bayesian,
       bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, which_valid_locs_prev_map)
     if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
-    
+
     # toc()
     # tic("---------------------->  ESS calculation")
     
@@ -251,10 +233,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
 
     # Check inputs of previous run provided by the user 
     check_initial_vals = function(d){
-      if(!is.null(initial_amis_vals$amis_bits[[d]])){
-        initial_amis_vals$amis_bits[[d]]
+      if(!is.null(initial_amis_vals[[d]])){
+        initial_amis_vals[[d]]
       } else {
-        stop(paste0("Cannot find object 'initial_amis_vals$amis_bits[['",d,"']]'. To initialise from a previous run, use object saved by setting amis_params[['intermittent output']]=TRUE.\n"))
+        stop(paste0("Cannot find object 'initial_amis_vals[['",d,"']]'. To initialise from a previous run, use object saved by setting amis_params[['intermittent output']]=TRUE.\n"))
       }
     }
     
@@ -265,19 +247,15 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     components <- check_initial_vals("components")
     param <- check_initial_vals("param")
     prior_density <- check_initial_vals("prior_density")
-    seeds <- function(iter) ((iter - 2) * nsamples + 1):((iter - 1) * nsamples) + initial_amis_vals$amis_bits$last_simulation_seed #function to calculate the seeds for iteration iter.
+    seeds <- function(iter) ((iter - 2) * nsamples + 1):((iter - 1) * nsamples) + initial_amis_vals$last_simulation_seed #function to calculate the seeds for iteration iter.
     niter <- 0 # number of completed iterations
-  }
-  
-  # Checking whether some locations have no data at any time point
-  if(any(locations_first_t==-1L)){
-    warning(paste0(sum(locations_first_t==-1L), " location(s) provided with no data. Using prior information to determine weights for these locations.\n"))
   }
   
   # Define first_weight object in case target_ess reached in first iteration
   first_weight = rep(1-amis_params[["log"]], nsamples)
   # Continue if target_ess not yet reached
   if (min(ess) >= amis_params[["target_ess"]]){
+    cat("----------------------- \n")
     cat("Algorithm finished after the first iteration with all locations below the target ESS. \n")
   }else{
     for (iter in 2:amis_params[["max_iters"]]) {
@@ -329,7 +307,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
                                              bool_valid_sim_prev, which_valid_sim_prev, 
                                              which_invalid_sim_prev, which_valid_locs_prev_map)
       if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
-      
+
       # toc()
       # tic("---------------------->  ESS calculation")
       
@@ -347,6 +325,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       if (min(ess) >= amis_params[["target_ess"]]) break
     }
   }
+  cat("----------------------- \n")
 
   # toc()
   
@@ -355,19 +334,24 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       "Some locations did not reach target ESS (%g) after %g iterations",
       amis_params[["target_ess"]], niter
       )
-    warning(msg)
+    warning(msg, call. = FALSE)
   }
   
   # Save output
-  res <- save_output()
+  output <- save_output()
   
   # Calculate model evidence only if bayesian==TRUE
   if (amis_params[["bayesian"]]){
     model_evidence <- NULL
     warning("model_evidence not calculated. Function compute_model_evidence() is under development.")
     # model_evidence <- compute_model_evidence(likelihoods, amis_params, first_weight)
-    return(list(sample=res$results, evidence=model_evidence))
+    output$evidence <- model_evidence
   } else {
-    return(list(sample=res$results, evidence=NULL))
+    output$evidence <- NULL
   }
+  
+  output$amis_params <- amis_params
+
+  class(output) <- 'amis'
+  return(output)
 }

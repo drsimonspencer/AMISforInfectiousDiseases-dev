@@ -323,6 +323,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
   n_locs <- dim(likelihoods)[2]
   n_sims <- dim(likelihoods)[3]
   weight_matrix <- matrix(rep(first_weight,n_locs), nrow = n_sims, ncol = n_locs)
+
   for (t in 1:n_tims) {
 
     lik_mat <- t(array(likelihoods[t,,], dim=c(n_locs, n_sims)))
@@ -343,7 +344,6 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
       if (is.null(amis_params[["breaks"]])){
           if(is.null(amis_params[["sigma"]])){
             if(!is.null(locs_empirical[[t]])){
-            
               weight_matrix <- compute_weight_matrix_empirical_uniform(lik_mat,simulated_prevalence[,t],amis_params,weight_matrix,
                                                                        bool_valid_sim_prev[,t], 
                                                                        which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], 
@@ -372,6 +372,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
       }
     }
   }
+
   # renormalise weights
   if (amis_params[["log"]]) {
     M<-apply(weight_matrix,2,max)
@@ -737,3 +738,4 @@ compute_model_evidence <- function(likelihoods, amis_params, first_weight){
   model_evidence_var = 1/length(weight_matrix)^2 * model_evidence^2 * sum((weight_matrix-1)^2)
   return(c(model_evidence = model_evidence,variance = model_evidence_var))
 }
+

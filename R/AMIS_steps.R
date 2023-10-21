@@ -148,10 +148,11 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     if(length(locs_no_data)==1L){
       message(paste0("Location ", shQuote(locs_no_data), " has no valid map samples. Its corresponding posterior samples will therefore be driven by the prior."))
     }else{
-      message(paste0("Locations ", paste(shQuote(locs_no_data), collapse=","), " have no valid map samples. Their corresponding posterior samples will therefore be driven by the prior."))
+      message(paste0("Locations (", paste(shQuote(locs_no_data), collapse=","), ") have no valid map samples. Their corresponding posterior samples will therefore be driven by the prior."))
     }
   }
-  
+ 
+  return(list(locs_no_data=locs_no_data)) 
 }
 
 

@@ -86,7 +86,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   # tic("---------------------->  check inputs and validity of data")
   
   # Checks
-  check_inputs(prevalence_map, transmission_model, prior, amis_params, seed)
+  checks <- check_inputs(prevalence_map, transmission_model, prior, amis_params, seed)
+  
+  locations_with_no_data <- checks$locs_no_data
   
   if(amis_params[["intermittent_output"]]){
     message("Saving output after each iteration (this will increase memory usage). \n")
@@ -123,6 +125,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
                 weight_matrix=weight_matrix, 
                 likelihoods=likelihoods, 
                 ess=ess, 
+                prevalence_map=prevalence_map,
+                locations_with_no_data=locations_with_no_data,
                 components=components, 
                 param=param, 
                 prior_density=prior_density,

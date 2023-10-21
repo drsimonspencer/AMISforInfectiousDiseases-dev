@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{The output from the function \code{\link{amis}()}.}
 
-\item{...}{Additional printing options.}
+\item{...}{Other arguments to match the generic \code{print}() function}
 }
 \value{
 Brief description of data and model specifications used to run \code{\link{amis}()}.

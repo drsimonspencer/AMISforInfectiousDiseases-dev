@@ -120,7 +120,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     colnames(simulated_prevalences) <- prevnames
     
     return(list(seeds=allseeds,
-                paramnames=param,
+                param=param,
                 simulated_prevalences=simulated_prevalences, 
                 weight_matrix=weight_matrix, 
                 likelihoods=likelihoods, 
@@ -128,7 +128,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
                 prevalence_map=prevalence_map,
                 locations_with_no_data=locations_with_no_data,
                 components=components, 
-                param=param, 
                 prior_density=prior_density,
                 last_simulation_seed=max(allseeds)))
 

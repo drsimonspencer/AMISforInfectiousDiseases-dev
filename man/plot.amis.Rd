@@ -4,10 +4,22 @@
 \alias{plot.amis}
 \title{Plot weighted simulated prevalences for a given an object of class \code{amis}.}
 \usage{
-\method{plot}{amis}(x, location = 1, time = 1, main = NULL, breaks = 500, xlim = NULL, ...)
+\method{plot}{amis}(
+  x,
+  what = "prev",
+  location = 1,
+  time = 1,
+  main = NULL,
+  breaks = 500,
+  xlim = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{The output from the function \code{\link{amis}()}.}
+
+\item{what}{What figure should be produced. Can be "prev" for histogram of
+prevalences. Default to "prev".}
 
 \item{location}{Integer identifying the location. Default to 1.}
 

@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{The output from the function \code{\link{amis}()}.}
 
-\item{...}{Additional printing options.}
+\item{...}{Other arguments to match the generic \code{summary}() function}
 }
 \value{
 Summary statistics of the fitted model.

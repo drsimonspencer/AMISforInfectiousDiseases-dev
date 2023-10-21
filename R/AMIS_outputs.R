@@ -1,6 +1,8 @@
 #' Plot weighted simulated prevalences for a given an object of class \code{amis}.
 #'
 #' @param x The output from the function \code{\link{amis}()}.
+#' @param what What figure should be produced. Can be "prev" for histogram of 
+#' prevalences. Default to "prev".  
 #' @param location Integer identifying the location. Default to 1.
 #' @param time Integer identifying the timepoint. Default to 1.
 #' @param breaks Argument passed to \code{\link{wtd.hist}()}. Default to 500.
@@ -10,39 +12,46 @@
 #' @importFrom  weights wtd.hist
 #' @return A plot.
 #' @export
-plot.amis <- function(x, location=1, time=1, main=NULL, 
+plot.amis <- function(x, what="prev", location=1, time=1, main=NULL, 
                       breaks=500, xlim=NULL, ...){
   if(!inherits(x, "amis")){
     stop("'x' must be of type amis")
   }
+  
+  if(!what%in%c("prev")){
+    stop("Argument 'what' must be one of the following: 'prev'.")
+  }
+  
   amis_params <- x$amis_params
   weights <- x$weight_matrix
   sim_prev <- x$simulated_prevalences[,time]
 
   if(amis_params$log){weights <- exp(weights)}
   
-  if(is.null(xlim)){
-    if(all(is.finite(amis_params$boundaries))){
-      xlim <- amis_params$boundaries
-    }else{
-      xlim <- range(sim_prev)
+  if(what=="prev"){
+    if(is.null(xlim)){
+      if(all(is.finite(amis_params$boundaries))){
+        xlim <- amis_params$boundaries
+      }else{
+        xlim <- range(sim_prev)
+      }
     }
+    if(is.null(main)){
+      main <- paste0("Location ", location, " at time ", time)
+    }
+    weights::wtd.hist(x=sim_prev, breaks=breaks, 
+                      weight=weights[,location],
+                      probability=T, xlim=xlim,
+                      xlab="Weighted prevalence",
+                      main=main, ...)
   }
-  if(is.null(main)){
-    main <- paste0("Location ", location, " at time ", time)
-  }
-  weights::wtd.hist(x=sim_prev, breaks=breaks, 
-                    weight=weights[,location],
-                    probability=T, xlim=xlim,
-                    xlab="Weighted prevalence",
-                    main=main, ...)
   
 }
 
 #' Print method for object of class \code{amis}
 #'
 #' @param x The output from the function \code{\link{amis}()}.
-#' @param ... Additional printing options.
+#' @param ... Other arguments to match the generic \code{print}() function
 #' @return Brief description of data and model specifications used to run \code{\link{amis}()}.
 #' @export
 print.amis <- function(x, ...) {
@@ -88,7 +97,7 @@ print.amis <- function(x, ...) {
 #' Summary method for object of class \code{amis}
 #'
 #' @param object The output from the function \code{\link{amis}()}.
-#' @param ... Additional printing options.
+#' @param ... Other arguments to match the generic \code{summary}() function
 #' @return Summary statistics of the fitted model.
 #' @export
 summary.amis <- function(object, ...) {
@@ -129,3 +138,52 @@ summary.amis <- function(object, ...) {
   }
 
 }
+
+
+#' Calculate summaries of weighted statistics
+#'
+#' @param x The output from the function \code{\link{amis}()}.
+#' @param what What statistic should be calculated the summaries from. 
+#' It must be either 'prev' or the name of one of the model parameters. Default to 'prev'.
+#' @param time Time point. Only used if 'what' is set to 'prev'.
+#' @param locations Integer vector or location names identifying locations where 
+#' summaries should be calculated for. If not specified, summary statistics of 
+#' all locations will be provided.
+#' @param alpha Numeric value between 0 and 1. Calculations are for the (alpha/2, 1-alpha/2)% quantiles.
+#' @param ... Other arguments to match the generic \code{summary}() function
+#' @return A list with mean, median, and quantiles of the weighted distribution
+#' @importFrom  Hmisc wtd.mean
+#' @importFrom  Hmisc wtd.quantile
+#' @export
+calc_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.05) {
+  
+  out <- vector(mode='list', length=3)
+  names(out) <- c("mean","median","quantiles")
+  
+  if(is.null(locations)){
+    n_locs <- nrow(x$prevalence_map[[1]]$data)
+    locations <- 1:n_locs
+  }
+  
+  if(alpha < 0 || alpha > 1){stop("'alpha' must be within 0 and 1.")}
+  if(what=="prev"){
+    statistic <- x$simulated_prevalences[,time]  #    #     #   
+  }else{
+    if(!(what%in%colnames(x$param))){
+      stop("'parameter' must be either 'prev' or have a valid parameter name.")
+    }
+    statistic <- x$param[,what]
+  }
+
+  wtd <- x$weight_matrix[,locations]
+
+  # weighted mean
+  out[[1]] <- sapply(1:length(locations), function(l) Hmisc::wtd.mean(statistic, weights=wtd[,l], normwt = T))
+  # weighted median
+  out[[2]] <- sapply(1:length(locations), function(l) Hmisc::wtd.quantile(statistic, weights=wtd[,l], probs=0.5, normwt = T))
+  # weighted quantiles
+  out[[3]] <- sapply(1:length(locations), function(l) Hmisc::wtd.quantile(statistic, weights=wtd[,l], probs=c(alpha/2, 1-alpha/2), normwt = T))
+
+  return(out)
+}
+

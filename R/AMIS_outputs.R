@@ -84,4 +84,48 @@ print.amis <- function(x, ...) {
   cat(paste0("- Target effective sample size:  ",  amis_params$target_ess,"\n"))
   
 }
+
+#' Summary method for object of class \code{amis}
+#'
+#' @param object The output from the function \code{\link{amis}()}.
+#' @param ... Additional printing options.
+#' @return Summary statistics of the fitted model.
+#' @export
+summary.amis <- function(object, ...) {
   
+  if(!inherits(object, "amis")){
+    stop("'object' must be of type amis")
+  }
+  x <- object
+  amis_params <- x$amis_params
+  
+  cat(paste0("=============================================================", "\n"))
+  cat(paste0("Data description: \n"))
+  cat(paste0("- Number of locations:  ", nrow(x$prevalence_map[[1]]$data),"\n"))
+  cat(paste0("- Number of map samples for each location:  ",  ncol(x$prevalence_map[[1]]$data),"\n"))
+  cat(paste0("- Number of time points:  ",  length(x$prevalence_map),"\n"))
+  
+  cat(paste0("=============================================================", "\n"))
+  cat(paste0("Fitted model: \n"))
+  
+  n_sims_total <- nrow(x$simulated_prevalences)
+  n_iters <- n_sims_total/amis_params$nsamples
+  cat(paste0("- Number of iterations:  ",  n_iters, "\n"))
+  cat(paste0("- Total number of simulated samples:  ",  n_sims_total, "\n"))
+  cat(paste0("- Target effective sample size:  ",  amis_params$target_ess,"\n"))
+  
+  # ESS_by_location <- data.frame(ESS = round(x$ess, digits = getOption("digits")))
+  # rownames(ESS_by_location) <- colnames(x$weight_matrix)
+  # cat(paste0("- Effective sample size by location: \n"))
+  # print(ESS_by_location)
+  
+  which_didnot_exceed_ESS <- which(x$ess < amis_params$target_ess)
+  if(length(which_didnot_exceed_ESS)>0){
+    message(paste0("- ESS of the following location(s) was lower than the target ESS: "))
+    message(paste0(paste(shQuote(colnames(x$weight_matrix)[which_didnot_exceed_ESS]), collapse=", ")))
+    ESS_by_location <- data.frame(ESS = round(x$ess[which_didnot_exceed_ESS], digits = getOption("digits")))
+    rownames(ESS_by_location) <- colnames(x$weight_matrix)[which_didnot_exceed_ESS]
+    print(ESS_by_location)
+  }
+
+}

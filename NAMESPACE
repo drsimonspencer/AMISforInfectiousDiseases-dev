@@ -2,6 +2,7 @@
 
 S3method(plot,amis)
 S3method(print,amis)
+S3method(summary,amis)
 export(amis)
 export(amis_env)
 export(check_inputs)

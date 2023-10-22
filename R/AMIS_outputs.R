@@ -77,10 +77,11 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
           if(all(is.finite(amis_params$boundaries))){
             xlim <- amis_params$boundaries
           }else{
-            xlim <- range(statistic)
+            xlim <- range(statistic[weights>0])
           }
         }else{
-          xlim <- range(statistic)
+          xlim <- range(statistic[weights>0])
+          xlim[2] <- xlim[2]+0.1*abs(xlim[2])
         }
       }
       
@@ -108,6 +109,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   # # ---------------------------------------------------
   # Credible intervals
   if(type=="CI"){
+    par(mfrow=mfrow)
     for(what_ in what){
       summaries <- calculate_summaries(x=x, what=what_, time=1, locations=locations, alpha=alpha)
       if(measure_central=="mean"){
@@ -133,6 +135,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
         graphics::segments(lo[l], l, up[l], l, lwd = 2)
       }
     }
+    par(mfrow=c(1,1))
   }
   
 }
@@ -219,8 +222,8 @@ summary.amis <- function(object, ...) {
   
   which_didnot_exceed_ESS <- which(x$ess < amis_params$target_ess)
   if(length(which_didnot_exceed_ESS)>0){
-    message(paste0("- ESS of the following location(s) was lower than the target ESS: "))
-    message(paste0(paste(shQuote(colnames(x$weight_matrix)[which_didnot_exceed_ESS]), collapse=", ")))
+    cat(paste0("- ESS of the following location(s) was lower than the target ESS: \n"))
+    # cat(paste0(paste(shQuote(colnames(x$weight_matrix)[which_didnot_exceed_ESS]), collapse=", ")))
     ESS_by_location <- data.frame(ESS = round(x$ess[which_didnot_exceed_ESS], digits = getOption("digits")))
     rownames(ESS_by_location) <- colnames(x$weight_matrix)[which_didnot_exceed_ESS]
     print(ESS_by_location)

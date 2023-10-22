@@ -1,49 +1,138 @@
 #' Plot weighted simulated prevalences for a given an object of class \code{amis}.
 #'
 #' @param x The output from the function \code{\link{amis}()}.
-#' @param what What figure should be produced. Can be "prev" for histogram of 
-#' prevalences. Default to "prev".  
-#' @param location Integer identifying the location. Default to 1.
+#' @param what What posterior distribution should be plotted. 
+#' It can be 'prev' (default) for plotting prevalences, or one of the parameter names. 
+#' @param type Type of plot. It can be 'hist' (default) for histogram, 
+#' or 'CI' for credible intervals
+#' @param locations Integer identifying the location. Default to 1.
 #' @param time Integer identifying the timepoint. Default to 1.
-#' @param breaks Argument passed to \code{\link{wtd.hist}()}. Default to 500.
-#' @param xlim Argument passed to \code{\link{wtd.hist}()}. Default to NULL.
+#' @param measure_central Measure of central tendency for credible interval plots. 
+#' It can be 'mean' (default) or 'median'.
+#' @param alpha Numeric value between 0 and 1 indicating the endpoints of the 
+#' credible intervals, which are evaluated at (alpha/2, 1-alpha/2)% quantiles. 
+#' Default (0.05) will create 95% credible intervals.
+#' @param breaks Argument passed to \code{\link{wtd.hist}()} for histogram plots. 
+#' Default to 500.
+#' @param xlim The x limits of the plots. 
+#' Default to NULL.
 #' @param main Title for the plot.
+#' @param mfrow A vector of the form \code{c(nrows, ncols)} describing the layout 
+#' of multiple histogram plots. Default to \code{c(1,1)}.
 #' @param ... Other graphical parameters passed to \code{\link{wtd.hist}()}.
 #' @importFrom  weights wtd.hist
+#' @importFrom graphics segments
+#' @importFrom graphics par
 #' @return A plot.
 #' @export
-plot.amis <- function(x, what="prev", location=1, time=1, main=NULL, 
-                      breaks=500, xlim=NULL, ...){
+plot.amis <- function(x, what="prev", type="hist", locations=1, time=1, 
+                      measure_central="mean", alpha=0.05, 
+                      breaks=500, xlim=NULL, main=NULL, mfrow=c(1,1), ...){
   if(!inherits(x, "amis")){
     stop("'x' must be of type amis")
   }
   
-  if(!what%in%c("prev")){
-    stop("Argument 'what' must be one of the following: 'prev'.")
+  param_names <- colnames(x$param)
+  
+  if(!type%in%c("hist","CI")){stop("Argument 'type' must be either 'hist' or 'CI'.")}
+  
+  if(type=="hist"){
+    if(length(what)!=1){
+      stop("If type = 'hist', 'what' must have length one")
+    }
+    if(!what%in%c("prev", param_names)){
+      stop("Argument 'what' must be either 'prev' or one of the model parameter names.")
+    }
+  }else{
+    if(!all(what%in%c("prev", param_names))){
+      stop("All entries of argument 'what' must be 'prev' or model parameter names.")
+    }
   }
   
-  amis_params <- x$amis_params
-  weights <- x$weight_matrix
-  sim_prev <- x$simulated_prevalences[,time]
-
-  if(amis_params$log){weights <- exp(weights)}
+  n_locs <- length(locations)
+  location_names <- colnames(x$weight_matrix)[locations]
   
-  if(what=="prev"){
-    if(is.null(xlim)){
-      if(all(is.finite(amis_params$boundaries))){
-        xlim <- amis_params$boundaries
+  # # ---------------------------------------------------
+  # Histograms
+  if(type=="hist"){
+    par(mfrow=mfrow)
+    for(location in locations){
+      amis_params <- x$amis_params
+      weights <- x$weight_matrix
+      if(amis_params$log){weights <- exp(weights)}
+      
+      
+      if(what=="prev"){
+        statistic <- x$simulated_prevalences[,time]
       }else{
-        xlim <- range(sim_prev)
+        if(!(what%in%colnames(x$param))){
+          stop("'parameter' must be either 'prev' or have a valid parameter name.")
+        }
+        statistic <- x$param[,what]
+      }
+
+
+      if(is.null(xlim)){
+        if(what=="prev"){
+          if(all(is.finite(amis_params$boundaries))){
+            xlim <- amis_params$boundaries
+          }else{
+            xlim <- range(statistic)
+          }
+        }else{
+          xlim <- range(statistic)
+        }
+      }
+      
+      if(is.null(main)){
+        if(what=="prev"){
+          main_ <- paste0("Location '", location, "' at time ", time)
+        }else{
+          main_ <- paste0("Location '", location, "'")
+        }
+      }else{
+        main_ <- NULL
+      }
+      hist_title <- ifelse(what=="prev", "Weighted prevalence", 
+                           paste0("Weighted ", what))
+      weights::wtd.hist(x=statistic, breaks=breaks, 
+                        weight=weights[,location],
+                        probability=T, xlim=xlim,
+                        xlab=hist_title,
+                        main=main_, ...)
+      
+    }
+    par(mfrow=c(1,1))
+  }
+  
+  # # ---------------------------------------------------
+  # Credible intervals
+  if(type=="CI"){
+    for(what_ in what){
+      summaries <- calculate_summaries(x=x, what=what_, time=1, locations=locations, alpha=alpha)
+      if(measure_central=="mean"){
+        mu <- summaries[["mean"]]
+      }else if(measure_central=="median"){
+        mu <- summaries[["median"]]
+      }
+      names(mu) <- location_names
+      lo <- summaries[["quantiles"]][1, ]
+      up <- summaries[["quantiles"]][2, ]
+      CItitle <- ifelse(what_=="prev", "Prevalences", what_)
+      if(is.null(xlim)){
+        xlim <- c(min(lo), max(up))
+      }
+      plot(mu, 1:n_locs, pch = 20,
+           xlim = xlim,
+           ylim = c(0.5,n_locs+0.5),
+           xlab = paste0("Mean and ", 100-alpha*100,"% credible interval"),
+           ylab = "Location",
+           main = CItitle
+      )
+      for(l in 1:n_locs){
+        graphics::segments(lo[l], l, up[l], l, lwd = 2)
       }
     }
-    if(is.null(main)){
-      main <- paste0("Location ", location, " at time ", time)
-    }
-    weights::wtd.hist(x=sim_prev, breaks=breaks, 
-                      weight=weights[,location],
-                      probability=T, xlim=xlim,
-                      xlab="Weighted prevalence",
-                      main=main, ...)
   }
   
 }
@@ -150,13 +239,12 @@ summary.amis <- function(object, ...) {
 #' summaries should be calculated for. If not specified, summary statistics of 
 #' all locations will be provided.
 #' @param alpha Numeric value between 0 and 1. Calculations are for the (alpha/2, 1-alpha/2)% quantiles.
-#' @param ... Other arguments to match the generic \code{summary}() function
 #' @return A list with mean, median, and quantiles of the weighted distribution
 #' @importFrom  Hmisc wtd.mean
 #' @importFrom  Hmisc wtd.quantile
 #' @export
-calc_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.05) {
-  
+calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.05) {
+
   out <- vector(mode='list', length=3)
   names(out) <- c("mean","median","quantiles")
   
@@ -175,15 +263,21 @@ calc_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.05) {
     statistic <- x$param[,what]
   }
 
-  wtd <- x$weight_matrix[,locations]
-
+  wtd <- x$weight_matrix[,locations,drop=F]
+  if(x$amis_params$log){wtd <- exp(wtd)}
+  
+  location_names <- colnames(x$weight_matrix)[locations]
   # weighted mean
   out[[1]] <- sapply(1:length(locations), function(l) Hmisc::wtd.mean(statistic, weights=wtd[,l], normwt = T))
+  names(out[[1]]) <- location_names
   # weighted median
   out[[2]] <- sapply(1:length(locations), function(l) Hmisc::wtd.quantile(statistic, weights=wtd[,l], probs=0.5, normwt = T))
+  names(out[[2]]) <- location_names
   # weighted quantiles
   out[[3]] <- sapply(1:length(locations), function(l) Hmisc::wtd.quantile(statistic, weights=wtd[,l], probs=c(alpha/2, 1-alpha/2), normwt = T))
-
+  colnames(out[[3]]) <- location_names
+  
   return(out)
+  
 }
 

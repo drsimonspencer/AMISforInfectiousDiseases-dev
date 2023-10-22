@@ -7,29 +7,48 @@
 \method{plot}{amis}(
   x,
   what = "prev",
-  location = 1,
+  type = "hist",
+  locations = 1,
   time = 1,
-  main = NULL,
+  measure_central = "mean",
+  alpha = 0.05,
   breaks = 500,
   xlim = NULL,
+  main = NULL,
+  mfrow = c(1, 1),
   ...
 )
 }
 \arguments{
 \item{x}{The output from the function \code{\link{amis}()}.}
 
-\item{what}{What figure should be produced. Can be "prev" for histogram of
-prevalences. Default to "prev".}
+\item{what}{What posterior distribution should be plotted.
+It can be 'prev' (default) for plotting prevalences, or one of the parameter names.}
 
-\item{location}{Integer identifying the location. Default to 1.}
+\item{type}{Type of plot. It can be 'hist' (default) for histogram,
+or 'CI' for credible intervals}
+
+\item{locations}{Integer identifying the location. Default to 1.}
 
 \item{time}{Integer identifying the timepoint. Default to 1.}
 
+\item{measure_central}{Measure of central tendency for credible interval plots.
+It can be 'mean' (default) or 'median'.}
+
+\item{alpha}{Numeric value between 0 and 1 indicating the endpoints of the
+credible intervals, which are evaluated at (alpha/2, 1-alpha/2)\% quantiles.
+Default (0.05) will create 95\% credible intervals.}
+
+\item{breaks}{Argument passed to \code{\link{wtd.hist}()} for histogram plots.
+Default to 500.}
+
+\item{xlim}{The x limits of the plots.
+Default to NULL.}
+
 \item{main}{Title for the plot.}
 
-\item{breaks}{Argument passed to \code{\link{wtd.hist}()}. Default to 500.}
-
-\item{xlim}{Argument passed to \code{\link{wtd.hist}()}. Default to NULL.}
+\item{mfrow}{A vector of the form \code{c(nrows, ncols)} describing the layout
+of multiple histogram plots. Default to \code{c(1,1)}.}
 
 \item{...}{Other graphical parameters passed to \code{\link{wtd.hist}()}.}
 }

@@ -204,7 +204,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     # Determine first time each location appears in the data
     weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, amis_params,
       first_weight = rep(1-amis_params[["log"]], nsamples), locs_empirical, locs_bayesian,
-      bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, which_valid_locs_prev_map)
+      bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, which_valid_locs_prev_map, 
+      locations_with_no_data)
     if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
 
     # toc()
@@ -308,7 +309,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
                                              amis_params, first_weight,
                                              locs_empirical, locs_bayesian,
                                              bool_valid_sim_prev, which_valid_sim_prev, 
-                                             which_invalid_sim_prev, which_valid_locs_prev_map)
+                                             which_invalid_sim_prev, which_valid_locs_prev_map, 
+                                             locations_with_no_data)
       if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
 
       # toc()

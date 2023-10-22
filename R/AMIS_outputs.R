@@ -58,7 +58,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
     par(mfrow=mfrow)
     for(location in locations){
       amis_params <- x$amis_params
-      weights <- x$weight_matrix
+      weights <- x$weight_matrix[,location]
       if(amis_params$log){weights <- exp(weights)}
       
       
@@ -96,7 +96,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       hist_title <- ifelse(what=="prev", "Weighted prevalence", 
                            paste0("Weighted ", what))
       weights::wtd.hist(x=statistic, breaks=breaks, 
-                        weight=weights[,location],
+                        weight=weights,
                         probability=T, xlim=xlim,
                         xlab=hist_title,
                         main=main_, ...)

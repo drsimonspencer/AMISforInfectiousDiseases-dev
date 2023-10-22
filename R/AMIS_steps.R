@@ -314,11 +314,12 @@ evaluate_likelihood <- function(param,prevalence_map,prev_sim,amis_params,
 #' @param which_valid_sim_prev List indicating, at each time, which simulated prevalences are valid.
 #' @param which_invalid_sim_prev List indicating, at each time, which simulated prevalences are invalid
 #' @param which_valid_locs_prev_map List showing which locations have valid data at each time
+#' @param locations_with_no_data Vector indicating which locations have no data at any time point
 #' @return normalised weight matrix.
 compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params, first_weight, 
                                   locs_empirical, locs_bayesian,
                                   bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, 
-                                  which_valid_locs_prev_map) {
+                                  which_valid_locs_prev_map, locations_with_no_data) {
 
   n_tims <- dim(likelihoods)[1]
   n_locs <- dim(likelihoods)[2]
@@ -372,8 +373,14 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
                                                           which_valid_locs_prev_map[[t]])
       }
     }
+    
+    if(length(locations_with_no_data)>0 && length(which_invalid_sim_prev[[t]])>0){
+      weight_inval_prev <- ifelse(amis_params[["log"]], -Inf, 0)
+      weight_matrix[which_invalid_sim_prev[[t]]+1L, locations_with_no_data] <- weight_inval_prev
+    }
+    
   }
-
+  
   # renormalise weights
   if (amis_params[["log"]]) {
     M<-apply(weight_matrix,2,max)

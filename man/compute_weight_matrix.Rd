@@ -14,7 +14,8 @@ compute_weight_matrix(
   bool_valid_sim_prev,
   which_valid_sim_prev,
   which_invalid_sim_prev,
-  which_valid_locs_prev_map
+  which_valid_locs_prev_map,
+  locations_with_no_data
 )
 }
 \arguments{
@@ -39,6 +40,8 @@ the weight expression. Should be of the same length as the rows in \code{simulat
 \item{which_invalid_sim_prev}{List indicating, at each time, which simulated prevalences are invalid}
 
 \item{which_valid_locs_prev_map}{List showing which locations have valid data at each time}
+
+\item{locations_with_no_data}{Vector indicating which locations have no data at any time point}
 }
 \value{
 normalised weight matrix.

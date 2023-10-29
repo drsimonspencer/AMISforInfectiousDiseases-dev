@@ -29,13 +29,11 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
 
   if (!(is.matrix(prevalence_map) || is.data.frame(prevalence_map) || is.list(prevalence_map))) {
     stop(("prevalence_map must be either \n - a matrix or data frame of size #locations by #samples (for one timepoint); or \n - a list with n_tims timepoints, each one with a matrix named 'data'."))
-    }
-  if(is.list(prevalence_map)){
-    dims <- lapply(prevalence_map, dim)
-    if(!all(sapply(dims, FUN = identical, dims[[1]]))){
-      stop("'prevalence_map' must have the same dimension (number of spatial units and number of samples) at each time point. If data for some locations are missing at a timepoint, set to NA.")
-    }
-    num_time_points <- length(prevalence_map)
+  }
+  if (is.matrix(prevalence_map) || is.data.frame(prevalence_map)) {prevalence_map=list(list(data=prevalence_map))}
+  dims <- lapply(prevalence_map, dim)
+  if(!all(sapply(dims, FUN = identical, dims[[1]]))){
+    stop("'prevalence_map' must have the same dimension (number of spatial units and number of samples) at each time point. If data for some locations are missing at a timepoint, set to NA.")
   }
   stopifnot("'transmission_model' must be a function." = is.function(transmission_model))
   stopifnot("'prior' must be a list." = is.list(prior))
@@ -129,8 +127,6 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     }
   }
   
-  if (is.matrix(prevalence_map) || is.data.frame(prevalence_map)) {
-    prevalence_map=list(list(data=prevalence_map))  }
   n_tims <- length(prevalence_map)
   locs_no_data <- NULL
   n_locs <- dim(prevalence_map[[1]]$data)[1]

@@ -45,13 +45,15 @@ fit_mixture<-function(dat,max.components=10) {
     # Run EM algorithm
     em <- mclust::me(modelName=modelName,data=dat,z=z)
     em$BIC <- mclust::bic(modelName=modelName,loglik=em$loglik,n=n,d=d,G=g) 
-    if (!is.na(em$BIC) && em$BIC>BIC) { #mclust:::bic calculates the negative BIC
+    if (!is.na(em$BIC) && em$BIC>BIC) { # mclust:::bic calculates the negative BIC
       clustering <- em
       G <- g
       BIC <- em$BIC
     }
   }
+  # clustering$data <- dat
+  class(clustering) <- "Mclust"
   return(list(G=G,probs=clustering$parameters$pro,Mean=matrix(clustering$parameters$mean,d,G),
-              Sigma=array(clustering$parameters$variance$sigma,c(d,d,G)),
-    BIC=BIC,modelName=clustering$modelName))
+              Sigma=array(clustering$parameters$variance$sigma,c(d,d,G)),BIC=BIC,modelName=clustering$modelName, 
+              clustering=clustering, mixture_samples_data=dat, mixture_samples_z=z))
 }

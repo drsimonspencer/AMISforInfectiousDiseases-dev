@@ -29,7 +29,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
                       measure_central="mean", alpha=0.05, 
                       breaks=500, xlim=NULL, main=NULL, mfrow=c(1,1), ...){
   if(!inherits(x, "amis")){
-    stop("'x' must be of type amis")
+    stop("'x' must be of type 'amis'")
   }
   
   param_names <- colnames(x$param)
@@ -149,7 +149,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
 print.amis <- function(x, ...) {
   
   if(!inherits(x, "amis")){
-    stop("'x' must be of type amis")
+    stop("'x' must be of type 'amis'")
   }
   amis_params <- x$amis_params
   cat(paste0("=============================================================", "\n"))
@@ -195,7 +195,7 @@ print.amis <- function(x, ...) {
 summary.amis <- function(object, ...) {
   
   if(!inherits(object, "amis")){
-    stop("'object' must be of type amis")
+    stop("'object' must be of type 'amis'")
   }
   x <- object
   amis_params <- x$amis_params
@@ -284,3 +284,28 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
   
 }
 
+
+
+#' Wrapper function for \code{\link{plot.Mclust}()}
+#'
+#' @param x The output from the function \code{\link{amis}()}.
+#' @param what A string specifying the type of plot requested:
+#' \describe{
+#' \item{\code{uncertainty}}{A plot of classification uncertainty.}
+#' \item{\code{density}}{a plot of estimated density}
+#' }
+#' See more details in \code{\link{plot.Mclust}()}.
+#' @param ... Other arguments to match the \code{plot.Mclust}() function
+#' @return A plot for model-based clustering results.
+#' @export
+plot_mixture_components <- function(x, what, ...) {
+  if(!inherits(x, "amis")){
+    stop("'x' must be of type 'amis'")
+  }
+  if(!(what%in%c("uncertainty", "density"))){
+    stop("'what' must be either 'uncertainty' or 'density'.")
+  }
+  clustering <- x$mixture$clustering
+  colnames(clustering$data) <- colnames(x$param)
+  mclust::plot.Mclust(clustering, what = what, ...)
+}

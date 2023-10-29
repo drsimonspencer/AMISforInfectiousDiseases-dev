@@ -32,3 +32,5 @@ Imports:
     Rcpp,
     weights
 LinkingTo: Rcpp, RcppArmadillo
+Depends: 
+    R (>= 2.10)

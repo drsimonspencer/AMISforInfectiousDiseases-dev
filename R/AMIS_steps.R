@@ -12,7 +12,8 @@ amis_env <- new.env()
 #' @return List containing the default AMIS parameters.
 #' @export
 default_amis_params <- function() {
-  amis_params<-list(nsamples=500, boundaries=c(0,1), bayesian=FALSE,
+  amis_params<-list(nsamples=500, boundaries=c(0,1), boundaries_param=NULL, 
+                    bayesian=FALSE,
                     mixture_samples=1000, df=3,
                     target_ess=500, log=FALSE, max_iters=12,
                     intermittent_output=FALSE, 
@@ -52,6 +53,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   bayesian <- amis_params$bayesian
   breaks <- amis_params$breaks
   boundaries <- amis_params$boundaries
+  boundaries_param <- amis_params$boundaries_param
   boundaries <- as.numeric(boundaries)
   if(length(boundaries)!=2){stop("'boundaries' must be a vector of length 2.")}
   if(!(diff(boundaries)>0)){stop("The second element of 'boundaries' must be larger than the first one.")}
@@ -72,6 +74,10 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
         stop("The last entry of 'breaks' must be equal to the right boundary if the right boundary is finite.")
       }
     }
+  }
+  if(!is.null(boundaries_param)){
+    stopifnot("'boundaries_param' must be a (#parameters x 2) matrix" = (is.matrix(boundaries_param)) && 
+                (ncol(boundaries_param)==2) && (nrow(boundaries_param)==ncol(rprior(1))))
   }
   stopifnot("'delta' must be either NULL or a single positive numeric value" = ((length(delta)==1 && is.numeric(delta) && delta>0) || is.null(delta)))
   stopifnot("'sigma' must be either NULL or a single positive numeric value" = ((length(sigma)==1 && is.numeric(sigma) && sigma>0) || is.null(sigma)))

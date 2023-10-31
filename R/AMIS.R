@@ -55,6 +55,8 @@
 #' \item{\code{boundaries}}{A vector of length two with the left and right boundaries for prevalences. 
 #' Default to \code{c(0,1)}. If left boundary is zero and there is no right boundary, 
 #' set \code{boundaries = c(0,Inf)}.}
+#' \item{\code{boundaries_param}}{If specified, it should be a \eqn{d \times 2} matrix 
+#' with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to NULL}
 #' \item{\code{bayesian}}{Logical indicating whether the update of weights is Bayesian or not. 
 #' Default to FALSE. If set to TRUE, the likelihood is not divided by the induced prior 
 #' over the simulated prevalences when updating weights.}
@@ -141,8 +143,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   if (is.matrix(prevalence_map) || is.data.frame(prevalence_map)) {prevalence_map=list(list(data=prevalence_map))}
   use_gaussian_kernel <- ifelse(is.null(amis_params[["breaks"]]) && !is.null(amis_params[["sigma"]]), TRUE, FALSE)
   boundaries <- amis_params[["boundaries"]]
+  boundaries_param <- amis_params[["boundaries_param"]]
   nsamples <- amis_params[["nsamples"]]
-
+  nparams <- ncol(prior$rprior(1))
+  
   # Check which prevalence map samples are valid (non-NA, finite, and within boundaries)
   which_valid_prev_map <- get_which_valid_prev_map(prevalence_map, boundaries)
   
@@ -187,9 +191,15 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     if(!is.matrix(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, transmission_model function should produce a MATRIX of size #simulations by #timepoints, even when #timepoints is equal to 1. \n")}
     if(nrow(param) != nrow(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of rows in matrices from transmission_model and rprior functions must be equal (#simulations). \n")}
     if(length(prevalence_map) != ncol(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of timepoints in prevalence_map and the number of columns in output from transmission_model function must be equal to #timepoints. \n")}
-
     bool_valid_sim_prev <- (simulated_prevalences>=boundaries[1]) & (simulated_prevalences<=boundaries[2]) & is.finite(simulated_prevalences)
-    
+    if(!is.null(boundaries_param)){
+      bool_valid_sim_param <- rep(T, nsamples)
+      for(i_samp in 1:nsamples){
+        bool_valid_sim_param[i_samp] <- all((param[i_samp,]>=boundaries_param[,1])&(param[i_samp,]<=boundaries_param[,2]))
+      }
+      prior_density[!bool_valid_sim_param] <- ifelse(amis_params[["log"]], -Inf, 0)
+      bool_valid_sim_prev <- bool_valid_sim_prev & bool_valid_sim_param
+    }
     which_valid_sim_prev <- lapply(1:n_tims, function(t) which(bool_valid_sim_prev[,t])-1L)
     which_invalid_sim_prev <- lapply(1:n_tims, function(t) which(!bool_valid_sim_prev[,t])-1L)
 
@@ -308,10 +318,19 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       new_params <- sample_new_parameters(mixture, nsamples, amis_params[["df"]], prior, amis_params[["log"]])
       if(any(is.na(new_params$params))){warning("At least one sample from the proposal after the first iteration of AMIS was NA or NaN. \n")}
       param <- rbind(param, new_params$params)
+      if(!is.null(boundaries_param)){
+        bool_valid_sim_param_iter <- rep(T, nsamples)
+        for(i_samp in 1:nsamples){
+          bool_valid_sim_param_iter[i_samp] <- all((new_params$params[i_samp,]>=boundaries_param[,1])&(new_params$params[i_samp,]<=boundaries_param[,2]))
+        }
+        new_params$prior_density[!bool_valid_sim_param_iter] <- ifelse(amis_params[["log"]], -Inf, 0)
+      }
       prior_density <- c(prior_density,new_params$prior_density)
       new_prevalences <- transmission_model(seeds(iter), new_params$params, n_tims)
-
       bool_valid_sim_prev_iter <- (new_prevalences>=boundaries[1]) & (new_prevalences<=boundaries[2]) & is.finite(new_prevalences)
+      if(!is.null(boundaries_param)){
+        bool_valid_sim_prev_iter <- bool_valid_sim_prev_iter & bool_valid_sim_param_iter
+      }
       bool_valid_sim_prev <- rbind(bool_valid_sim_prev, bool_valid_sim_prev_iter)
       which_valid_sim_prev_iter <- lapply(1:n_tims, function(t) which(bool_valid_sim_prev_iter[,t])-1L)
       which_valid_sim_prev <- lapply(1:n_tims, function(t) c(which_valid_sim_prev[[t]], which_valid_sim_prev_iter[[t]]+nsamples*(iter-1)))

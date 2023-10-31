@@ -22,7 +22,7 @@ Authors@R:
 Description: Fits infectious disease models to prevalence maps using the Adaptive Multiple Importance Sampling algorithm.
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
-LazyData: true
+LazyData: false
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Imports:

@@ -127,11 +127,11 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
                 weight_matrix=weight_matrix, 
                 likelihoods=likelihoods, 
                 ess=ess, 
-                mixture=mixture,
                 prevalence_map=prevalence_map,
                 locations_with_no_data=locations_with_no_data,
                 components=components, 
                 clustering_per_iteration=clustering_per_iteration,
+                ess_per_iteration=ess_per_iteration,
                 prior_density=prior_density,
                 last_simulation_seed=max(allseeds)))
 
@@ -168,6 +168,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   # Initialise
   if(!is.null(seed)){set.seed(seed)}
   iter <- 1
+  ess_per_iteration <- list()
+  clustering_per_iteration <- list()
+  clustering_per_iteration[[1]] <- NA
+  
   if(is.null(initial_amis_vals)){
     cat("----------------------- \n")
     cat("AMIS iteration 1\n")
@@ -267,6 +271,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     niter <- 0 # number of completed iterations
   }
   
+  ess_per_iteration[[iter]] <- ess
+  
   # Define first_weight object in case target_ess reached in first iteration
   first_weight = rep(1-amis_params[["log"]], nsamples)
   # Continue if target_ess not yet reached
@@ -276,8 +282,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   }else{
     mixt_samples <- NULL
     mixt_samples_z <- NULL
-    clustering_per_iteration <- list()
-    clustering_per_iteration[[1]] <- NA
     for (iter in 2:amis_params[["max_iters"]]) {
       cat("----------------------- \n")
       cat("AMIS iteration ",iter,"\n")
@@ -362,7 +366,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       # tic("---------------------->  ESS calculation")
       
       ess <- calculate_ess(weight_matrix,amis_params[["log"]])
-      
+      ess_per_iteration[[iter]] <- ess
       # toc()
       
       cat(paste0("  min ESS:", round(min(ess)),", mean ESS:", round(mean(ess)),", max ESS:", round(max(ess)),"\n"))

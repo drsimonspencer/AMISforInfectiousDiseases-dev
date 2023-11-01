@@ -49,7 +49,7 @@ fit_mixture<-function(dat,max.components=10) {
       clustering <- em
       G <- g
       BIC <- em$BIC
-      clustering$z <- z
+      clustering$z <- em$z
     }
   }
   clustering$data <- dat

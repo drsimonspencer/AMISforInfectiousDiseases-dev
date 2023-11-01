@@ -304,8 +304,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       cholsigma_list <- lapply(1:G, function(g) chol(mixture$Sigma[,,g]))
       mixture$clustering$parameters$variance$cholsigma <- array(as.numeric(unlist(cholsigma_list)), dim=c(d, d, G))
       
-      mixture$clustering$data <- mixture$mixture_samples_data
-      mixture$clustering$z <- mixture$mixture_samples_z
+      # mixture$clustering$data <- mixture$mixture_samples_data
+      # mixture$clustering$z <- mixture$mixture_samples_z
 
       clustering_per_iteration[[iter]] <- mixture$clustering
       mixture$clustering <- NULL

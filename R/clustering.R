@@ -49,11 +49,12 @@ fit_mixture<-function(dat,max.components=10) {
       clustering <- em
       G <- g
       BIC <- em$BIC
+      clustering$z <- z
     }
   }
-  # clustering$data <- dat
+  clustering$data <- dat
   class(clustering) <- "Mclust"
   return(list(G=G,probs=clustering$parameters$pro,Mean=matrix(clustering$parameters$mean,d,G),
               Sigma=array(clustering$parameters$variance$sigma,c(d,d,G)),BIC=BIC,modelName=clustering$modelName, 
-              clustering=clustering, mixture_samples_data=dat, mixture_samples_z=z))
+              clustering=clustering))
 }

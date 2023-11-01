@@ -4,7 +4,7 @@
 \alias{plot_mixture_components}
 \title{Wrapper function for \code{\link{plot.Mclust}()}}
 \usage{
-plot_mixture_components(x, what, ...)
+plot_mixture_components(x, what, iteration = NULL, ...)
 }
 \arguments{
 \item{x}{The output from the function \code{\link{amis}()}.}
@@ -13,7 +13,10 @@ plot_mixture_components(x, what, ...)
 \describe{
 \item{\code{uncertainty}}{A plot of classification uncertainty.}
 \item{\code{density}}{a plot of estimated density}
-}
+}}
+
+\item{iteration}{Integer indicating which iteration the plot should be about.
+If NULL (default), the plot will be for the final iteration.
 See more details in \code{\link{plot.Mclust}()}.}
 
 \item{...}{Other arguments to match the \code{plot.Mclust}() function}

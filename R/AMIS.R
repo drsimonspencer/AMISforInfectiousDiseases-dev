@@ -121,9 +121,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     colnames(weight_matrix) <- iunames
     colnames(simulated_prevalences) <- prevnames
     
-    pro <- mixture$clustering$parameters$pro
-    mixture$clustering$parameters$pro <- pro/sum(pro) # same number of samples per iteration
-    
     return(list(seeds=allseeds,
                 param=param,
                 simulated_prevalences=simulated_prevalences, 
@@ -134,6 +131,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
                 prevalence_map=prevalence_map,
                 locations_with_no_data=locations_with_no_data,
                 components=components, 
+                clustering_per_iteration=clustering_per_iteration,
                 prior_density=prior_density,
                 last_simulation_seed=max(allseeds)))
 
@@ -278,6 +276,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   }else{
     mixt_samples <- NULL
     mixt_samples_z <- NULL
+    clustering_per_iteration <- list()
+    clustering_per_iteration[[1]] <- NA
     for (iter in 2:amis_params[["max_iters"]]) {
       cat("----------------------- \n")
       cat("AMIS iteration ",iter,"\n")
@@ -286,35 +286,33 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       mean_weights <- update_according_to_ess_value(weight_matrix, ess, amis_params[["target_ess"]],amis_params[["log"]])
       if ((amis_params[["log"]] && max(mean_weights)==-Inf) || (!amis_params[["log"]] && max(mean_weights)==0)) {stop("No weight on any particles for locations in the active set.\n")}
       mixture <- weighted_mixture(param, amis_params[["mixture_samples"]], mean_weights, amis_params[["log"]])
+      
+      #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  
+
+      G <- mixture$G
+      mixture$clustering$G <- G
+      mixture$clustering$parameters$pro <- mixture$probs
+      mixture$clustering$parameters$mean <- mixture$Mean
+      mixture$clustering$parameters$variance$G <- G
+      
+      d <- mixture$clustering$d
+      mixture$clustering$parameters$variance$sigma <- mixture$Sigma
+      cholsigma_list <- lapply(1:G, function(g) chol(mixture$Sigma[,,g]))
+      mixture$clustering$parameters$variance$cholsigma <- array(as.numeric(unlist(cholsigma_list)), dim=c(d, d, G))
+      
+      mixture$clustering$data <- mixture$mixture_samples_data
+      mixture$clustering$z <- mixture$mixture_samples_z
+
+      clustering_per_iteration[[iter]] <- mixture$clustering
+      mixture$clustering <- NULL
       cat("  A",mixture$G,"component mixture has been fitted.\n")
       components <- update_mixture_components(mixture, components, iter)
       
       
-      mixture$clustering$n <- (iter-1)*amis_params$mixture_samples
-      G <- sum(components$G)
-      d <- mixture$clustering$d
-      mixture$clustering$G <- G
-      print(G)
-      mixture$clustering$parameters$pro <- unlist(components$probs)
-      mixture$clustering$parameters$mean <- do.call(cbind, components$Mean)
-      mixture$clustering$parameters$variance
-      mixture$clustering$parameters$variance$G <- G
+      #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  
 
-      sigma_array <- array(as.numeric(unlist(components$Sigma)), dim=c(d, d, length(components$Sigma)))
-      mixture$clustering$parameters$variance$sigma <- sigma_array
-      cholsigma_list <- lapply(1:G, function(g) chol(sigma_array[,,g]))
-      mixture$clustering$parameters$variance$cholsigma <- array(as.numeric(unlist(cholsigma_list)), dim=c(d, d, length(components$Sigma)))
-
-      mixt_samples <- rbind(mixt_samples, mixture$mixture_samples_data)
-      mixture$clustering$data <- mixt_samples
-      mixt_samples_z <- rbind(mixt_samples_z, mixture$mixture_samples_z)
-      mixture$clustering$z <- mixt_samples_z
-      
-      
       # toc()
       # tic("---------------------->  simulations and check vals")
-      
-      
       new_params <- sample_new_parameters(mixture, nsamples, amis_params[["df"]], prior, amis_params[["log"]])
       if(any(is.na(new_params$params))){warning("At least one sample from the proposal after the first iteration of AMIS was NA or NaN. \n")}
       param <- rbind(param, new_params$params)

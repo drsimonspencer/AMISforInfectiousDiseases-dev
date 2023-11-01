@@ -294,18 +294,33 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 #' \item{\code{uncertainty}}{A plot of classification uncertainty.}
 #' \item{\code{density}}{a plot of estimated density}
 #' }
+#' @param iteration Integer indicating which iteration the plot should be about. 
+#' If NULL (default), the plot will be for the final iteration.
 #' See more details in \code{\link{plot.Mclust}()}.
 #' @param ... Other arguments to match the \code{plot.Mclust}() function
 #' @return A plot for model-based clustering results.
 #' @export
-plot_mixture_components <- function(x, what, ...) {
+plot_mixture_components <- function(x, what, iteration=NULL, ...) {
   if(!inherits(x, "amis")){
     stop("'x' must be of type 'amis'")
   }
   if(!(what%in%c("uncertainty", "density"))){
     stop("'what' must be either 'uncertainty' or 'density'.")
   }
-  clustering <- x$mixture$clustering
+  if(is.null(iteration)){
+    total_nsamples <- nrow(x$simulated_prevalences)
+    iteration <- total_nsamples/x$amis_params$nsamples
+    if(iteration==1){
+      stop("Algorithm stoped after one iteration. Therefore, no mixture model has been fitted.")
+    }
+  }else{
+    if(iteration==1){
+      stop("At iteration 1, no mixture model has been fitted.")
+    }
+  }
+  # clustering <- x$mixture$clustering
+  clustering <- x$clustering_per_iteration[[iteration]]
   colnames(clustering$data) <- colnames(x$param)
+  cat(paste0("Plotting fitted mixture model at iteration ", iteration, "..."))
   mclust::plot.Mclust(clustering, what = what, ...)
 }

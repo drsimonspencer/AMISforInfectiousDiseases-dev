@@ -307,9 +307,13 @@ plot_mixture_components <- function(x, what, iteration=NULL, ...) {
   if(!(what%in%c("uncertainty", "density"))){
     stop("'what' must be either 'uncertainty' or 'density'.")
   }
+  total_nsamples <- nrow(x$simulated_prevalences)
+  last_iteration <- total_nsamples/x$amis_params$nsamples
+  if(last_iteration==1){
+    stop("Algorithm stoped after one iteration. Therefore, no mixture model has been fitted.")
+  }
   if(is.null(iteration)){
-    total_nsamples <- nrow(x$simulated_prevalences)
-    iteration <- total_nsamples/x$amis_params$nsamples
+    iteration <- last_iteration
     if(iteration==1){
       stop("Algorithm stoped after one iteration. Therefore, no mixture model has been fitted.")
     }
@@ -317,8 +321,11 @@ plot_mixture_components <- function(x, what, iteration=NULL, ...) {
     if(iteration==1){
       stop("At iteration 1, no mixture model has been fitted.")
     }
+    if(!(iteration%in%c(2:last_iteration))){
+      stop("'iteration' must be an integer that does not exceed the maximum number of iterations that have been run.")
+    }
   }
-  # clustering <- x$mixture$clustering
+
   clustering <- x$clustering_per_iteration[[iteration]]
   colnames(clustering$data) <- colnames(x$param)
   cat(paste0("Plotting fitted mixture model at iteration ", iteration, "..."))

@@ -19,8 +19,12 @@ sample_new_parameters(mixture, nsamples, df, prior, log)
 \item{log}{A logical indicating if densities}
 }
 \value{
-A list containing \code{params}, an \code{nsamples} x d matrix containing the sampled parameter values and
-\code{prior_density}, the corresponding vector of prior densities.
+A list containing the sampled parameters:
+\describe{
+\item{\code{params}}{An \code{nsamples} x d matrix containing the sampled parameter values}
+\item{\code{prior_density}}{The corresponding vector of prior densities}
+\item{\code{compon_proposal}}{A vector indicating the mixture component each parameter value was simulated from}
+}
 }
 \description{
 This function generates \code{nsamples} new model parameter values according the

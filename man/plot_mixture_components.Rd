@@ -4,20 +4,37 @@
 \alias{plot_mixture_components}
 \title{Wrapper function for \code{\link{plot.Mclust}()}}
 \usage{
-plot_mixture_components(x, what, iteration = NULL, ...)
+plot_mixture_components(
+  x,
+  what = "uncertainty",
+  iteration = NULL,
+  datapoints = "proposed",
+  ...
+)
 }
 \arguments{
 \item{x}{The output from the function \code{\link{amis}()}.}
 
 \item{what}{A string specifying the type of plot requested:
 \describe{
-\item{\code{uncertainty}}{A plot of classification uncertainty.}
-\item{\code{density}}{a plot of estimated density}
+\item{\code{uncertainty}}{A plot of classification uncertainty (default)}
+\item{\code{density}}{A plot of estimated density}
 }}
 
 \item{iteration}{Integer indicating which iteration the plot should be about.
 If NULL (default), the plot will be for the final iteration.
 See more details in \code{\link{plot.Mclust}()}.}
+
+\item{datapoints}{A string specifying what the datapoints should represent in the
+plot of classification uncertainty:
+\describe{
+\item{\code{"proposed"}}{datapoints will represent the samples simulated from the mixture.
+The colours indicate which mixture components the samples were simulated from.}
+\item{\code{"fitted"}}{datapoints will show the samples that the mixture model was fitted to,
+i.e. weighted samples from the previous iteration.
+The colour of a datapoint indicates the most likely mixture component the sample belongs to, and
+the point size represents the probability that the sample belongs to that component.}
+}}
 
 \item{...}{Other arguments to match the \code{plot.Mclust}() function}
 }

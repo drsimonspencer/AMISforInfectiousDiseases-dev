@@ -291,21 +291,37 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 #' @param x The output from the function \code{\link{amis}()}.
 #' @param what A string specifying the type of plot requested:
 #' \describe{
-#' \item{\code{uncertainty}}{A plot of classification uncertainty.}
-#' \item{\code{density}}{a plot of estimated density}
+#' \item{\code{uncertainty}}{A plot of classification uncertainty (default)}
+#' \item{\code{density}}{A plot of estimated density}
 #' }
 #' @param iteration Integer indicating which iteration the plot should be about. 
 #' If NULL (default), the plot will be for the final iteration.
 #' See more details in \code{\link{plot.Mclust}()}.
+#' @param datapoints A string specifying what the datapoints should represent in the 
+#' plot of classification uncertainty: 
+#' \describe{
+#'   \item{\code{"proposed"}}{datapoints will represent the samples simulated from the mixture.
+#'   The colours indicate which mixture components the samples were simulated from.}
+#'   \item{\code{"fitted"}}{datapoints will show the samples that the mixture model was fitted to, 
+#'   i.e. weighted samples from the previous iteration. 
+#'   The colour of a datapoint indicates the most likely mixture component the sample belongs to, and 
+#'   the point size represents the probability that the sample belongs to that component.}
+#' }
+#' 
 #' @param ... Other arguments to match the \code{plot.Mclust}() function
 #' @return A plot for model-based clustering results.
 #' @export
-plot_mixture_components <- function(x, what, iteration=NULL, ...) {
+plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, datapoints="proposed",...) {
   if(!inherits(x, "amis")){
     stop("'x' must be of type 'amis'")
   }
   if(!(what%in%c("uncertainty", "density"))){
     stop("'what' must be either 'uncertainty' or 'density'.")
+  }
+  if(what=="uncertainty"){
+    if(!(datapoints%in%c("proposed", "fitted"))){
+      stop("'datapoints' must be either 'proposed' or 'fitted'.")
+    }
   }
   total_nsamples <- nrow(x$simulated_prevalences)
   last_iteration <- total_nsamples/x$amis_params$nsamples
@@ -325,9 +341,29 @@ plot_mixture_components <- function(x, what, iteration=NULL, ...) {
       stop("'iteration' must be an integer that does not exceed the maximum number of iterations that have been run.")
     }
   }
-
   clustering <- x$clustering_per_iteration[[iteration]]
+  
+  if(what=="uncertainty"){
+    if(datapoints=="proposed"){
+      cat(paste0("Plotting components of the mixture model (and samples simulated from) at iteration ", iteration, "...\n"))
+      clustering$data <- clustering$data_proposed
+      n <- length(clustering$compon_proposal)
+      clustering$n <- n
+      comp_idx <- clustering$compon_proposal
+      G <- clustering$G
+      z <- matrix(0, n, G)
+      for(i in 1:n){
+        z[i,comp_idx[i]] <- 1
+      }
+      clustering$z <- z
+    }else if(datapoints=="fitted"){
+      cat(paste0("Plotting components of the fitted mixture model at iteration ", iteration, " and weighted samples of the previous iteration...\n"))
+    }
+  }else if(what=="density"){
+    cat(paste0("Plotting density of the mixture model at iteration ", iteration, "...\n"))
+  }
   colnames(clustering$data) <- colnames(x$param)
-  cat(paste0("Plotting fitted mixture model at iteration ", iteration, "..."))
   mclust::plot.Mclust(clustering, what = what, ...)
 }
+
+

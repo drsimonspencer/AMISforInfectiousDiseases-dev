@@ -290,34 +290,16 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       mean_weights <- update_according_to_ess_value(weight_matrix, ess, amis_params[["target_ess"]],amis_params[["log"]])
       if ((amis_params[["log"]] && max(mean_weights)==-Inf) || (!amis_params[["log"]] && max(mean_weights)==0)) {stop("No weight on any particles for locations in the active set.\n")}
       mixture <- weighted_mixture(param, amis_params[["mixture_samples"]], mean_weights, amis_params[["log"]])
-      
-      #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  
 
-      G <- mixture$G
-      mixture$clustering$G <- G
-      mixture$clustering$parameters$pro <- mixture$probs
-      mixture$clustering$parameters$mean <- mixture$Mean
-      mixture$clustering$parameters$variance$G <- G
-      
-      d <- mixture$clustering$d
-      mixture$clustering$parameters$variance$sigma <- mixture$Sigma
-      cholsigma_list <- lapply(1:G, function(g) chol(mixture$Sigma[,,g]))
-      mixture$clustering$parameters$variance$cholsigma <- array(as.numeric(unlist(cholsigma_list)), dim=c(d, d, G))
-      
-      # mixture$clustering$data <- mixture$mixture_samples_data
-      # mixture$clustering$z <- mixture$mixture_samples_z
-
-      clustering_per_iteration[[iter]] <- mixture$clustering
-      mixture$clustering <- NULL
       cat("  A",mixture$G,"component mixture has been fitted.\n")
       components <- update_mixture_components(mixture, components, iter)
-      
-      
-      #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  
 
       # toc()
       # tic("---------------------->  simulations and check vals")
       new_params <- sample_new_parameters(mixture, nsamples, amis_params[["df"]], prior, amis_params[["log"]])
+      
+      clustering_per_iteration[[iter]] <- update_Mclust_object(mixture, new_params)
+
       if(any(is.na(new_params$params))){warning("At least one sample from the proposal after the first iteration of AMIS was NA or NaN. \n")}
       param <- rbind(param, new_params$params)
       if(!is.null(boundaries_param)){

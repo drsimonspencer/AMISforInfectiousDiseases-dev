@@ -614,15 +614,22 @@ weighted_mixture <- function(parameters, nsamples, weights, log=F) {
 #' @param df The degrees of freedom for the t-distributed proposal distribution.
 #' @param prior list containing the functions \code{rprior} and \code{dprior}
 #' @param log A logical indicating if densities 
-#' @return A list containing \code{params}, an \code{nsamples} x d matrix containing the sampled parameter values and
-#' \code{prior_density}, the corresponding vector of prior densities.
+#' 
+#' @return A list containing the sampled parameters:
+#' \describe{
+#'   \item{\code{params}}{An \code{nsamples} x d matrix containing the sampled parameter values}
+#'   \item{\code{prior_density}}{The corresponding vector of prior densities}
+#'   \item{\code{compon_proposal}}{A vector indicating the mixture component each parameter value was simulated from}
+#' }
 #'
 #' @seealso \code{\link{fit_mixture}}
 sample_new_parameters <- function(mixture, nsamples, df, prior, log) {
-  prior_density<-rep(NA,nsamples) 
+  prior_density <- rep(NA,nsamples)
+  compon_proposal <- rep(NA,nsamples)
   i<-1
   while (i <= nsamples) {
     compo <- sample(1:mixture$G, 1, prob = mixture$probs)
+    compon_proposal[i] <- compo
     proposal <- mnormt::rmt(1,mean=mixture$Mean[,compo],S=mixture$Sigma[,,compo],df=df)
     density_of_proposal <- prior$dprior(proposal,log=log)
     if (all(!is.na(proposal)) && ((log && density_of_proposal>-Inf) || (!log && density_of_proposal>0))) {
@@ -632,7 +639,7 @@ sample_new_parameters <- function(mixture, nsamples, df, prior, log) {
       i<-i+1
     }
   }
-  return(list(params=params,prior_density=prior_density))
+  return(list(params=params,prior_density=prior_density,compon_proposal=compon_proposal))
 }
 
 #' Update the components of the mixture
@@ -662,6 +669,28 @@ update_mixture_components <- function(mixture, components, iter) {
     components$probs[[i + G_previous]] <- mixture$probs[i] ### scale by number of points if nsamples varies by iteration
   }
   return(components)
+}
+
+#' Update the \code{Mclust} object used for plotting mixture components
+#' 
+#' The object is used in \code{\link{plot_mixture_components}}.
+#' 
+#' @param mixture A list of the mixture components returned by \code{\link{weighted_mixture}}
+#' @param sampled_params List of parameter values sampled from the mixture. It is returned by \code{\link{sample_new_parameters}}
+#' @return An updated list of class \code{Mclust}
+update_Mclust_object <- function(mixture, sampled_params){
+  G <- mixture$G
+  mixture$clustering$G <- G
+  mixture$clustering$parameters$pro <- mixture$probs
+  mixture$clustering$parameters$mean <- mixture$Mean
+  mixture$clustering$parameters$variance$G <- G
+  d <- mixture$clustering$d
+  mixture$clustering$parameters$variance$sigma <- mixture$Sigma
+  cholsigma_list <- lapply(1:G, function(g) chol(mixture$Sigma[,,g]))
+  mixture$clustering$parameters$variance$cholsigma <- array(as.numeric(unlist(cholsigma_list)), dim=c(d, d, G))
+  mixture$clustering$data_proposed <- sampled_params$params
+  mixture$clustering$compon_proposal <- sampled_params$compon_proposal
+  return(mixture$clustering)
 }
 
 #' Compute the prior/proposal ratio

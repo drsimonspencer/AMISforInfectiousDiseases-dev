@@ -7,7 +7,7 @@
 calculate_summaries(x, what = "prev", time = 1, locations = NULL, alpha = 0.05)
 }
 \arguments{
-\item{x}{The output from the function \code{\link{amis}()}.}
+\item{x}{The output from the function \code{\link{amis}}.}
 
 \item{what}{What statistic should be calculated the summaries from.
 It must be either 'prev' or the name of one of the model parameters. Default to 'prev'.}

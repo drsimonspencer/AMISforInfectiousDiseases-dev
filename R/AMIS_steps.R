@@ -28,6 +28,9 @@ default_amis_params <- function() {
 #' @export
 check_inputs <- function(prevalence_map, transmission_model, prior, amis_params, seed) {
 
+  if(amis_params[["intermittent_output"]]){
+    message("Saving output after each iteration (this will increase memory usage). \n")
+  }
   if (!(is.matrix(prevalence_map) || is.data.frame(prevalence_map) || is.list(prevalence_map))) {
     stop(("prevalence_map must be either \n - a matrix or data frame of size #locations by #samples (for one timepoint); or \n - a list with n_tims timepoints, each one with a matrix named 'data'."))
   }
@@ -77,7 +80,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   }
   if(!is.null(boundaries_param)){
     stopifnot("'boundaries_param' must be a (#parameters x 2) matrix" = (is.matrix(boundaries_param)) && 
-                (ncol(boundaries_param)==2) && (nrow(boundaries_param)==ncol(rprior(1))))
+                (ncol(boundaries_param)==2) && (nrow(boundaries_param)==ncol(prior$rprior(1))))
   }
   stopifnot("'delta' must be either NULL or a single positive numeric value" = ((length(delta)==1 && is.numeric(delta) && delta>0) || is.null(delta)))
   stopifnot("'sigma' must be either NULL or a single positive numeric value" = ((length(sigma)==1 && is.numeric(sigma) && sigma>0) || is.null(sigma)))

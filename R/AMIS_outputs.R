@@ -1,6 +1,6 @@
 #' Plot weighted simulated prevalences for a given an object of class \code{amis}.
 #'
-#' @param x The output from the function \code{\link{amis}()}.
+#' @param x The output from the function \code{\link{amis}}.
 #' @param what What posterior distribution should be plotted. 
 #' It can be 'prev' (default) for plotting prevalences, or one of the parameter names. 
 #' @param type Type of plot. It can be 'hist' (default) for histogram, 
@@ -12,14 +12,14 @@
 #' @param alpha Numeric value between 0 and 1 indicating the endpoints of the 
 #' credible intervals, which are evaluated at (alpha/2, 1-alpha/2)% quantiles. 
 #' Default (0.05) will create 95% credible intervals.
-#' @param breaks Argument passed to \code{\link{wtd.hist}()} for histogram plots. 
+#' @param breaks Argument passed to \code{\link{wtd.hist}} for histogram plots. 
 #' Default to 500.
 #' @param xlim The x limits of the plots. 
 #' Default to NULL.
 #' @param main Title for the plot.
 #' @param mfrow A vector of the form \code{c(nrows, ncols)} describing the layout 
 #' of multiple histogram plots. Default to \code{c(1,1)}.
-#' @param ... Other graphical parameters passed to \code{\link{wtd.hist}()}.
+#' @param ... Other graphical parameters passed to \code{\link{wtd.hist}}.
 #' @importFrom  weights wtd.hist
 #' @importFrom graphics segments
 #' @importFrom graphics par
@@ -52,7 +52,6 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   n_locs <- length(locations)
   location_names <- colnames(x$weight_matrix)[locations]
   
-  # # ---------------------------------------------------
   # Histograms
   if(type=="hist"){
     par(mfrow=mfrow)
@@ -70,7 +69,6 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
         }
         statistic <- x$param[,what]
       }
-
 
       if(is.null(xlim)){
         if(what=="prev"){
@@ -106,7 +104,6 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
     par(mfrow=c(1,1))
   }
   
-  # # ---------------------------------------------------
   # Credible intervals
   if(type=="CI"){
     par(mfrow=mfrow)
@@ -142,9 +139,9 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
 
 #' Print method for object of class \code{amis}
 #'
-#' @param x The output from the function \code{\link{amis}()}.
-#' @param ... Other arguments to match the generic \code{print}() function
-#' @return Brief description of data and model specifications used to run \code{\link{amis}()}.
+#' @param x The output from the function \code{\link{amis}}.
+#' @param ... Other arguments to match the generic \code{print} function
+#' @return Brief description of data and model specifications used to run \code{\link{amis}}.
 #' @export
 print.amis <- function(x, ...) {
   
@@ -188,8 +185,8 @@ print.amis <- function(x, ...) {
 
 #' Summary method for object of class \code{amis}
 #'
-#' @param object The output from the function \code{\link{amis}()}.
-#' @param ... Other arguments to match the generic \code{summary}() function
+#' @param object The output from the function \code{\link{amis}}.
+#' @param ... Other arguments to match the generic \code{summary} function
 #' @return Summary statistics of the fitted model.
 #' @export
 summary.amis <- function(object, ...) {
@@ -234,7 +231,7 @@ summary.amis <- function(object, ...) {
 
 #' Calculate summaries of weighted statistics
 #'
-#' @param x The output from the function \code{\link{amis}()}.
+#' @param x The output from the function \code{\link{amis}}.
 #' @param what What statistic should be calculated the summaries from. 
 #' It must be either 'prev' or the name of one of the model parameters. Default to 'prev'.
 #' @param time Time point. Only used if 'what' is set to 'prev'.
@@ -286,17 +283,17 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 
 
 
-#' Wrapper function for \code{\link{plot.Mclust}()}
+#' Wrapper function for \code{\link{plot.Mclust}}
 #'
-#' @param x The output from the function \code{\link{amis}()}.
+#' @param x The output from the function \code{\link{amis}}.
 #' @param what A string specifying the type of plot requested:
 #' \describe{
-#' \item{\code{uncertainty}}{A plot of classification uncertainty (default)}
-#' \item{\code{density}}{A plot of estimated density}
+#' \item{\code{"uncertainty"}}{A plot of classification uncertainty (default)}
+#' \item{\code{"density"}}{A plot of estimated density}
 #' }
 #' @param iteration Integer indicating which iteration the plot should be about. 
 #' If NULL (default), the plot will be for the final iteration.
-#' See more details in \code{\link{plot.Mclust}()}.
+#' See more details in \code{\link{plot.Mclust}}.
 #' @param datapoints A string specifying what the datapoints should represent in the 
 #' plot of classification uncertainty: 
 #' \describe{
@@ -308,7 +305,7 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 #'   the point size represents the probability that the sample belongs to that component.}
 #' }
 #' 
-#' @param ... Other arguments to match the \code{plot.Mclust}() function
+#' @param ... Other arguments to match the \code{plot.Mclust} function
 #' @return A plot for model-based clustering results.
 #' @export
 plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, datapoints="proposed",...) {

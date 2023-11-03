@@ -20,7 +20,7 @@
 )
 }
 \arguments{
-\item{x}{The output from the function \code{\link{amis}()}.}
+\item{x}{The output from the function \code{\link{amis}}.}
 
 \item{what}{What posterior distribution should be plotted.
 It can be 'prev' (default) for plotting prevalences, or one of the parameter names.}
@@ -39,7 +39,7 @@ It can be 'mean' (default) or 'median'.}
 credible intervals, which are evaluated at (alpha/2, 1-alpha/2)\% quantiles.
 Default (0.05) will create 95\% credible intervals.}
 
-\item{breaks}{Argument passed to \code{\link{wtd.hist}()} for histogram plots.
+\item{breaks}{Argument passed to \code{\link{wtd.hist}} for histogram plots.
 Default to 500.}
 
 \item{xlim}{The x limits of the plots.
@@ -50,7 +50,7 @@ Default to NULL.}
 \item{mfrow}{A vector of the form \code{c(nrows, ncols)} describing the layout
 of multiple histogram plots. Default to \code{c(1,1)}.}
 
-\item{...}{Other graphical parameters passed to \code{\link{wtd.hist}()}.}
+\item{...}{Other graphical parameters passed to \code{\link{wtd.hist}}.}
 }
 \value{
 A plot.

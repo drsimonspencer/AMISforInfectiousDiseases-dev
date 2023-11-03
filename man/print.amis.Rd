@@ -7,12 +7,12 @@
 \method{print}{amis}(x, ...)
 }
 \arguments{
-\item{x}{The output from the function \code{\link{amis}()}.}
+\item{x}{The output from the function \code{\link{amis}}.}
 
-\item{...}{Other arguments to match the generic \code{print}() function}
+\item{...}{Other arguments to match the generic \code{print} function}
 }
 \value{
-Brief description of data and model specifications used to run \code{\link{amis}()}.
+Brief description of data and model specifications used to run \code{\link{amis}}.
 }
 \description{
 Print method for object of class \code{amis}

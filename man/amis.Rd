@@ -65,7 +65,7 @@ Parameter names are inherited from the \code{colnames} from the output of \code{
 Default to \code{c(0,1)}. If left boundary is zero and there is no right boundary,
 set \code{boundaries = c(0,Inf)}.}
 \item{\code{boundaries_param}}{If specified, it should be a \eqn{d \times 2} matrix
-with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to NULL}
+with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to NULL.}
 \item{\code{bayesian}}{Logical indicating whether the update of weights is Bayesian or not.
 Default to FALSE. If set to TRUE, the likelihood is not divided by the induced prior
 over the simulated prevalences when updating weights.}

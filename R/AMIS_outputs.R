@@ -106,6 +106,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   
   # Credible intervals
   if(type=="CI"){
+    if(!measure_central%in%c("mean","median")){stop("Argument 'measure_central' must be either 'mean' or 'median'.")}
     par(mfrow=mfrow)
     for(what_ in what){
       summaries <- calculate_summaries(x=x, what=what_, time=1, locations=locations, alpha=alpha)

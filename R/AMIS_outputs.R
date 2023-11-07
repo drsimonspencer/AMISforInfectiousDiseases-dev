@@ -1,4 +1,4 @@
-#' Plot weighted simulated prevalences for a given an object of class \code{amis}.
+#' Plot histogram or credible interval of weighted distributions for a given an object of class \code{amis}.
 #'
 #' @param x The output from the function \code{\link{amis}}.
 #' @param what What posterior distribution should be plotted. 

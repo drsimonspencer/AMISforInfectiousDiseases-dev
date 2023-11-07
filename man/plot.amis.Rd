@@ -2,7 +2,7 @@
 % Please edit documentation in R/AMIS_outputs.R
 \name{plot.amis}
 \alias{plot.amis}
-\title{Plot weighted simulated prevalences for a given an object of class \code{amis}.}
+\title{Plot histogram or credible interval of weighted distributions for a given an object of class \code{amis}.}
 \usage{
 \method{plot}{amis}(
   x,
@@ -56,5 +56,5 @@ of multiple histogram plots. Default to \code{c(1,1)}.}
 A plot.
 }
 \description{
-Plot weighted simulated prevalences for a given an object of class \code{amis}.
+Plot histogram or credible interval of weighted distributions for a given an object of class \code{amis}.
 }

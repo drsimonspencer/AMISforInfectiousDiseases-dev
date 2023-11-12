@@ -2,8 +2,8 @@
 #'
 #' @docType data
 #'
-#' @usage data(prev)
+#' @usage data(ascaris_prev)
 
 #' @examples
-#' data(prev)
-"prev"
+#' data(ascaris_prev)
+"ascaris_prev"

@@ -2,8 +2,8 @@
 #'
 #' @docType data
 #'
-#' @usage data(coord)
+#' @usage data(ascaris_coord)
 
 #' @examples
-#' data(coord)
-"coord"
+#' data(ascaris_coord)
+"ascaris_coord"

@@ -339,7 +339,7 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, datap
       stop("'iteration' must be an integer that does not exceed the maximum number of iterations that have been run.")
     }
   }
-  clustering <- x$clustering_per_iteration[[iteration]]
+  clustering <- x$components_per_iteration[[iteration]]
   
   if(what=="uncertainty"){
     if(datapoints=="proposed"){

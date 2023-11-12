@@ -61,24 +61,24 @@ Parameter names are inherited from the \code{colnames} from the output of \code{
 \item{amis_params}{A list containing the control parameters for the AMIS algorithm:
 \describe{
 \item{\code{nsamples}}{Number of new samples drawn within each AMIS iteration. Default to 500.}
+\item{\code{target_ess}}{Target effective sample size. Default to 500.}
+\item{\code{max_iters}}{Maximum number of AMIS iterations. Default to 12.}
+\item{\code{output_dir}}{A string specifying the local directory
+where to save outputs at each iteration of the algorithm. At the end of the string,
+use the correct path separator for your OS system. If the directory is specified,
+the outputs will be saved in a file called 'intermittent_output.rds'.
+Default to NA (intermittent outputs are not saved).}
 \item{\code{boundaries}}{A vector of length two with the left and right boundaries for prevalences.
 Default to \code{c(0,1)}. If left boundary is zero and there is no right boundary,
 set \code{boundaries = c(0,Inf)}.}
 \item{\code{boundaries_param}}{If specified, it should be a \eqn{d \times 2} matrix
 with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to NULL.}
+\item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to FALSE.}
 \item{\code{bayesian}}{Logical indicating whether the update of weights is Bayesian or not.
 Default to FALSE. If set to TRUE, the likelihood is not divided by the induced prior
 over the simulated prevalences when updating weights.}
 \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
 \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
-\item{\code{target_ess}}{Target effective sample size. Default to 500.}
-\item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to FALSE.}
-\item{\code{max_iters}}{Maximum number of AMIS iterations.}
-\item{\code{intermittent_output_dir}}{A string specifying the local directory
-where to save outputs at each iteration of the algorithm. At the end of the string,
-use the correct path separator for your OS system. If the directory is specified,
-the outputs will be saved in a file called 'intermittent_output.rds'.
-Default to NA (intermittent outputs are not saved).}
 \item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to 0.01.}
 \item{\code{sigma}}{Optional smoothing parameter if Gaussian kernel is used. Default to NULL.}
 \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to NULL.
@@ -93,12 +93,36 @@ If \code{breaks} is provided, then histogram-based method will supersede all the
 \item{seed}{Optional seed for the random number generator.}
 
 \item{initial_amis_vals}{Optional list of intermittent outputs (saved in the
-user-specified directory `\code{intermittent_output_dir}').
+user-specified directory `\code{output_dir}').
 Necessary to initialise the algorithm from intermittent output from a
 previous run (where at least one iteration was successful!).}
 }
 \value{
-A dataframe with the simulation seeds and the corresponding sampled parameters, simulated prevalences, and weight in each location.
+A list of class '\code{amis}' containing:
+\describe{
+\item{\code{seeds}}{Vector with the simulation seeds that were used.}
+\item{\code{param}}{A matrix with \eqn{d} columns containing the model parameters.}
+\item{\code{simulated_prevalences}}{A matrix with \eqn{T} columns containing the simulated prevalences at each time.}
+\item{\code{weight_matrix}}{A matrix with \eqn{L} columns containing the weights for each location.}
+\item{\code{likelihoods}}{An array with the likelihoods for each location at each time.}
+\item{\code{ess}}{Vector with the final ESS for each location.}
+\item{\code{prevalence_map}}{List with the prevalence map supplied by the user.}
+\item{\code{locations_with_no_data}}{Vector indicating which locations have no data at any time point.}
+\item{\code{components}}{A list of the mixture components of all iterations, containing:
+\itemize{
+\item \code{G}: number of components in each iteration;
+\item \code{probs}: the mixture weights;
+\item \code{Mean}: the means of the components;
+\item \code{Sigma}: the covariance matrices of the components.
+}
+}
+\item{\code{components_per_iteration}}{A list with the mixture components at each iteration.
+This object is used in \code{\link{plot_mixture_components}}.}
+\item{\code{ess_per_iteration}}{List showing the ESS for each location after each iteration.}
+\item{\code{prior_density}}{Vector with the density function evaluated at the simulated parameter values.}
+\item{\code{last_simulation_seed}}{Last simulation seed that was used.}
+\item{\code{amis_params}}{List supplied by the user.}
+}
 }
 \description{
 For details of the algorithm, see

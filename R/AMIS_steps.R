@@ -8,25 +8,22 @@ NULL
 #' @return List containing the default AMIS parameters.
 #' @export
 default_amis_params <- function() {
-  amis_params<-list(nsamples=500, boundaries=c(0,1), boundaries_param=NULL, 
-                    bayesian=FALSE,
-                    mixture_samples=1000, df=3,
-                    target_ess=500, log=FALSE, max_iters=12,
-                    intermittent_output_dir=NA, 
-                    delta=0.01, sigma=NULL, breaks=NULL)
+  amis_params <- list(nsamples=500, target_ess=500, max_iters=12, output_dir=NA,
+                      boundaries=c(0,1), boundaries_param=NULL, 
+                      log=FALSE, bayesian=FALSE, mixture_samples=1000, df=3,
+                      delta=0.01, sigma=NULL, breaks=NULL)
   return(amis_params)
 }
 
 #' Check inputs of \code{amis} function
 #' 
 #' Check whether all the inputs of \code{\link{amis}} function are as expected.
-#' @inheritParams amis
 #' @export
 check_inputs <- function(prevalence_map, transmission_model, prior, amis_params, seed) {
 
-  directory <- amis_params[["intermittent_output_dir"]]
+  directory <- amis_params[["output_dir"]]
   if((!is.na(directory))&&(!is.character(directory))){
-    stop("'intermittent_output_dir' must be either a character string or set to NA.\n")
+    stop("'output_dir' must be either a character string or set to NA.\n")
   }
   if(!is.na(directory)){
     message("Outputs will be saved in the user-specified directory after each iteration (this will use data storage space).\n")

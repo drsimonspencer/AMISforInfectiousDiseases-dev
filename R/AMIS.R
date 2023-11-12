@@ -52,24 +52,24 @@
 #' @param amis_params A list containing the control parameters for the AMIS algorithm:
 #' \describe{
 #' \item{\code{nsamples}}{Number of new samples drawn within each AMIS iteration. Default to 500.}
+#' \item{\code{target_ess}}{Target effective sample size. Default to 500.}
+#' \item{\code{max_iters}}{Maximum number of AMIS iterations. Default to 12.}
+#' \item{\code{output_dir}}{A string specifying the local directory 
+#' where to save outputs at each iteration of the algorithm. At the end of the string, 
+#' use the correct path separator for your OS system. If the directory is specified, 
+#' the outputs will be saved in a file called 'intermittent_output.rds'. 
+#' Default to NA (intermittent outputs are not saved).}
 #' \item{\code{boundaries}}{A vector of length two with the left and right boundaries for prevalences. 
 #' Default to \code{c(0,1)}. If left boundary is zero and there is no right boundary, 
 #' set \code{boundaries = c(0,Inf)}.}
 #' \item{\code{boundaries_param}}{If specified, it should be a \eqn{d \times 2} matrix 
 #' with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to NULL.}
+#' \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to FALSE.}
 #' \item{\code{bayesian}}{Logical indicating whether the update of weights is Bayesian or not. 
 #' Default to FALSE. If set to TRUE, the likelihood is not divided by the induced prior 
 #' over the simulated prevalences when updating weights.}
 #' \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
 #' \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
-#' \item{\code{target_ess}}{Target effective sample size. Default to 500.}
-#' \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to FALSE.}
-#' \item{\code{max_iters}}{Maximum number of AMIS iterations.}
-#' \item{\code{intermittent_output_dir}}{A string specifying the local directory 
-#' where to save outputs at each iteration of the algorithm. At the end of the string, 
-#' use the correct path separator for your OS system. If the directory is specified, 
-#' the outputs will be saved in a file called 'intermittent_output.rds'. 
-#' Default to NA (intermittent outputs are not saved).}
 #' \item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to 0.01.}
 #' \item{\code{sigma}}{Optional smoothing parameter if Gaussian kernel is used. Default to NULL.}
 #' \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to NULL.
@@ -82,10 +82,34 @@
 #' If \code{breaks} is provided, then histogram-based method will supersede all the other methods.
 #' @param seed Optional seed for the random number generator.
 #' @param initial_amis_vals Optional list of intermittent outputs (saved in the 
-#' user-specified directory `\code{intermittent_output_dir}'). 
+#' user-specified directory `\code{output_dir}'). 
 #' Necessary to initialise the algorithm from intermittent output from a 
 #' previous run (where at least one iteration was successful!).
-#' @return A dataframe with the simulation seeds and the corresponding sampled parameters, simulated prevalences, and weight in each location.
+#' @return A list of class '\code{amis}' containing:
+#' \describe{
+#' \item{\code{seeds}}{Vector with the simulation seeds that were used.}
+#' \item{\code{param}}{A matrix with \eqn{d} columns containing the model parameters.}
+#' \item{\code{simulated_prevalences}}{A matrix with \eqn{T} columns containing the simulated prevalences at each time.}
+#' \item{\code{weight_matrix}}{A matrix with \eqn{L} columns containing the weights for each location.}
+#' \item{\code{likelihoods}}{An array with the likelihoods for each location at each time.}
+#' \item{\code{ess}}{Vector with the final ESS for each location.}
+#' \item{\code{prevalence_map}}{List with the prevalence map supplied by the user.}
+#' \item{\code{locations_with_no_data}}{Vector indicating which locations have no data at any time point.}
+#' \item{\code{components}}{A list of the mixture components of all iterations, containing:
+#'  \itemize{
+#'    \item \code{G}: number of components in each iteration;
+#'    \item \code{probs}: the mixture weights;
+#'    \item \code{Mean}: the means of the components;
+#'    \item \code{Sigma}: the covariance matrices of the components.
+#'  }
+#' }
+#' \item{\code{components_per_iteration}}{A list with the mixture components at each iteration. 
+#' This object is used in \code{\link{plot_mixture_components}}.}
+#' \item{\code{ess_per_iteration}}{List showing the ESS for each location after each iteration.}
+#' \item{\code{prior_density}}{Vector with the density function evaluated at the simulated parameter values.}
+#' \item{\code{last_simulation_seed}}{Last simulation seed that was used.}
+#' \item{\code{amis_params}}{List supplied by the user.}
+#' }
 #' @export
 amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = NULL, initial_amis_vals = NULL) {
 
@@ -93,7 +117,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   checks <- check_inputs(prevalence_map, transmission_model, prior, amis_params, seed)
   locations_with_no_data <- checks$locs_no_data
 
-  directory <- amis_params[["intermittent_output_dir"]]
+  directory <- amis_params[["output_dir"]]
   if (!is.na(directory)){
     if(!dir.exists(directory)){dir.create(directory)}
   }
@@ -121,19 +145,23 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     }
     colnames(weight_matrix) <- iunames
     colnames(simulated_prevalences) <- prevnames
-    return(list(seeds=allseeds,
-                param=param,
-                simulated_prevalences=simulated_prevalences, 
-                weight_matrix=weight_matrix, 
-                likelihoods=likelihoods, 
-                ess=ess, 
-                prevalence_map=prevalence_map,
-                locations_with_no_data=locations_with_no_data,
-                components=components, 
-                clustering_per_iteration=clustering_per_iteration,
-                ess_per_iteration=ess_per_iteration,
-                prior_density=prior_density,
-                last_simulation_seed=max(allseeds)))
+    
+    output <- list(seeds=allseeds,
+                   param=param,
+                   simulated_prevalences=simulated_prevalences, 
+                   weight_matrix=weight_matrix, 
+                   likelihoods=likelihoods, 
+                   ess=ess, 
+                   prevalence_map=prevalence_map,
+                   locations_with_no_data=locations_with_no_data,
+                   components=components, 
+                   components_per_iteration=components_per_iteration,
+                   ess_per_iteration=ess_per_iteration,
+                   prior_density=prior_density,
+                   last_simulation_seed=max(allseeds), 
+                   amis_params=amis_params)
+    class(output) <- 'amis'
+    return(output)
   }
   
   # Formatting
@@ -164,8 +192,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   if(!is.null(seed)){set.seed(seed)}
   iter <- 1
   ess_per_iteration <- list()
-  clustering_per_iteration <- list()
-  clustering_per_iteration[[1]] <- NA
+  components_per_iteration <- list()
+  components_per_iteration[[1]] <- NA
   
   if(is.null(initial_amis_vals)){
     cat("----------------------- \n")
@@ -235,7 +263,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       if(!is.null(initial_amis_vals[[d]])){
         initial_amis_vals[[d]]
       } else {
-        stop(paste0("Cannot find object 'initial_amis_vals[['",d,"']]'. To initialise from a previous run, use object saved by specifying amis_params[['intermittent_output_dir']].\n"))
+        stop(paste0("Cannot find object 'initial_amis_vals[['",d,"']]'. To initialise from a previous run, use object saved by specifying amis_params[['output_dir']].\n"))
       }
     }
     simulated_prevalences = check_initial_vals("simulated_prevalences")
@@ -269,7 +297,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       cat("  A",mixture$G,"component mixture has been fitted.\n")
       components <- update_mixture_components(mixture, components, iter)
       new_params <- sample_new_parameters(mixture, nsamples, amis_params[["df"]], prior, amis_params[["log"]])
-      clustering_per_iteration[[iter]] <- update_Mclust_object(mixture, new_params)
+      components_per_iteration[[iter]] <- update_Mclust_object(mixture, new_params)
       # Check validity of sampled parameters
       if(any(is.na(new_params$params))){warning("At least one sample from the proposal after the first iteration of AMIS was NA or NaN. \n")}
       param <- rbind(param, new_params$params)
@@ -343,7 +371,5 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     output$evidence <- NULL
   }
   
-  output$amis_params <- amis_params
-  class(output) <- 'amis'
   return(output)
 }

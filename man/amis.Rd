@@ -64,10 +64,10 @@ Parameter names are inherited from the \code{colnames} from the output of \code{
 \item{\code{target_ess}}{Target effective sample size. Default to 500.}
 \item{\code{max_iters}}{Maximum number of AMIS iterations. Default to 12.}
 \item{\code{output_dir}}{A string specifying the local directory
-where to save outputs at each iteration of the algorithm. At the end of the string,
+where to save outputs after each iteration of the algorithm. At the end of the string,
 use the correct path separator for your OS system. If the directory is specified,
-the outputs will be saved in a file called 'intermittent_output.rds'.
-Default to NA (intermittent outputs are not saved).}
+the outputs will be saved in a file called 'amis_output.rds'.
+Default to NA (i.e. outputs are not saved in a local directory).}
 \item{\code{boundaries}}{A vector of length two with the left and right boundaries for prevalences.
 Default to \code{c(0,1)}. If left boundary is zero and there is no right boundary,
 set \code{boundaries = c(0,Inf)}.}
@@ -92,10 +92,10 @@ If \code{breaks} is provided, then histogram-based method will supersede all the
 
 \item{seed}{Optional seed for the random number generator.}
 
-\item{initial_amis_vals}{Optional list of intermittent outputs (saved in the
-user-specified directory `\code{output_dir}').
-Necessary to initialise the algorithm from intermittent output from a
-previous run (where at least one iteration was successful!).}
+\item{initial_amis_vals}{Optional list of intermittent outputs from a
+previous run (where at least one iteration was successful). These outputs can
+be saved by specifying the directory `\code{output_dir}' (see \code{amis_params})
+before running \code{\link{amis}}.}
 }
 \value{
 A list of class '\code{amis}' containing:

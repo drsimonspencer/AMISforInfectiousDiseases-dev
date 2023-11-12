@@ -74,8 +74,11 @@ over the simulated prevalences when updating weights.}
 \item{\code{target_ess}}{Target effective sample size. Default to 500.}
 \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to FALSE.}
 \item{\code{max_iters}}{Maximum number of AMIS iterations.}
-\item{\code{intermittent_output}}{Optional logical indicating whether to save output to
-\code{\link{amis_env}} environment at each iteration of the algorithm. Default to FALSE.}
+\item{\code{intermittent_output_dir}}{A string specifying the local directory
+where to save outputs at each iteration of the algorithm. At the end of the string,
+use the correct path separator for your OS system. If the directory is specified,
+the outputs will be saved in a file called 'intermittent_output.rds'.
+Default to NA (intermittent outputs are not saved).}
 \item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to 0.01.}
 \item{\code{sigma}}{Optional smoothing parameter if Gaussian kernel is used. Default to NULL.}
 \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to NULL.
@@ -89,8 +92,10 @@ If \code{breaks} is provided, then histogram-based method will supersede all the
 
 \item{seed}{Optional seed for the random number generator.}
 
-\item{initial_amis_vals}{Optional list containing the object created by setting \code{intermittent_output=TRUE}.
-Necessary to initialise the algorithm from intermittent output from a previous run (where at least one iteration was successful!).}
+\item{initial_amis_vals}{Optional list of intermittent outputs (saved in the
+user-specified directory `\code{intermittent_output_dir}').
+Necessary to initialise the algorithm from intermittent output from a
+previous run (where at least one iteration was successful!).}
 }
 \value{
 A dataframe with the simulation seeds and the corresponding sampled parameters, simulated prevalences, and weight in each location.

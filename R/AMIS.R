@@ -65,8 +65,11 @@
 #' \item{\code{target_ess}}{Target effective sample size. Default to 500.}
 #' \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to FALSE.}
 #' \item{\code{max_iters}}{Maximum number of AMIS iterations.}
-#' \item{\code{intermittent_output}}{Optional logical indicating whether to save output to 
-#' \code{\link{amis_env}} environment at each iteration of the algorithm. Default to FALSE.}
+#' \item{\code{intermittent_output_dir}}{A string specifying the local directory 
+#' where to save outputs at each iteration of the algorithm. At the end of the string, 
+#' use the correct path separator for your OS system. If the directory is specified, 
+#' the outputs will be saved in a file called 'intermittent_output.rds'. 
+#' Default to NA (intermittent outputs are not saved).}
 #' \item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to 0.01.}
 #' \item{\code{sigma}}{Optional smoothing parameter if Gaussian kernel is used. Default to NULL.}
 #' \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to NULL.
@@ -78,8 +81,10 @@
 #' If \code{sigma} is provided, then Gaussian kernel will be used instead. 
 #' If \code{breaks} is provided, then histogram-based method will supersede all the other methods.
 #' @param seed Optional seed for the random number generator.
-#' @param initial_amis_vals Optional list containing the object created by setting \code{intermittent_output=TRUE}. 
-#' Necessary to initialise the algorithm from intermittent output from a previous run (where at least one iteration was successful!).
+#' @param initial_amis_vals Optional list of intermittent outputs (saved in the 
+#' user-specified directory `\code{intermittent_output_dir}'). 
+#' Necessary to initialise the algorithm from intermittent output from a 
+#' previous run (where at least one iteration was successful!).
 #' @return A dataframe with the simulation seeds and the corresponding sampled parameters, simulated prevalences, and weight in each location.
 #' @export
 amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = NULL, initial_amis_vals = NULL) {
@@ -88,6 +93,11 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   checks <- check_inputs(prevalence_map, transmission_model, prior, amis_params, seed)
   locations_with_no_data <- checks$locs_no_data
 
+  directory <- amis_params[["intermittent_output_dir"]]
+  if (!is.na(directory)){
+    if(!dir.exists(directory)){dir.create(directory)}
+  }
+  
   save_output <- function(){
     if (is.null(initial_amis_vals)){
       allseeds <- 1:(niter * nsamples)
@@ -212,9 +222,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     )
     seeds <- function(iter) ((iter - 1) * nsamples + 1):(iter * nsamples)  # function to calculate the seeds for iteration iter.
     niter <- 1 # number of completed iterations 
-    if (amis_params[["intermittent_output"]]){
+    if (!is.na(directory)){
       res <- save_output()
-      assign(x="intermittent_output",value=res,envir=amis_env)
+      saveRDS(res, file = paste0(directory,"intermittent_output.rds"))
     }
   } else {
     cat("----------------------- \n")
@@ -225,7 +235,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       if(!is.null(initial_amis_vals[[d]])){
         initial_amis_vals[[d]]
       } else {
-        stop(paste0("Cannot find object 'initial_amis_vals[['",d,"']]'. To initialise from a previous run, use object saved by setting amis_params[['intermittent output']]=TRUE.\n"))
+        stop(paste0("Cannot find object 'initial_amis_vals[['",d,"']]'. To initialise from a previous run, use object saved by specifying amis_params[['intermittent_output_dir']].\n"))
       }
     }
     simulated_prevalences = check_initial_vals("simulated_prevalences")
@@ -303,9 +313,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       cat(paste0("  min ESS:", round(min(ess)),", mean ESS:", round(mean(ess)),", max ESS:", round(max(ess)),"\n"))
       cat(paste0("  ",sum(ess<amis_params[["target_ess"]])," locations are below the target ESS.\n"))
       niter <- niter + 1
-      if (amis_params[["intermittent_output"]]){
+      if (!is.na(directory)){
         res <- save_output()
-        assign(x="intermittent_output",value=res,envir=amis_env)
+        saveRDS(res, file = paste0(directory,"intermittent_output.rds"))
       }
       if (min(ess) >= amis_params[["target_ess"]]) break
     }

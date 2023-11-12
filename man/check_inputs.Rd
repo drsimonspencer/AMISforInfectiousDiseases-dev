@@ -67,8 +67,11 @@ over the simulated prevalences when updating weights.}
 \item{\code{target_ess}}{Target effective sample size. Default to 500.}
 \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to FALSE.}
 \item{\code{max_iters}}{Maximum number of AMIS iterations.}
-\item{\code{intermittent_output}}{Optional logical indicating whether to save output to
-\code{\link{amis_env}} environment at each iteration of the algorithm. Default to FALSE.}
+\item{\code{intermittent_output_dir}}{A string specifying the local directory
+where to save outputs at each iteration of the algorithm. At the end of the string,
+use the correct path separator for your OS system. If the directory is specified,
+the outputs will be saved in a file called 'intermittent_output.rds'.
+Default to NA (intermittent outputs are not saved).}
 \item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to 0.01.}
 \item{\code{sigma}}{Optional smoothing parameter if Gaussian kernel is used. Default to NULL.}
 \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to NULL.

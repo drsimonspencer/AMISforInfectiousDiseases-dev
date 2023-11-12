@@ -2,10 +2,6 @@
 #' @importFrom Rcpp sourceCpp
 NULL
 
-#' Environment where intermittent outputs are saved
-#' @export
-amis_env <- new.env()
-
 #' Produce list containing the default AMIS parameters
 #' 
 #' For description of AMIS parameters, see argument \code{amis_params} in \code{\link{amis}}.
@@ -16,7 +12,7 @@ default_amis_params <- function() {
                     bayesian=FALSE,
                     mixture_samples=1000, df=3,
                     target_ess=500, log=FALSE, max_iters=12,
-                    intermittent_output=FALSE, 
+                    intermittent_output_dir=NA, 
                     delta=0.01, sigma=NULL, breaks=NULL)
   return(amis_params)
 }
@@ -28,8 +24,12 @@ default_amis_params <- function() {
 #' @export
 check_inputs <- function(prevalence_map, transmission_model, prior, amis_params, seed) {
 
-  if(amis_params[["intermittent_output"]]){
-    message("Saving output after each iteration (this will increase memory usage). \n")
+  directory <- amis_params[["intermittent_output_dir"]]
+  if((!is.na(directory))&&(!is.character(directory))){
+    stop("'intermittent_output_dir' must be either a character string or set to NA.\n")
+  }
+  if(!is.na(directory)){
+    message("Outputs will be saved in the user-specified directory after each iteration (this will use data storage space).\n")
   }
   if (!(is.matrix(prevalence_map) || is.data.frame(prevalence_map) || is.list(prevalence_map))) {
     stop(("prevalence_map must be either \n - a matrix or data frame of size #locations by #samples (for one timepoint); or \n - a list with n_tims timepoints, each one with a matrix named 'data'."))
@@ -682,6 +682,9 @@ update_mixture_components <- function(mixture, components, iter) {
 #' @param sampled_params List of parameter values sampled from the mixture. It is returned by \code{\link{sample_new_parameters}}
 #' @return An updated list of class \code{Mclust}
 update_Mclust_object <- function(mixture, sampled_params){
+  if(!inherits(mixture$clustering, "Mclust")){
+    stop("'mixture' must have an element called 'clustering' of class 'Mclust'.")
+  }
   G <- mixture$G
   mixture$clustering$G <- G
   mixture$clustering$parameters$pro <- mixture$probs

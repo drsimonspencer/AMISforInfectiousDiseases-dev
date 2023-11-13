@@ -218,8 +218,8 @@ summary.amis <- function(object, ...) {
     num_above_ESS <- n_locs - num_above_ESS
     cat(paste0("Number of locations whose ESS exceeded the target ESS:  ",  num_above_ESS, "\n"))
     cat(paste0("Number of locations whose ESS was lower the target ESS:  ",  num_below_ESS, "\n"))
-    if(num_above_ESS>0){
-      if(num_above_ESS<=10){
+    if(num_below_ESS>0){
+      if(num_below_ESS<=10){
         message(paste0("  ESS for the following location(s) was lower than the target ESS: "))
         below_ESS <- data.frame(ESS = round(x$ess[which_didnot_exceed_ESS], digits = 0))
         rownames(below_ESS) <- colnames(x$weight_matrix)[which_didnot_exceed_ESS]

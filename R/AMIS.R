@@ -105,7 +105,7 @@
 #' }
 #' \item{\code{components_per_iteration}}{A list with the mixture components at each iteration. 
 #' This object is used in \code{\link{plot_mixture_components}}.}
-#' \item{\code{ess_per_iteration}}{List showing the ESS for each location after each iteration.}
+#' \item{\code{ess_per_iteration}}{Matrix with with \eqn{L} rows showing the ESS for each location after each iteration.}
 #' \item{\code{prior_density}}{Vector with the density function evaluated at the simulated parameter values.}
 #' \item{\code{last_simulation_seed}}{Last simulation seed that was used.}
 #' \item{\code{amis_params}}{List supplied by the user.}
@@ -145,7 +145,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     }
     colnames(weight_matrix) <- iunames
     colnames(simulated_prevalences) <- prevnames
-    
+    names(ess) <- iunames
+    rownames(ess_per_iteration) <- iunames
+    colnames(ess_per_iteration) <- paste0("iter",1:niter)
     output <- list(seeds=allseeds,
                    param=param,
                    simulated_prevalences=simulated_prevalences, 
@@ -191,7 +193,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   # Initialise
   if(!is.null(seed)){set.seed(seed)}
   iter <- 1
-  ess_per_iteration <- list()
+  ess_per_iteration <- NULL
   components_per_iteration <- list()
   components_per_iteration[[1]] <- NA
   
@@ -277,7 +279,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     niter <- 0 # number of completed iterations
   }
   
-  ess_per_iteration[[iter]] <- ess
+  ess_per_iteration <- cbind(ess_per_iteration, ess)
   # Define first_weight object in case target_ess reached in first iteration
   first_weight = rep(1-amis_params[["log"]], nsamples)
   # Continue if target_ess not yet reached
@@ -337,7 +339,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
       # Calculate ESS
       ess <- calculate_ess(weight_matrix,amis_params[["log"]])
-      ess_per_iteration[[iter]] <- ess
+      ess_per_iteration <- cbind(ess_per_iteration, ess)
       cat(paste0("  min ESS:", round(min(ess)),", mean ESS:", round(mean(ess)),", max ESS:", round(max(ess)),"\n"))
       cat(paste0("  ",sum(ess<amis_params[["target_ess"]])," locations are below the target ESS.\n"))
       niter <- niter + 1

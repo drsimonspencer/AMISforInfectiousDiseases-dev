@@ -118,7 +118,7 @@ A list of class '\code{amis}' containing:
 }
 \item{\code{components_per_iteration}}{A list with the mixture components at each iteration.
 This object is used in \code{\link{plot_mixture_components}}.}
-\item{\code{ess_per_iteration}}{List showing the ESS for each location after each iteration.}
+\item{\code{ess_per_iteration}}{Matrix with with \eqn{L} rows showing the ESS for each location after each iteration.}
 \item{\code{prior_density}}{Vector with the density function evaluated at the simulated parameter values.}
 \item{\code{last_simulation_seed}}{Last simulation seed that was used.}
 \item{\code{amis_params}}{List supplied by the user.}

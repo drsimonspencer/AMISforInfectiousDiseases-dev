@@ -199,34 +199,36 @@ summary.amis <- function(object, ...) {
   amis_params <- x$amis_params
   
   cat(paste0("=============================================================", "\n"))
-  cat(paste0("Data description: \n"))
-  cat(paste0("- Number of locations:  ", nrow(x$prevalence_map[[1]]$data),"\n"))
-  cat(paste0("- Number of map samples for each location:  ",  ncol(x$prevalence_map[[1]]$data),"\n"))
-  cat(paste0("- Number of time points:  ",  length(x$prevalence_map),"\n"))
-  
-  cat(paste0("=============================================================", "\n"))
   cat(paste0("Fitted model: \n"))
   
+  n_locs <- nrow(x$prevalence_map[[1]]$data)
   n_sims_total <- nrow(x$simulated_prevalences)
   n_iters <- n_sims_total/amis_params$nsamples
   cat(paste0("- Number of iterations:  ",  n_iters, "\n"))
   cat(paste0("- Total number of simulated samples:  ",  n_sims_total, "\n"))
   cat(paste0("- Target effective sample size:  ",  amis_params$target_ess,"\n"))
   
-  # ESS_by_location <- data.frame(ESS = round(x$ess, digits = getOption("digits")))
-  # rownames(ESS_by_location) <- colnames(x$weight_matrix)
-  # cat(paste0("- Effective sample size by location: \n"))
-  # print(ESS_by_location)
-  
-  which_didnot_exceed_ESS <- which(x$ess < amis_params$target_ess)
-  if(length(which_didnot_exceed_ESS)>0){
-    cat(paste0("- ESS of the following location(s) was lower than the target ESS: \n"))
-    # cat(paste0(paste(shQuote(colnames(x$weight_matrix)[which_didnot_exceed_ESS]), collapse=", ")))
-    ESS_by_location <- data.frame(ESS = round(x$ess[which_didnot_exceed_ESS], digits = getOption("digits")))
-    rownames(ESS_by_location) <- colnames(x$weight_matrix)[which_didnot_exceed_ESS]
+  ESS_by_location <- data.frame(ESS = round(x$ess, digits = 0))
+  if(n_locs<=10){
+    cat(paste0("- Effective sample size by location: \n"))
     print(ESS_by_location)
+  }else{
+    which_didnot_exceed_ESS <- which(x$ess < amis_params$target_ess)
+    num_below_ESS <- length(which_didnot_exceed_ESS)
+    num_above_ESS <- n_locs - num_above_ESS
+    cat(paste0("Number of locations whose ESS exceeded the target ESS:  ",  num_above_ESS, "\n"))
+    cat(paste0("Number of locations whose ESS was lower the target ESS:  ",  num_below_ESS, "\n"))
+    if(num_above_ESS>0){
+      if(num_above_ESS<=10){
+        message(paste0("  ESS for the following location(s) was lower than the target ESS: "))
+        below_ESS <- data.frame(ESS = round(x$ess[which_didnot_exceed_ESS], digits = 0))
+        rownames(below_ESS) <- colnames(x$weight_matrix)[which_didnot_exceed_ESS]
+        print(below_ESS)
+      }else{
+        message("   ESS of more than 10 locations was lower than the target ESS. To see all of them, run 'out$ess[(out$ess < out$amis_params$target_ess)]', where 'out' is an output returned by amis().")
+      }
+    }
   }
-
 }
 
 

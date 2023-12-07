@@ -19,6 +19,7 @@ plot_mixture_components(
 \describe{
 \item{\code{"uncertainty"}}{A plot of classification uncertainty (default)}
 \item{\code{"density"}}{A plot of estimated density}
+\item{\code{"BIC"}}{A plot showing BIC values used to choose the number of components}
 }}
 
 \item{iteration}{Integer indicating which iteration the plot should be about.

@@ -22,6 +22,7 @@ fit_mixture<-function(dat,max.components=10) {
   colnames(dat) <- NULL # remove colnames to prevent instigating bug in mclust
   if (n<d+1) {stop("Not enough observations to fit mixture model.\n")}
   max.components <- min(max.components,floor(n/(d+1)))
+  BICmatrix <- matrix(NA,nrow=max.components,ncol=1)
   # Start by fitting one group
   G <- 1 # number of groups
   if (d==1) {
@@ -32,6 +33,7 @@ fit_mixture<-function(dat,max.components=10) {
   clustering <- mclust::mvn(modelName=modelName,data=dat)
   BIC <- mclust::bic(modelName=modelName,loglik=clustering$loglik,n=n,d=d,G=1)
   cat("  BIC:", BIC,"\n")
+  BICmatrix[1, 1] <- BIC
   # fit agglomerative clustering model
   if (d==1) {
     modelName <- "V"
@@ -44,7 +46,8 @@ fit_mixture<-function(dat,max.components=10) {
     z <- mclust::unmap(cut.tree[,g-1]) # extract cluster indices
     # Run EM algorithm
     em <- mclust::me(modelName=modelName,data=dat,z=z)
-    em$BIC <- mclust::bic(modelName=modelName,loglik=em$loglik,n=n,d=d,G=g) 
+    em$BIC <- mclust::bic(modelName=modelName,loglik=em$loglik,n=n,d=d,G=g)
+    BICmatrix[g, 1] <- em$BIC
     if (!is.na(em$BIC) && em$BIC>BIC) { # mclust:::bic calculates the negative BIC
       clustering <- em
       G <- g
@@ -52,6 +55,9 @@ fit_mixture<-function(dat,max.components=10) {
       clustering$z <- em$z
     }
   }
+  colnames(BICmatrix) <- modelName
+  rownames(BICmatrix) <- 1:max.components
+  clustering$BIC <- BICmatrix
   clustering$data <- dat
   class(clustering) <- "Mclust"
   return(list(G=G,probs=clustering$parameters$pro,Mean=matrix(clustering$parameters$mean,d,G),

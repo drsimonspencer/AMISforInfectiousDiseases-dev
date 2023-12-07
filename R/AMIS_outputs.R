@@ -293,6 +293,7 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 #' \describe{
 #' \item{\code{"uncertainty"}}{A plot of classification uncertainty (default)}
 #' \item{\code{"density"}}{A plot of estimated density}
+#' \item{\code{"BIC"}}{A plot showing BIC values used to choose the number of components}
 #' }
 #' @param iteration Integer indicating which iteration the plot should be about. 
 #' If NULL (default), the plot will be for the final iteration.
@@ -315,8 +316,8 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, datap
   if(!inherits(x, "amis")){
     stop("'x' must be of type 'amis'")
   }
-  if(!(what%in%c("uncertainty", "density"))){
-    stop("'what' must be either 'uncertainty' or 'density'.")
+  if(!(what%in%c("uncertainty", "density", "BIC"))){
+    stop("'what' must be 'uncertainty', 'density', or 'BIC'.")
   }
   if(what=="uncertainty"){
     if(!(datapoints%in%c("proposed", "fitted"))){
@@ -359,11 +360,17 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, datap
     }else if(datapoints=="fitted"){
       cat(paste0("Plotting components of the fitted mixture model at iteration ", iteration, " and weighted samples of the previous iteration...\n"))
     }
+    colnames(clustering$data) <- colnames(x$param)
+    mclust::plot.Mclust(clustering, what = what, ...)
   }else if(what=="density"){
     cat(paste0("Plotting density of the mixture model at iteration ", iteration, "...\n"))
+    mclust::plot.Mclust(clustering, what = what, ...)
+  }else if(what=="BIC"){
+    cat(paste0("Plotting BIC against number of components at iteration ", iteration, "...\n"))
+    mclust::plot.Mclust(clustering, what = what, 
+                        legendArgs = list(plot=FALSE), ...)
   }
-  colnames(clustering$data) <- colnames(x$param)
-  mclust::plot.Mclust(clustering, what = what, ...)
+  
 }
 
 

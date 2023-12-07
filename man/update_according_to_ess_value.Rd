@@ -4,7 +4,7 @@
 \alias{update_according_to_ess_value}
 \title{Calculate sum of weight matrix for active locations}
 \usage{
-update_according_to_ess_value(weight_matrix, ess, target_size, log)
+update_according_to_ess_value(weight_matrix, ess, target_size, log, q)
 }
 \arguments{
 \item{weight_matrix}{The weight_matrix as returned by
@@ -16,6 +16,8 @@ update_according_to_ess_value(weight_matrix, ess, target_size, log)
 \item{target_size}{A number representing the target size for the sample.}
 
 \item{log}{A logical indicating if the weights are logged.}
+
+\item{q}{Parameter (between 0 and 1) controlling how the weights are calculated for active locations.}
 }
 \value{
 Vector containing the row sums of the active columns of the weight matrix.

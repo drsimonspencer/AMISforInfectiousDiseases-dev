@@ -73,6 +73,9 @@ with the lower and upper boundaries for the \eqn{d} transmission model parameter
 \item{\code{use_induced_prior}}{Logical indicating whether the induced prior density is to be used in the update of weights. Default to TRUE.}
 \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
 \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
+\item{\code{q}}{Parameter (between 0 and 1) controlling how the weights are calculated for active locations.
+If q=1, simple average of individual weights will be calculated.
+If q<1, more weight will be assigned to locations with low ESS. Default to 1.}
 \item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to 0.01.}
 \item{\code{sigma}}{Optional smoothing parameter if Gaussian kernel is used. Default to NULL.}
 \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to NULL.

@@ -10,7 +10,7 @@ NULL
 default_amis_params <- function() {
   amis_params <- list(n_samples=500, target_ess=500, max_iters=12,
                       boundaries=c(0,1), boundaries_param=NULL, 
-                      log=TRUE, use_induced_prior=TRUE, mixture_samples=1000, df=3,
+                      log=TRUE, use_induced_prior=TRUE, mixture_samples=1000, df=3, q=1,
                       delta=0.01, sigma=NULL, breaks=NULL)
   return(amis_params)
 }
@@ -48,16 +48,20 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   stopifnot("'log' must be a single logical value" = (length(amis_params$log)==1 && is.logical(amis_params$log)))
   delta <- amis_params$delta
   sigma <- amis_params$sigma
+  breaks <- amis_params$breaks
   n_samples <- amis_params$n_samples
   mixture_samples <- amis_params$mixture_samples
   df <- amis_params$df
   target_ess <- amis_params$target_ess
   max_iters <- amis_params$max_iters
   use_induced_prior <- amis_params$use_induced_prior
-  breaks <- amis_params$breaks
   boundaries <- amis_params$boundaries
   boundaries_param <- amis_params$boundaries_param
   boundaries <- as.numeric(boundaries)
+  q <- amis_params$q
+  if(!(is.numeric(q)&&(q>=0)&&(q<=1))){
+    stop("Parameter 'q' must be in [0,1].")
+  }
   if(length(boundaries)!=2){stop("'boundaries' must be a vector of length 2.")}
   if(!(diff(boundaries)>0)){stop("The second element of 'boundaries' must be larger than the first one.")}
   if(!is.null(breaks)){
@@ -443,17 +447,34 @@ calculate_ess <- function(weight_mat,log) {
 #'     \link{calculate_ess}
 #' @param target_size A number representing the target size for the sample.
 #' @param log A logical indicating if the weights are logged.
+#' @param q Parameter (between 0 and 1) controlling how the weights are calculated for active locations. 
 #' @return Vector containing the row sums of the active columns of the weight matrix.
-update_according_to_ess_value <- function(weight_matrix, ess, target_size,log) {
+update_according_to_ess_value <- function(weight_matrix, ess, target_size, log, q) {
   active_cols <- which(ess < target_size)
   if (log) {
-    M<-apply(weight_matrix[,active_cols,drop=FALSE],1,max)
+    ## original version:
+    # M<-apply(weight_matrix[,active_cols,drop=FALSE],1,max)
+    # wh<-which(M==-Inf)
+    # M[wh]<-0
+    # out <- M+log(rowSums(exp(weight_matrix[,active_cols,drop=FALSE]-M)))
+    ## re-scaling depending on q:
+    ratio <- log(((target_size - ess)/(target_size - ess)^q)[active_cols])  # |A|-length vector
+    ratio <- t(replicate(nrow(weight_matrix), ratio))                       # N by |A|
+    new_weight_matrix <- weight_matrix[,active_cols,drop=FALSE] + ratio     # both in log-scale
+    M<-apply(new_weight_matrix,1,max)
     wh<-which(M==-Inf)
     M[wh]<-0
-    return(M+log(rowSums(exp(weight_matrix[,active_cols,drop=FALSE]-M))))
+    out <- M+log(rowSums(exp(new_weight_matrix-M)))
   } else {
-    return(rowSums(weight_matrix[,active_cols,drop=FALSE]))
+    ## original version:
+    # out <- rowSums(weight_matrix[,active_cols,drop=FALSE])
+    ## re-scaling depending on q:
+    ratio <- ((target_size - ess)/(target_size - ess)^q)[active_cols]  # |A|-length vector
+    ratio <- t(replicate(nrow(weight_matrix), ratio))                  # N by |A|
+    new_weight_matrix <- weight_matrix[,active_cols,drop=FALSE] * ratio
+    out <- rowSums(new_weight_matrix)
   }
+  return(out)
 }
 #' Systematic resampling function
 #' 

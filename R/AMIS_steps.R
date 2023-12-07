@@ -457,17 +457,19 @@ update_according_to_ess_value <- function(weight_matrix, ess, target_size, log, 
     # wh<-which(M==-Inf)
     # M[wh]<-0
     # out <- M+log(rowSums(exp(weight_matrix[,active_cols,drop=FALSE]-M)))
+    
     ## re-scaling depending on q:
     ratio <- log(((target_size - ess)/(target_size - ess)^q)[active_cols])  # |A|-length vector
     ratio <- t(replicate(nrow(weight_matrix), ratio))                       # N by |A|
     new_weight_matrix <- weight_matrix[,active_cols,drop=FALSE] + ratio     # both in log-scale
-    M<-apply(new_weight_matrix,1,max)
-    wh<-which(M==-Inf)
-    M[wh]<-0
-    out <- M+log(rowSums(exp(new_weight_matrix-M)))
+    M <- apply(new_weight_matrix,1,max)
+    wh <- which(M==-Inf)
+    M[wh] <- 0
+    out <- M + log(rowSums(exp(new_weight_matrix-M)))
   } else {
     ## original version:
     # out <- rowSums(weight_matrix[,active_cols,drop=FALSE])
+    
     ## re-scaling depending on q:
     ratio <- ((target_size - ess)/(target_size - ess)^q)[active_cols]  # |A|-length vector
     ratio <- t(replicate(nrow(weight_matrix), ratio))                  # N by |A|

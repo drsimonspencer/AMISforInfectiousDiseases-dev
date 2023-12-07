@@ -114,7 +114,7 @@
 amis <- function(prevalence_map, transmission_model, prior, amis_params = default_amis_params(), 
                  seed = NULL, output_dir = NULL, initial_amis_vals = NULL) {
 
-  if(is.null(initial_amis_vals)){
+  if(!is.null(initial_amis_vals)){
     amis_params <- initial_amis_vals$amis_params
     cat("'amis_params' used to generate intermittent outputs will be used again.\n")
   }

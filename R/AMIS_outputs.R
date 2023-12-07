@@ -215,7 +215,7 @@ summary.amis <- function(object, ...) {
   }else{
     which_didnot_exceed_ESS <- which(x$ess < amis_params$target_ess)
     num_below_ESS <- length(which_didnot_exceed_ESS)
-    num_above_ESS <- n_locs - num_above_ESS
+    num_above_ESS <- n_locs - num_below_ESS
     cat(paste0("Number of locations whose ESS exceeded the target ESS:  ",  num_above_ESS, "\n"))
     cat(paste0("Number of locations whose ESS was lower the target ESS:  ",  num_below_ESS, "\n"))
     if(num_below_ESS>0){

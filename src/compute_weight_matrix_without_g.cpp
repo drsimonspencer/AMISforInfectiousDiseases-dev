@@ -1,7 +1,7 @@
 #include <RcppArmadillo.h>
 #include "functions.h"
 
-//' @title  Compute weight matrix without using empirical Radon-Nikodym derivative
+//' @title  Compute weight matrix without using induced prior
 //' @description Compute matrix describing the weights for each parameter sampled, for each
 //' location. One row per sample, one column per location.  Each weight 
 //' is computed based on the empirical Radon-Nikodym derivative, taking into account 
@@ -17,7 +17,7 @@
 //' @return An updated weight matrix.
 //' @noRd
 // [[Rcpp::export]]
-arma::mat compute_weight_matrix_bayesian_Rcpp(const arma::mat& likelihoods, 
+arma::mat compute_weight_matrix_without_g(const arma::mat& likelihoods, 
                                            List amis_params,
                                            const arma::mat& weight_matrix,
                                            arma::uvec& which_valid_sim_prev,

@@ -19,7 +19,7 @@ MY_CPPFLAGS=-g0 -O3
 calc_log_norm_const_gaussian.o: calc_log_norm_const_gaussian.cpp
 	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@
 
-compute_weight_matrix_bayesian.o: compute_weight_matrix_bayesian.cpp
+compute_weight_matrix_without_g.o: compute_weight_matrix_without_g.cpp
 	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(MY_CPPFLAGS) -c $< -o $@	
 	
 compute_weight_matrix_empirical_gauss.o: compute_weight_matrix_empirical_gauss.cpp

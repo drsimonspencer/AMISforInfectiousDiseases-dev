@@ -178,7 +178,7 @@ print.amis <- function(x, ...) {
   }
   cat(paste0("- Lower and upper boundaries for prevalences:  ", 
              paste0(amis_params$boundaries, collapse=", "),"\n"))
-  cat(paste0("- Number of new samples drawn within each AMIS iteration:  ",  amis_params$nsamples,"\n"))
+  cat(paste0("- Number of new samples drawn within each AMIS iteration:  ",  amis_params$n_samples,"\n"))
   cat(paste0("- Maximum number of iterations:  ",  amis_params$max_iters,"\n"))
   cat(paste0("- Target effective sample size:  ",  amis_params$target_ess,"\n"))
   
@@ -203,7 +203,7 @@ summary.amis <- function(object, ...) {
   
   n_locs <- nrow(x$prevalence_map[[1]]$data)
   n_sims_total <- nrow(x$simulated_prevalences)
-  n_iters <- n_sims_total/amis_params$nsamples
+  n_iters <- n_sims_total/amis_params$n_samples
   cat(paste0("- Number of iterations:  ",  n_iters, "\n"))
   cat(paste0("- Total number of simulated samples:  ",  n_sims_total, "\n"))
   cat(paste0("- Target effective sample size:  ",  amis_params$target_ess,"\n"))
@@ -323,8 +323,8 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, datap
       stop("'datapoints' must be either 'proposed' or 'fitted'.")
     }
   }
-  total_nsamples <- nrow(x$simulated_prevalences)
-  last_iteration <- total_nsamples/x$amis_params$nsamples
+  total_n_samples <- nrow(x$simulated_prevalences)
+  last_iteration <- total_n_samples/x$amis_params$n_samples
   if(last_iteration==1){
     stop("Algorithm stoped after one iteration. Therefore, no mixture model has been fitted.")
   }

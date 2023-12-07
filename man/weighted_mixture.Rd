@@ -4,12 +4,12 @@
 \alias{weighted_mixture}
 \title{Fit mixture to weighted sample}
 \usage{
-weighted_mixture(parameters, nsamples, weights, log = F)
+weighted_mixture(parameters, n_samples, weights, log = F)
 }
 \arguments{
 \item{parameters}{An N x d matrix containing the sampled values for the d parameters.}
 
-\item{nsamples}{The number of parameter to resample as data to fit the mixture to.}
+\item{n_samples}{The number of parameter to resample as data to fit the mixture to.}
 
 \item{weights}{A vector of weights with length N.}
 

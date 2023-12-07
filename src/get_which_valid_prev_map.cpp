@@ -128,36 +128,36 @@ arma::ivec get_locations_first_t(List& which_valid_locs_prev_map,
  return(locations_first_t);
 }
 
-//' @title Determine, at which time point, which locations are updated without using Bayesian method
+//' @title Determine, at which time point, which locations are updated using induced prior
 //' @param locations_first_t Vector obtained by locations_first_t
 //' @param n_tims Number of time points
 //' @noRd
 // [[Rcpp::export]]
-List get_locs_empirical(arma::ivec& locations_first_t, int n_tims){
-  List locs_empirical(n_tims);
+List get_locs_with_g(arma::ivec& locations_first_t, int n_tims){
+  List locs_with_g(n_tims);
   for (int t=0; t<n_tims; t++) {
     arma::uvec idx = arma::find(locations_first_t == t);
     if(idx.n_elem>0L){
       arma::uvec locs_empirical_t_arma = idx;
-      locs_empirical[t] = wrap(locs_empirical_t_arma); 
+      locs_with_g[t] = wrap(locs_empirical_t_arma); 
     }
   }
-return(locs_empirical);
+return(locs_with_g);
 }
 
-//' @title Determine, at which time point, which locations are updated using Bayesian method
+//' @title Determine, at which time point, which locations are updated without using induced prior
 //' @param locations_first_t Vector obtained by locations_first_t
 //' @param n_tims Number of time points
 //' @noRd
 // [[Rcpp::export]]
-List get_locs_bayesian(arma::ivec& locations_first_t, int n_tims){
- List locs_bayesian(n_tims);
+List get_locs_without_g(arma::ivec& locations_first_t, int n_tims){
+ List locs_without_g(n_tims);
  for (int t=0; t<n_tims; t++) {
    arma::uvec idx = arma::find((locations_first_t < t) && (locations_first_t != -1L));
    if(idx.n_elem>0L){
-     arma::uvec locs_bayesian_t_arma = idx;
-     locs_bayesian[t] = wrap(locs_bayesian_t_arma);
+     arma::uvec locs_t_arma = idx;
+     locs_without_g[t] = wrap(locs_t_arma);
    }
  }
- return(locs_bayesian);
+ return(locs_without_g);
 }

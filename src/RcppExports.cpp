@@ -24,22 +24,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_weight_matrix_bayesian_Rcpp
-arma::mat compute_weight_matrix_bayesian_Rcpp(const arma::mat& likelihoods, List amis_params, const arma::mat& weight_matrix, arma::uvec& which_valid_sim_prev, arma::uvec& which_invalid_sim_prev, arma::uvec& locs);
-RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_bayesian_Rcpp(SEXP likelihoodsSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP which_valid_sim_prevSEXP, SEXP which_invalid_sim_prevSEXP, SEXP locsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type likelihoods(likelihoodsSEXP);
-    Rcpp::traits::input_parameter< List >::type amis_params(amis_paramsSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type weight_matrix(weight_matrixSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type which_valid_sim_prev(which_valid_sim_prevSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type which_invalid_sim_prev(which_invalid_sim_prevSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_weight_matrix_bayesian_Rcpp(likelihoods, amis_params, weight_matrix, which_valid_sim_prev, which_invalid_sim_prev, locs));
-    return rcpp_result_gen;
-END_RCPP
-}
 // compute_weight_matrix_empirical_gauss
 arma::mat compute_weight_matrix_empirical_gauss(const arma::mat& likelihoods, const arma::vec& prev_sim, List amis_params, const arma::mat& weight_matrix, arma::uvec& which_valid_sim_prev, arma::uvec& which_invalid_sim_prev, arma::uvec& locs);
 RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss(SEXP likelihoodsSEXP, SEXP prev_simSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP which_valid_sim_prevSEXP, SEXP which_invalid_sim_prevSEXP, SEXP locsSEXP) {
@@ -90,6 +74,22 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::uvec& >::type which_invalid_sim_prev(which_invalid_sim_prevSEXP);
     Rcpp::traits::input_parameter< arma::uvec& >::type locs(locsSEXP);
     rcpp_result_gen = Rcpp::wrap(compute_weight_matrix_empirical_uniform(likelihoods, prev_sim, amis_params, weight_matrix, bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, locs));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_weight_matrix_without_g
+arma::mat compute_weight_matrix_without_g(const arma::mat& likelihoods, List amis_params, const arma::mat& weight_matrix, arma::uvec& which_valid_sim_prev, arma::uvec& which_invalid_sim_prev, arma::uvec& locs);
+RcppExport SEXP _AMISforInfectiousDiseases_compute_weight_matrix_without_g(SEXP likelihoodsSEXP, SEXP amis_paramsSEXP, SEXP weight_matrixSEXP, SEXP which_valid_sim_prevSEXP, SEXP which_invalid_sim_prevSEXP, SEXP locsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type likelihoods(likelihoodsSEXP);
+    Rcpp::traits::input_parameter< List >::type amis_params(amis_paramsSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type weight_matrix(weight_matrixSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_valid_sim_prev(which_valid_sim_prevSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_invalid_sim_prev(which_invalid_sim_prevSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type locs(locsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_weight_matrix_without_g(likelihoods, amis_params, weight_matrix, which_valid_sim_prev, which_invalid_sim_prev, locs));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -231,37 +231,37 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// get_locs_empirical
-List get_locs_empirical(arma::ivec& locations_first_t, int n_tims);
-RcppExport SEXP _AMISforInfectiousDiseases_get_locs_empirical(SEXP locations_first_tSEXP, SEXP n_timsSEXP) {
+// get_locs_with_g
+List get_locs_with_g(arma::ivec& locations_first_t, int n_tims);
+RcppExport SEXP _AMISforInfectiousDiseases_get_locs_with_g(SEXP locations_first_tSEXP, SEXP n_timsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::ivec& >::type locations_first_t(locations_first_tSEXP);
     Rcpp::traits::input_parameter< int >::type n_tims(n_timsSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_locs_empirical(locations_first_t, n_tims));
+    rcpp_result_gen = Rcpp::wrap(get_locs_with_g(locations_first_t, n_tims));
     return rcpp_result_gen;
 END_RCPP
 }
-// get_locs_bayesian
-List get_locs_bayesian(arma::ivec& locations_first_t, int n_tims);
-RcppExport SEXP _AMISforInfectiousDiseases_get_locs_bayesian(SEXP locations_first_tSEXP, SEXP n_timsSEXP) {
+// get_locs_without_g
+List get_locs_without_g(arma::ivec& locations_first_t, int n_tims);
+RcppExport SEXP _AMISforInfectiousDiseases_get_locs_without_g(SEXP locations_first_tSEXP, SEXP n_timsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::ivec& >::type locations_first_t(locations_first_tSEXP);
     Rcpp::traits::input_parameter< int >::type n_tims(n_timsSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_locs_bayesian(locations_first_t, n_tims));
+    rcpp_result_gen = Rcpp::wrap(get_locs_without_g(locations_first_t, n_tims));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_AMISforInfectiousDiseases_calc_log_norm_const_gaussian", (DL_FUNC) &_AMISforInfectiousDiseases_calc_log_norm_const_gaussian, 3},
-    {"_AMISforInfectiousDiseases_compute_weight_matrix_bayesian_Rcpp", (DL_FUNC) &_AMISforInfectiousDiseases_compute_weight_matrix_bayesian_Rcpp, 6},
     {"_AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss", (DL_FUNC) &_AMISforInfectiousDiseases_compute_weight_matrix_empirical_gauss, 7},
     {"_AMISforInfectiousDiseases_compute_weight_matrix_empirical_histogram", (DL_FUNC) &_AMISforInfectiousDiseases_compute_weight_matrix_empirical_histogram, 8},
     {"_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform", (DL_FUNC) &_AMISforInfectiousDiseases_compute_weight_matrix_empirical_uniform, 8},
+    {"_AMISforInfectiousDiseases_compute_weight_matrix_without_g", (DL_FUNC) &_AMISforInfectiousDiseases_compute_weight_matrix_without_g, 6},
     {"_AMISforInfectiousDiseases_f_estimator_Gaussian", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_Gaussian, 7},
     {"_AMISforInfectiousDiseases_f_estimator_histogram", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_histogram, 5},
     {"_AMISforInfectiousDiseases_f_estimator_uniform", (DL_FUNC) &_AMISforInfectiousDiseases_f_estimator_uniform, 7},
@@ -271,8 +271,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_AMISforInfectiousDiseases_get_which_valid_prev_map", (DL_FUNC) &_AMISforInfectiousDiseases_get_which_valid_prev_map, 2},
     {"_AMISforInfectiousDiseases_get_which_valid_locs_prev_map", (DL_FUNC) &_AMISforInfectiousDiseases_get_which_valid_locs_prev_map, 3},
     {"_AMISforInfectiousDiseases_get_locations_first_t", (DL_FUNC) &_AMISforInfectiousDiseases_get_locations_first_t, 3},
-    {"_AMISforInfectiousDiseases_get_locs_empirical", (DL_FUNC) &_AMISforInfectiousDiseases_get_locs_empirical, 2},
-    {"_AMISforInfectiousDiseases_get_locs_bayesian", (DL_FUNC) &_AMISforInfectiousDiseases_get_locs_bayesian, 2},
+    {"_AMISforInfectiousDiseases_get_locs_with_g", (DL_FUNC) &_AMISforInfectiousDiseases_get_locs_with_g, 2},
+    {"_AMISforInfectiousDiseases_get_locs_without_g", (DL_FUNC) &_AMISforInfectiousDiseases_get_locs_without_g, 2},
     {NULL, NULL, 0}
 };
 

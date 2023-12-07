@@ -4,10 +4,10 @@
 \alias{systematic_sample}
 \title{Systematic resampling function}
 \usage{
-systematic_sample(nsamples, weights, log = F)
+systematic_sample(n_samples, weights, log = F)
 }
 \arguments{
-\item{nsamples}{number of samples to draw}
+\item{n_samples}{number of samples to draw}
 
 \item{weights}{vector of length equal to the number of particles, containing their weights}
 

@@ -33,14 +33,22 @@ amis_output <- AMISforInfectiousDiseases::amis(prevalence_map, transmission_mode
 - `transmission_model`: A function implementing the model. It can be anything, as
   long as it conforms to a specific interface. See defining a model
   function.
+- `prior`: A list containing the functions dprior and rprior (density and RNG, respectively).
 - `amis_params`: A list containing the parameters for the AMIS algorithm, such as:
-  - `nsamples`: The number of sample parameters to draw at each iteration.
-  - `boundaries`: Lower and upper boundaries for prevalences.
-  - `mixture_samples`: The number of samples drawn from the weighted distribution to fit a new mixture to.
+  - `n_samples`: The number of sample parameters to draw at each iteration.
   - `target_ess`: The target effective sample size.
   - `max_iters`: The maximum number of iterations.
-  - `delta`, `sigma`, `breaks`: Options for density estimation used in the Randon-Nikodym derivative.
-  - `log`: logical indicating whether to work with log weights. 
+  - `boundaries`: Lower and upper boundaries for prevalences.
+  - `boundaries_param`: Lower and upper boundaries for parameters.
+  - `log`: logical indicating whether to work with log weights.
+  - `use_induced_prior`: logical indicating whether induced prior density is used in the update of weights.
+  - `mixture_samples`: The number of samples drawn from the weighted distribution to fit a new mixture to.
+  - `df`: degrees of freedom in the t-distributions, used yield a heavy tailed proposal.
+  - `delta`, `sigma`, `breaks`: Options for density estimation used in the pseudo-likelihood and induced prior density.
+- `seed`: Optional seed for the random number generator.
+- `output_dir`: An optional string specifying the local directory where to save outputs after each iteration of the algorithm.
+- `initial_amis_vals`: Optional list of intermittent outputs from a previous run.
+  
   
 ## Defining a model function
 

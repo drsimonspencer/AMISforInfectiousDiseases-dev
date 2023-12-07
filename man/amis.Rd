@@ -8,8 +8,9 @@ amis(
   prevalence_map,
   transmission_model,
   prior,
-  amis_params,
+  amis_params = default_amis_params(),
   seed = NULL,
+  output_dir = NULL,
   initial_amis_vals = NULL
 )
 }
@@ -58,25 +59,18 @@ The only argument of \code{rprior} must be a single integer \eqn{n} that determi
 \code{rprior} must produce an \eqn{n \times d} \bold{matrix} of parameters, even when \eqn{d=1}.
 Parameter names are inherited from the \code{colnames} from the output of \code{rprior} if possible.}
 
-\item{amis_params}{A list containing the control parameters for the AMIS algorithm:
+\item{amis_params}{A list containing the control parameters for the AMIS algorithm (type default_amis_params() to see default values):
 \describe{
-\item{\code{nsamples}}{Number of new samples drawn within each AMIS iteration. Default to 500.}
+\item{\code{n_samples}}{Number of new samples drawn within each AMIS iteration. Default to 500.}
 \item{\code{target_ess}}{Target effective sample size. Default to 500.}
 \item{\code{max_iters}}{Maximum number of AMIS iterations. Default to 12.}
-\item{\code{output_dir}}{A string specifying the local directory
-where to save outputs after each iteration of the algorithm. At the end of the string,
-use the correct path separator for your OS system. If the directory is specified,
-the outputs will be saved in a file called 'amis_output.rds'.
-Default to NA (i.e. outputs are not saved in a local directory).}
 \item{\code{boundaries}}{A vector of length two with the left and right boundaries for prevalences.
 Default to \code{c(0,1)}. If left boundary is zero and there is no right boundary,
 set \code{boundaries = c(0,Inf)}.}
 \item{\code{boundaries_param}}{If specified, it should be a \eqn{d \times 2} matrix
 with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to NULL.}
-\item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to FALSE.}
-\item{\code{bayesian}}{Logical indicating whether the update of weights is Bayesian or not.
-Default to FALSE. If set to TRUE, the likelihood is not divided by the induced prior
-over the simulated prevalences when updating weights.}
+\item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to TRUE}
+\item{\code{use_induced_prior}}{Logical indicating whether the induced prior density is to be used in the update of weights. Default to TRUE.}
 \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
 \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
 \item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to 0.01.}
@@ -92,10 +86,15 @@ If \code{breaks} is provided, then histogram-based method will supersede all the
 
 \item{seed}{Optional seed for the random number generator.}
 
+\item{output_dir}{A string specifying the local directory where to save outputs
+after each iteration of the algorithm. At the end of the string,
+use the correct path separator for your machine's operating system.
+If the directory is specified, the outputs will be saved in a file called 'amis_output.rds'.
+Default to NULL (i.e. outputs are not saved in a local directory).}
+
 \item{initial_amis_vals}{Optional list of intermittent outputs from a
 previous run (where at least one iteration was successful). These outputs can
-be saved by specifying the directory `\code{output_dir}' (see \code{amis_params})
-before running \code{\link{amis}}.}
+be saved by specifying the directory `\code{output_dir}' before running \code{\link{amis}}.}
 }
 \value{
 A list of class '\code{amis}' containing:

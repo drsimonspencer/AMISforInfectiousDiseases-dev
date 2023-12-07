@@ -49,25 +49,18 @@
 #' The only argument of \code{rprior} must be a single integer \eqn{n} that determines the number of samples to draw. 
 #' \code{rprior} must produce an \eqn{n \times d} \bold{matrix} of parameters, even when \eqn{d=1}.
 #' Parameter names are inherited from the \code{colnames} from the output of \code{rprior} if possible.
-#' @param amis_params A list containing the control parameters for the AMIS algorithm:
+#' @param amis_params A list containing the control parameters for the AMIS algorithm (type default_amis_params() to see default values):
 #' \describe{
-#' \item{\code{nsamples}}{Number of new samples drawn within each AMIS iteration. Default to 500.}
+#' \item{\code{n_samples}}{Number of new samples drawn within each AMIS iteration. Default to 500.}
 #' \item{\code{target_ess}}{Target effective sample size. Default to 500.}
 #' \item{\code{max_iters}}{Maximum number of AMIS iterations. Default to 12.}
-#' \item{\code{output_dir}}{A string specifying the local directory 
-#' where to save outputs after each iteration of the algorithm. At the end of the string, 
-#' use the correct path separator for your OS system. If the directory is specified, 
-#' the outputs will be saved in a file called 'amis_output.rds'. 
-#' Default to NA (i.e. outputs are not saved in a local directory).}
 #' \item{\code{boundaries}}{A vector of length two with the left and right boundaries for prevalences. 
 #' Default to \code{c(0,1)}. If left boundary is zero and there is no right boundary, 
 #' set \code{boundaries = c(0,Inf)}.}
 #' \item{\code{boundaries_param}}{If specified, it should be a \eqn{d \times 2} matrix 
 #' with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to NULL.}
-#' \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to FALSE.}
-#' \item{\code{bayesian}}{Logical indicating whether the update of weights is Bayesian or not. 
-#' Default to FALSE. If set to TRUE, the likelihood is not divided by the induced prior 
-#' over the simulated prevalences when updating weights.}
+#' \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to TRUE}
+#' \item{\code{use_induced_prior}}{Logical indicating whether the induced prior density is to be used in the update of weights. Default to TRUE.}
 #' \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
 #' \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
 #' \item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to 0.01.}
@@ -81,10 +74,14 @@
 #' If \code{sigma} is provided, then Gaussian kernel will be used instead. 
 #' If \code{breaks} is provided, then histogram-based method will supersede all the other methods.
 #' @param seed Optional seed for the random number generator.
+#' @param output_dir A string specifying the local directory where to save outputs 
+#' after each iteration of the algorithm. At the end of the string, 
+#' use the correct path separator for your machine's operating system. 
+#' If the directory is specified, the outputs will be saved in a file called 'amis_output.rds'. 
+#' Default to NULL (i.e. outputs are not saved in a local directory).
 #' @param initial_amis_vals Optional list of intermittent outputs from a 
 #' previous run (where at least one iteration was successful). These outputs can 
-#' be saved by specifying the directory `\code{output_dir}' (see \code{amis_params}) 
-#' before running \code{\link{amis}}. 
+#' be saved by specifying the directory `\code{output_dir}' before running \code{\link{amis}}. 
 #' @return A list of class '\code{amis}' containing:
 #' \describe{
 #' \item{\code{seeds}}{Vector with the simulation seeds that were used.}
@@ -111,22 +108,25 @@
 #' \item{\code{amis_params}}{List supplied by the user.}
 #' }
 #' @export
-amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = NULL, initial_amis_vals = NULL) {
+amis <- function(prevalence_map, transmission_model, prior, amis_params = default_amis_params(), 
+                 seed = NULL, output_dir = NULL, initial_amis_vals = NULL) {
+
+  if(is.null(initial_amis_vals)){
+    amis_params <- initial_amis_vals$amis_params
+    cat("'amis_params' used to generate intermittent outputs will be used again.\n")
+  }
+  
+  directory <- output_dir
 
   # Checks
-  checks <- check_inputs(prevalence_map, transmission_model, prior, amis_params, seed)
+  checks <- check_inputs(prevalence_map, transmission_model, prior, amis_params, seed, output_dir)
   locations_with_no_data <- checks$locs_no_data
-
-  directory <- amis_params[["output_dir"]]
-  if (!is.na(directory)){
-    if(!dir.exists(directory)){dir.create(directory)}
-  }
   
   save_output <- function(){
     if (is.null(initial_amis_vals)){
-      allseeds <- 1:(niter * nsamples)
+      allseeds <- 1:(niter * n_samples)
     } else {
-      allseeds <- c(1:(initial_amis_vals$last_simulation_seed + (niter * nsamples)))
+      allseeds <- c(1:(initial_amis_vals$last_simulation_seed + (niter * n_samples)))
     }
     if (is.null(rownames(prevalence_map[[1]]$data))) {
       iunames <- sapply(1:dim(weight_matrix)[2], function(idx) sprintf("iu%g", idx))
@@ -171,7 +171,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   use_gaussian_kernel <- ifelse(is.null(amis_params[["breaks"]]) && !is.null(amis_params[["sigma"]]), TRUE, FALSE)
   boundaries <- amis_params[["boundaries"]]
   boundaries_param <- amis_params[["boundaries_param"]]
-  nsamples <- amis_params[["nsamples"]]
+  n_samples <- amis_params[["n_samples"]]
   nparams <- ncol(prior$rprior(1))
   n_tims <- length(prevalence_map)
   n_locs <- dim(prevalence_map[[1]]$data)[1]
@@ -180,8 +180,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   which_valid_locs_prev_map <- get_which_valid_locs_prev_map(which_valid_prev_map, n_tims, n_locs)
   # Determine at which time, for each location, denominator g will be calculated for
   locations_first_t <- get_locations_first_t(which_valid_locs_prev_map, n_tims, n_locs)
-  locs_empirical <- get_locs_empirical(locations_first_t, n_tims)
-  locs_bayesian <- get_locs_bayesian(locations_first_t, n_tims)
+  locs_with_g <- get_locs_with_g(locations_first_t, n_tims)
+  locs_without_g <- get_locs_without_g(locations_first_t, n_tims)
   # calculate normalising constant for truncated Gaussian kernel
   log_norm_const_gaussian <- array(NA, c(1,1,1))  # for the Gaussian kernel case only, but needs to be declared
   if(use_gaussian_kernel){
@@ -202,24 +202,24 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     cat("AMIS iteration 1\n")
     cat("Initialising algorithm by sampling the first set of parameters from the prior. \n")
     # Sample first set of parameters from the prior
-    param <- prior$rprior(nsamples)
+    param <- prior$rprior(n_samples)
     if(!is.matrix(param)) {stop("rprior function must produce a MATRIX of size #simulations by #parameters, even when #parameters is equal to 1. \n")}
     if(any(is.na(param))){warning("At least one sample from the prior was NA or NaN. \n")}
-    if(ncol(param)==1 && amis_params[["bayesian"]]==F) {warning("Currently running with amis_params[['bayesian']]==FALSE. For models with only one parameter it is recommended to set amis_params[['bayesian']] = TRUE for prior to influence the weights calculation.\n")}
+    if(ncol(param)==1 && amis_params[["use_induced_prior"]]==T) {warning("Currently running with amis_params[['use_induced_prior']]=TRUE. For models with only one parameter it is recommended to set amis_params[['use_induced_prior']]=FALSE for prior to influence the weights calculation.\n")}
     # To avoid duplication, evaluate prior density now.
-    prior_density <- sapply(1:nsamples,function(b) {prior$dprior(param[b,],log=amis_params[["log"]])})
-    if(length(prior_density)!=nsamples) {stop("Output from dprior function must have length 1. \n")}
+    prior_density <- sapply(1:n_samples,function(b) {prior$dprior(param[b,],log=amis_params[["log"]])})
+    if(length(prior_density)!=n_samples) {stop("Output from dprior function must have length 1. \n")}
     if(any(is.na(prior_density))){warning("At least one prior density evaluation was NA or NaN. \n")}
     # Simulate from transmission model
-    simulated_prevalences <- transmission_model(seeds = 1:nsamples, param, n_tims)
+    simulated_prevalences <- transmission_model(seeds = 1:n_samples, param, n_tims)
     if(!is.matrix(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, transmission_model function should produce a MATRIX of size #simulations by #timepoints, even when #timepoints is equal to 1. \n")}
     if(nrow(param) != nrow(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of rows in matrices from transmission_model and rprior functions must be equal (#simulations). \n")}
     if(length(prevalence_map) != ncol(simulated_prevalences)) {warning("Unless specifying a bespoke likelihood function, number of timepoints in prevalence_map and the number of columns in output from transmission_model function must be equal to #timepoints. \n")}
     # Check validity of simulated prevalences
     bool_valid_sim_prev <- (simulated_prevalences>=boundaries[1]) & (simulated_prevalences<=boundaries[2]) & is.finite(simulated_prevalences)
     if(!is.null(boundaries_param)){
-      bool_valid_sim_param <- rep(T, nsamples)
-      for(i_samp in 1:nsamples){
+      bool_valid_sim_param <- rep(T, n_samples)
+      for(i_samp in 1:n_samples){
         bool_valid_sim_param[i_samp] <- all((param[i_samp,]>=boundaries_param[,1])&(param[i_samp,]<=boundaries_param[,2]))
       }
       prior_density[!bool_valid_sim_param] <- ifelse(amis_params[["log"]], -Inf, 0)
@@ -234,7 +234,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
     # Update weight matrix
     weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, amis_params,
-      first_weight = rep(1-amis_params[["log"]], nsamples), locs_empirical, locs_bayesian,
+      first_weight = rep(1-amis_params[["log"]], n_samples), locs_with_g, locs_without_g,
       bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, which_valid_locs_prev_map, 
       locations_with_no_data)
     if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
@@ -250,9 +250,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       Mean = list(), # list of means for each component
       probs = list() # probability of each component (unnormalised)
     )
-    seeds <- function(iter) ((iter - 1) * nsamples + 1):(iter * nsamples)  # function to calculate the seeds for iteration iter.
+    seeds <- function(iter) ((iter - 1) * n_samples + 1):(iter * n_samples)  # function to calculate the seeds for iteration iter.
     niter <- 1 # number of completed iterations 
-    if (!is.na(directory)){
+    if (!is.null(directory)){
       res <- save_output()
       saveRDS(res, file = paste0(directory,"amis_output.rds"))
     }
@@ -265,7 +265,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       if(!is.null(initial_amis_vals[[d]])){
         initial_amis_vals[[d]]
       } else {
-        stop(paste0("Cannot find object 'initial_amis_vals[['",d,"']]'. To initialise from a previous run, use object saved by specifying amis_params[['output_dir']].\n"))
+        stop(paste0("Cannot find object 'initial_amis_vals[['",d,"']]'. To initialise from a previous run, use object saved by specifying 'output_dir'.\n"))
       }
     }
     simulated_prevalences = check_initial_vals("simulated_prevalences")
@@ -275,13 +275,13 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
     components <- check_initial_vals("components")
     param <- check_initial_vals("param")
     prior_density <- check_initial_vals("prior_density")
-    seeds <- function(iter) ((iter - 2) * nsamples + 1):((iter - 1) * nsamples) + initial_amis_vals$last_simulation_seed #function to calculate the seeds for iteration iter.
+    seeds <- function(iter) ((iter - 2) * n_samples + 1):((iter - 1) * n_samples) + initial_amis_vals$last_simulation_seed #function to calculate the seeds for iteration iter.
     niter <- 0 # number of completed iterations
   }
   
   ess_per_iteration <- cbind(ess_per_iteration, ess)
   # Define first_weight object in case target_ess reached in first iteration
-  first_weight = rep(1-amis_params[["log"]], nsamples)
+  first_weight = rep(1-amis_params[["log"]], n_samples)
   # Continue if target_ess not yet reached
   if (min(ess) >= amis_params[["target_ess"]]){
     cat("----------------------- \n")
@@ -298,14 +298,14 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       mixture <- weighted_mixture(param, amis_params[["mixture_samples"]], mean_weights, amis_params[["log"]])
       cat("  A",mixture$G,"component mixture has been fitted.\n")
       components <- update_mixture_components(mixture, components, iter)
-      new_params <- sample_new_parameters(mixture, nsamples, amis_params[["df"]], prior, amis_params[["log"]])
+      new_params <- sample_new_parameters(mixture, n_samples, amis_params[["df"]], prior, amis_params[["log"]])
       components_per_iteration[[iter]] <- update_Mclust_object(mixture, new_params)
       # Check validity of sampled parameters
       if(any(is.na(new_params$params))){warning("At least one sample from the proposal after the first iteration of AMIS was NA or NaN. \n")}
       param <- rbind(param, new_params$params)
       if(!is.null(boundaries_param)){
-        bool_valid_sim_param_iter <- rep(T, nsamples)
-        for(i_samp in 1:nsamples){
+        bool_valid_sim_param_iter <- rep(T, n_samples)
+        for(i_samp in 1:n_samples){
           bool_valid_sim_param_iter[i_samp] <- all((new_params$params[i_samp,]>=boundaries_param[,1])&(new_params$params[i_samp,]<=boundaries_param[,2]))
         }
         new_params$prior_density[!bool_valid_sim_param_iter] <- ifelse(amis_params[["log"]], -Inf, 0)
@@ -319,9 +319,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       }
       bool_valid_sim_prev <- rbind(bool_valid_sim_prev, bool_valid_sim_prev_iter)
       which_valid_sim_prev_iter <- lapply(1:n_tims, function(t) which(bool_valid_sim_prev_iter[,t])-1L)
-      which_valid_sim_prev <- lapply(1:n_tims, function(t) c(which_valid_sim_prev[[t]], which_valid_sim_prev_iter[[t]]+nsamples*(iter-1)))
+      which_valid_sim_prev <- lapply(1:n_tims, function(t) c(which_valid_sim_prev[[t]], which_valid_sim_prev_iter[[t]]+n_samples*(iter-1)))
       which_invalid_sim_prev_iter <- lapply(1:n_tims, function(t) which(!bool_valid_sim_prev_iter[,t])-1L)
-      which_invalid_sim_prev <- lapply(1:n_tims, function(t) c(which_invalid_sim_prev[[t]], which_invalid_sim_prev_iter[[t]]+nsamples*(iter-1)))
+      which_invalid_sim_prev <- lapply(1:n_tims, function(t) c(which_invalid_sim_prev[[t]], which_invalid_sim_prev_iter[[t]]+n_samples*(iter-1)))
       simulated_prevalences <- rbind(simulated_prevalences,new_prevalences)
       # Evaluate likelihood
       likelihoods <- compute_likelihood(new_params$params,prevalence_map,new_prevalences,amis_params, 
@@ -332,7 +332,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       first_weight <- compute_prior_proposal_ratio(components, param, prior_density, amis_params[["df"]], amis_params[["log"]]) # Prior/proposal
       weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, 
                                              amis_params, first_weight,
-                                             locs_empirical, locs_bayesian,
+                                             locs_with_g, locs_without_g,
                                              bool_valid_sim_prev, which_valid_sim_prev, 
                                              which_invalid_sim_prev, which_valid_locs_prev_map, 
                                              locations_with_no_data)
@@ -343,7 +343,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
       cat(paste0("  min ESS:", round(min(ess)),", mean ESS:", round(mean(ess)),", max ESS:", round(max(ess)),"\n"))
       cat(paste0("  ",sum(ess<amis_params[["target_ess"]])," locations are below the target ESS.\n"))
       niter <- niter + 1
-      if (!is.na(directory)){
+      if (!is.null(directory)){
         res <- save_output()
         saveRDS(res, file = paste0(directory,"amis_output.rds"))
       }
@@ -363,8 +363,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params, seed = 
   # Save output
   output <- save_output()
   
-  # Calculate model evidence only if bayesian==TRUE
-  if (amis_params[["bayesian"]]){
+  # Calculate model evidence only if use_induced_prior==FALSE
+  if (!amis_params[["use_induced_prior"]]){
     model_evidence <- NULL
     warning("model_evidence not calculated. Function compute_model_evidence() is under development.")
     # model_evidence <- compute_model_evidence(likelihoods, amis_params, first_weight)

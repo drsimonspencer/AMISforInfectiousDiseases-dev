@@ -356,6 +356,37 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, datap
       for(i in 1:n){
         z[i,comp_idx[i]] <- 1
       }
+      # not displaying samples that will be given zero weight
+      # ... because of zero prior density:
+      wh_delete <- NULL
+      n_samples <- x$amis_params$n_samples
+      idx <- 1:n_samples + n_samples*(iteration-1)
+      prior_densities <- x$prior_density[idx]
+      if(x$amis_params$log){
+        wh_delete <- which(prior_densities==-Inf)
+      }else{
+        wh_delete <- which(prior_densities==0)
+      }
+      # ... because they are out of parameter boundaries:
+      if(!is.null(x$amis_params$boundaries_param)){
+        nrows <- nrow(clustering$data)
+        ncols <- ncol(clustering$data)
+        for(j in 1:ncols){
+          boundaries <- x$amis_params$boundaries_param[j,]
+          for(i in 1:nrows){
+            if(clustering$data[i,j]<boundaries[1] || clustering$data[i,j]>boundaries[2]){
+              wh_delete <- c(wh_delete, i)
+            }
+          }
+        }
+      }
+      wh_delete <- unique(wh_delete)
+      if(length(wh_delete)>0){
+        clustering$data <- clustering$data[-wh_delete,]
+        z <- z[-wh_delete,]
+        n <- nrow(z)
+        clustering$n <- n  
+      }
       clustering$z <- z
     }else if(datapoints=="fitted"){
       # forcing same point sizes

@@ -305,8 +305,7 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 #'   The colours indicate which mixture components the samples were simulated from.}
 #'   \item{\code{"fitted"}}{datapoints will show the samples that the mixture model was fitted to, 
 #'   i.e. weighted samples from the previous iteration. 
-#'   The colour of a datapoint indicates the most likely mixture component the sample belongs to, and 
-#'   the point size represents the probability that the sample belongs to that component.}
+#'   The colour of a datapoint indicates the most likely mixture component the sample belongs to.}
 #' }
 #' 
 #' @param ... Other arguments to match the \code{plot.Mclust} function
@@ -352,12 +351,23 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, datap
       clustering$n <- n
       comp_idx <- clustering$compon_proposal
       G <- clustering$G
+      # forcing same point sizes
       z <- matrix(0, n, G)
       for(i in 1:n){
         z[i,comp_idx[i]] <- 1
       }
       clustering$z <- z
     }else if(datapoints=="fitted"){
+      # forcing same point sizes
+      z <- clustering$z
+      ncols <- ncol(z)
+      for(i in 1:nrow(z)){
+        which_comp <- which.max(z[i,])
+        rest <- (1:ncols)[-which_comp]
+        z[i,which_comp] <- 1
+        z[i,rest] <- 0
+      }
+      clustering$z <- z
       cat(paste0("Plotting components of the fitted mixture model at iteration ", iteration, " and weighted samples of the previous iteration...\n"))
     }
     colnames(clustering$data) <- colnames(x$param)

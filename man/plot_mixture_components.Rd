@@ -33,8 +33,7 @@ plot of classification uncertainty:
 The colours indicate which mixture components the samples were simulated from.}
 \item{\code{"fitted"}}{datapoints will show the samples that the mixture model was fitted to,
 i.e. weighted samples from the previous iteration.
-The colour of a datapoint indicates the most likely mixture component the sample belongs to, and
-the point size represents the probability that the sample belongs to that component.}
+The colour of a datapoint indicates the most likely mixture component the sample belongs to.}
 }}
 
 \item{...}{Other arguments to match the \code{plot.Mclust} function}

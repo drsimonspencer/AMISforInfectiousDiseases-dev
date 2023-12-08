@@ -9,6 +9,7 @@ plot_mixture_components(
   what = "uncertainty",
   iteration = NULL,
   datapoints = "proposed",
+  main = NULL,
   ...
 )
 }
@@ -35,6 +36,8 @@ The colours indicate which mixture components the samples were simulated from.}
 i.e. weighted samples from the previous iteration.
 The colour of a datapoint indicates the most likely mixture component the sample belongs to.}
 }}
+
+\item{main}{Title of the plot. If NULL, the default title will be displayed. Set to NA for omitting title.}
 
 \item{...}{Other arguments to match the \code{plot.Mclust} function}
 }

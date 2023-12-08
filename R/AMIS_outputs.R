@@ -307,11 +307,12 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 #'   i.e. weighted samples from the previous iteration. 
 #'   The colour of a datapoint indicates the most likely mixture component the sample belongs to.}
 #' }
-#' 
+#' @param main Title of the plot. If NULL, the default title will be displayed. Set to NA for omitting title.
 #' @param ... Other arguments to match the \code{plot.Mclust} function
 #' @return A plot for model-based clustering results.
 #' @export
-plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, datapoints="proposed",...) {
+plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, 
+                                    datapoints="proposed", main=NULL, ...) {
   if(!inherits(x, "amis")){
     stop("'x' must be of type 'amis'")
   }
@@ -403,13 +404,26 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, datap
     }
     colnames(clustering$data) <- colnames(x$param)
     mclust::plot.Mclust(clustering, what = what, ...)
+    if(datapoints=="proposed"){
+      default_main <- "Proposed Parameter Values"
+    }else if(datapoints=="fitted"){
+      default_main <- "Parameter Values that the Mixture Model Was Fitted To"
+    }
+    main <- ifelse(is.null(main), default_main, main)
+    title(main = main)
   }else if(what=="density"){
+    xlab = colnames(x$param)[1]
+    ylab = colnames(x$param)[2]
     cat(paste0("Plotting density of the mixture model at iteration ", iteration, "...\n"))
-    mclust::plot.Mclust(clustering, what = what, ...)
+    mclust::plot.Mclust(clustering, what=what, xlab=xlab, ylab=ylab, ...)
+    main <- ifelse(is.null(main), "Proposal Density", main)
+    title(main = main)
   }else if(what=="BIC"){
     cat(paste0("Plotting BIC against number of components at iteration ", iteration, "...\n"))
     mclust::plot.Mclust(clustering, what = what, 
-                        legendArgs = list(plot=FALSE), ...)
+                        legendArgs = list(plot=FALSE), xlab="Number of Components", ...)
+    main <- ifelse(is.null(main), "BIC", main)
+    title(main = main)
   }
   
 }

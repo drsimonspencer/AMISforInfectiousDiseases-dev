@@ -309,6 +309,7 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 #' }
 #' @param main Title of the plot. If NULL, the default title will be displayed. Set to NA for omitting title.
 #' @param ... Other arguments to match the \code{plot.Mclust} function
+#' @importFrom graphics title
 #' @return A plot for model-based clustering results.
 #' @export
 plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, 

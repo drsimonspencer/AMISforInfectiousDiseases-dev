@@ -59,6 +59,7 @@ fit_mixture<-function(dat,max.components=10) {
   rownames(BICmatrix) <- 1:max.components
   clustering$BIC <- BICmatrix
   clustering$data <- dat
+  clustering$hypvol <- NA
   class(clustering) <- "Mclust"
   return(list(G=G,probs=clustering$parameters$pro,Mean=matrix(clustering$parameters$mean,d,G),
               Sigma=array(clustering$parameters$variance$sigma,c(d,d,G)),BIC=BIC,modelName=clustering$modelName, 

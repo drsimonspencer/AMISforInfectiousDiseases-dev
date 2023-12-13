@@ -413,10 +413,17 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL,
     main <- ifelse(is.null(main), default_main, main)
     title(main = main)
   }else if(what=="density"){
-    xlab = colnames(x$param)[1]
-    ylab = colnames(x$param)[2]
+    param_names <- colnames(out$param)
+    d <- length(param_names)
+    # xlab = colnames(x$param)[1]
+    # ylab = colnames(x$param)[2]
     cat(paste0("Plotting density of the mixture model at iteration ", iteration, "...\n"))
-    mclust::plot.Mclust(clustering, what=what, xlab=xlab, ylab=ylab, ...)
+    # mclust::plot.Mclust(clustering, what=what, xlab=xlab, ylab=ylab, ...)
+    if(d==1){
+      mclust::plot.Mclust(clustering, what=what, xlab=param_names)
+    }else{
+      mclust::plot.Mclust(clustering, what=what, ...)  
+    }
     main <- ifelse(is.null(main), "Proposal Density", main)
     title(main = main)
   }else if(what=="BIC"){

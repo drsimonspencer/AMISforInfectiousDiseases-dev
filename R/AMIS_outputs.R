@@ -313,7 +313,7 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 #' @return A plot for model-based clustering results.
 #' @export
 plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, 
-                                    datapoints="proposed", main=NULL, ...) {
+                                    datapoints="proposed", main=NULL, xlim=NULL, ylim=NULL, ...) {
   if(!inherits(x, "amis")){
     stop("'x' must be of type 'amis'")
   }
@@ -344,6 +344,9 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL,
     }
   }
   clustering <- x$components_per_iteration[[iteration]]
+  
+  param_names <- colnames(x$param)
+  d <- length(param_names)
   
   if(what=="uncertainty"){
     if(datapoints=="proposed"){
@@ -404,7 +407,7 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL,
       cat(paste0("Plotting components of the fitted mixture model at iteration ", iteration, " and weighted samples of the previous iteration...\n"))
     }
     colnames(clustering$data) <- colnames(x$param)
-    mclust::plot.Mclust(clustering, what = what, ...)
+    mclust::plot.Mclust(clustering, what = what, xlim=xlim, ylim=ylim, ...)
     if(datapoints=="proposed"){
       default_main <- "Proposed Parameter Values"
     }else if(datapoints=="fitted"){
@@ -413,16 +416,14 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL,
     main <- ifelse(is.null(main), default_main, main)
     title(main = main)
   }else if(what=="density"){
-    param_names <- colnames(out$param)
-    d <- length(param_names)
     # xlab = colnames(x$param)[1]
     # ylab = colnames(x$param)[2]
     cat(paste0("Plotting density of the mixture model at iteration ", iteration, "...\n"))
     # mclust::plot.Mclust(clustering, what=what, xlab=xlab, ylab=ylab, ...)
     if(d==1){
-      mclust::plot.Mclust(clustering, what=what, xlab=param_names)
+      mclust::plot.Mclust(clustering, what=what, xlab=param_names, xlim=xlim, ylim=ylim, ...)
     }else{
-      mclust::plot.Mclust(clustering, what=what, ...)  
+      mclust::plot.Mclust(clustering, what=what, xlim=xlim, ylim=ylim, ...)  
     }
     main <- ifelse(is.null(main), "Proposal Density", main)
     title(main = main)

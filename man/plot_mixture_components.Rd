@@ -10,6 +10,8 @@ plot_mixture_components(
   iteration = NULL,
   datapoints = "proposed",
   main = NULL,
+  xlim = NULL,
+  ylim = NULL,
   ...
 )
 }

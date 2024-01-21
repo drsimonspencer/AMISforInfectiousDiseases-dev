@@ -6,3 +6,4 @@ tests/.Rhistory
 **/.Rhistory
 files/
 output/
+inst/doc

@@ -673,13 +673,15 @@ compute_prior_proposal_ratio <- function(components, param, prior_density, df, l
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
 #' @param first_weight A vector containing the values for the right hand side of
 #'     the weight expression. 
-#' @return estimate of the model evidence.
+#' @return A list containing an estimate of the log model evidence and corresponding log variance of this estimate for both the full likelihood model 
+#'     (product over all locations), and for each location individually.
 #' @noRd
 compute_model_evidence <- function(likelihoods, amis_params, first_weight){
   n_tims <- dim(likelihoods)[1]
   n_locs <- dim(likelihoods)[2]
   n_sims <- dim(likelihoods)[3]
-  weight_matrix <- matrix(rep(first_weight,n_locs), nrow = n_sims, ncol = n_locs)
+  weight_matrix <- matrix(rep(rep(1-amis_params[["log"]], amis_params[["nsamples"]]),n_locs), nrow = n_sims, ncol = n_locs) 
+  weight_matrix_loc <- matrix(rep(first_weight,n_locs), nrow = n_sims, ncol = n_locs) 
   # ## If n_locs = 1, likelihood matrix for given timepoint is an atomic
   # ## vector and doesn't need to be transposed.
   # if (n_locs == 1) {
@@ -693,13 +695,26 @@ compute_model_evidence <- function(likelihoods, amis_params, first_weight){
     
     # Update the weights by the latest likelihood (filtering)
     weight_matrix <- compute_weight_matrix_no_induced_prior(lik_mat,amis_params,weight_matrix)
+    weight_matrix_loc <- compute_weight_matrix_no_induced_prior(lik_mat,amis_params,weight_matrix_loc)
   }
 
-  if(amis_params[['log']] == T){ 
-    weight_matrix = exp(weight_matrix)
-  }
-  model_evidence = mean(weight_matrix)
-  model_evidence_var = 1/length(weight_matrix)^2 * model_evidence^2 * sum((weight_matrix-1)^2)
-  return(c(model_evidence = model_evidence,variance = model_evidence_var))
+  # Model evidence of full model
+  joint_log_posterior = rowSums(weight_matrix) + first_weight
+  M = max(joint_log_posterior)
+  log_model_evidence =  - log(n_sims) + M + log(sum(exp(joint_log_posterior - M))) 
+  log_model_evidence_var = log(sum(exp(log((exp(joint_log_posterior) - exp(log_model_evidence))^2) - 2*log(n_sims))))
+  
+  # Model evidence for each location 
+  joint_log_posterior_loc = weight_matrix_loc
+  M_loc = apply(joint_log_posterior_loc,2,max)
+  log_model_evidence_loc = sapply(1:n_locs, function(v) {
+    - log(n_sims) + M_loc[v] + log(sum(exp(joint_log_posterior_loc[,v] - M_loc[v])))
+  })
+  log_model_evidence_var_loc = sapply(1:n_locs, function(v) {
+    log(sum(exp(log((exp(joint_log_posterior_loc[,v]) - exp(log_model_evidence_loc[v]))^2) - 2*log(n_sims))))
+  })
+
+  return(list(evidence_full_likelihood = cbind(log_model_evidence = log_model_evidence, log_variance = log_model_evidence_var), 
+              evidence_by_location = cbind(log_model_evidence = log_model_evidence_loc, log_variance = log_model_evidence_var_loc)))
 }
 

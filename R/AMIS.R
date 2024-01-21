@@ -124,6 +124,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
   # Checks
   checks <- check_inputs(prevalence_map, transmission_model, prior, amis_params, seed, output_dir)
   locations_with_no_data <- checks$locs_no_data
+  if(is.data.frame(prevalence_map)){
+    prevalence_map <- as.matrix(prevalence_map)
+  }
   
   save_output <- function(){
     if (is.null(initial_amis_vals)){

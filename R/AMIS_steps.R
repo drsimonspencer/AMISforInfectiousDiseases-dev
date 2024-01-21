@@ -31,10 +31,13 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     message("Outputs will be saved in the user-specified directory after each iteration (this will use data storage space).\n")
   }
   
-  if (!(is.matrix(prevalence_map) || is.data.frame(prevalence_map) || is.list(prevalence_map))) {
+  if(is.data.frame(prevalence_map)){
+    prevalence_map <- as.matrix(prevalence_map)
+  }
+  if (!(is.matrix(prevalence_map) || is.list(prevalence_map))) {
     stop(("prevalence_map must be either \n - a matrix or data frame of size #locations by #samples (for one timepoint); or \n - a list with n_tims timepoints, each one with a matrix named 'data'."))
   }
-  if (is.matrix(prevalence_map) || is.data.frame(prevalence_map)) {prevalence_map=list(list(data=prevalence_map))}
+  if (is.matrix(prevalence_map)) {prevalence_map=list(list(data=prevalence_map))}
   dims <- lapply(prevalence_map, dim)
   if(!all(sapply(dims, FUN = identical, dims[[1]]))){
     stop("'prevalence_map' must have the same dimension (number of spatial units and number of samples) at each time point. If data for some locations are missing at a timepoint, set to NA.")

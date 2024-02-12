@@ -1,6 +1,7 @@
 ---
 title: "Application to Ascaris data in Ethiopia"
 output: rmarkdown::html_vignette
+# output: pdf_document
 bibliography: refs.bib
 vignette: >
   %\VignetteIndexEntry{Application to Ascaris data in Ethiopia}
@@ -28,7 +29,8 @@ This vignette demonstrates the amis package through a case study considering Asc
 <!-- \subsection*{Prevalence map} -->
 ## Prevalence map
 
-Ascaris surveys for Ethiopia are available upon request from the Global Atlas of Helminth Infection developed by the London Applied \& Spatial Epidemiology Research Group (LASER) [@pullan2014ascaris]. [@retkute2021integrating] uses these surveys to obtain national level prevalence maps, which will be used in this analysis. These maps consist of $M=100$ samples of a prevalence map for Ascaris in Ethiopia with $11369$ locations at 10km $\times$ 10km resolution. The data are available in the package by calling \code{data(ascaris)}.
+Ascaris surveys for Ethiopia are available upon request from the Global Atlas of Helminth Infection developed by the London Applied \& Spatial Epidemiology Research Group (LASER) [@pullan2014ascaris]. [@retkute2021integrating] uses these surveys to obtain national level prevalence maps, which will be used in this analysis. These maps consist of $M=100$ samples of a prevalence map for Ascaris in Ethiopia with $11369$ locations at 10km $\times$ 10km resolution. 
+<!-- The data are available in the package by calling \code{data(ascaris)}. -->
 
 <!-- The mean prevalence values for all locations are presented in Figure~\ref{fig:ascaris_data}.  -->
 

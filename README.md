@@ -7,7 +7,7 @@ Integrating geostatistical maps and infectious disease transmission models using
 Renata Retkute, Panayiota Touloupou, María-Gloria Basáñez, T. Deirdre Hollingsworth and Simon E.F. Spencer (2021).
 _Annals of Applied Statistics_, 15 (4), 1980-1998. DOI https://doi.org/10.1214/21-AOAS1486 
 
-This repository contains the development version of the package, and it started as a cloned version of the [AMISforInfectiousDiseases](https://github.com/drsimonspencer/AMISforInfectiousDiseases) repository.
+This repository contains the development version of the package. It started as a cloned version of the [AMISforInfectiousDiseases](https://github.com/drsimonspencer/AMISforInfectiousDiseases) repository, and [Raiha Browning](https://github.com/RaihaTuiTaura) has added substantial improvements to this since then.
 
 # Installation
 

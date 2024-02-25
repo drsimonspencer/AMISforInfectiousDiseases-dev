@@ -42,8 +42,8 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' @param lwd Argument passed to plots of credible intervals.
 #' Default to 1.
 #' @param xlim The x limits of the plots. For for credible intervals of multiple 
-#' statistics (i.e. length(what)>1), it must be a list with the x limits for each statistic.
-#' Default to NULL.
+#' statistics (i.e. length(what)>1), it must be either NULL or a list with 
+#' the x limits for each statistic. Default to NULL.
 #' @param main Title for the plot.
 #' @param ... Other graphical parameters passed to \code{\link{wtd.hist}}.
 #' @importFrom weights wtd.hist
@@ -76,8 +76,11 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
     if(length(what)==1){
       xlim <- list(xlim)
     }else{
+      if(is.null(xlim)){
+        xlim <- replicate(length(what), NULL)
+      }
       if(!(is.list(xlim) && length(xlim)==length(what))){
-        stop("If length(what)>1, 'xlim' must be a list of length(what) elements")
+        stop("If length(what)>1, 'xlim' must be either NULL or a list of length(what) elements")
       }
     }
   }

@@ -50,8 +50,8 @@ Default to 1}
 Default to 1.}
 
 \item{xlim}{The x limits of the plots. For for credible intervals of multiple
-statistics (i.e. length(what)>1), it must be a list with the x limits for each statistic.
-Default to NULL.}
+statistics (i.e. length(what)>1), it must be either NULL or a list with
+the x limits for each statistic. Default to NULL.}
 
 \item{main}{Title for the plot.}
 

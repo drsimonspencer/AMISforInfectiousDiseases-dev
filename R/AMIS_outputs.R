@@ -37,6 +37,10 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' Default (0.05) will create 95% credible intervals.
 #' @param breaks Argument passed to \code{\link{wtd.hist}} for histogram plots. 
 #' Default to 500.
+#' @param cex Argument passed to plots of credible intervals.
+#' Default to 1
+#' @param lwd Argument passed to plots of credible intervals.
+#' Default to 1.
 #' @param xlim The x limits of the plots. 
 #' Default to NULL.
 #' @param main Title for the plot.
@@ -50,7 +54,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' @export
 plot.amis <- function(x, what="prev", type="hist", locations=1, time=1, 
                       measure_central="mean", alpha=0.05, 
-                      breaks=500, xlim=NULL, main=NULL, mfrow=c(1,1), ...){
+                      breaks=500, cex=1, lwd=1, xlim=NULL, main=NULL, mfrow=c(1,1), ...){
   if(!inherits(x, "amis")){
     stop("'x' must be of type 'amis'")
   }
@@ -145,7 +149,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       if(is.null(xlim)){
         xlim <- c(min(lo), max(up))
       }
-      plot(mu, 1:n_locs, pch = 20,
+      plot(mu, 1:n_locs, pch=20, cex=cex,
            xlim = xlim,
            ylim = c(0.5,n_locs+0.5),
            xlab = paste0("Mean and ", 100-alpha*100,"% credible interval"),
@@ -153,7 +157,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
            main = CItitle
       )
       for(l in 1:n_locs){
-        graphics::segments(lo[l], l, up[l], l, lwd = 2)
+        graphics::segments(lo[l], l, up[l], l, lwd = lwd)
       }
     }
     par(mfrow=c(1,1))

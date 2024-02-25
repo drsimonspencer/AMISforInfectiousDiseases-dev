@@ -13,6 +13,8 @@
   measure_central = "mean",
   alpha = 0.05,
   breaks = 500,
+  cex = 1,
+  lwd = 1,
   xlim = NULL,
   main = NULL,
   mfrow = c(1, 1),
@@ -41,6 +43,12 @@ Default (0.05) will create 95\% credible intervals.}
 
 \item{breaks}{Argument passed to \code{\link{wtd.hist}} for histogram plots.
 Default to 500.}
+
+\item{cex}{Argument passed to plots of credible intervals.
+Default to 1}
+
+\item{lwd}{Argument passed to plots of credible intervals.
+Default to 1.}
 
 \item{xlim}{The x limits of the plots.
 Default to NULL.}

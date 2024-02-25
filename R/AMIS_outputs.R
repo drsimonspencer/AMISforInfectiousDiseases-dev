@@ -45,8 +45,6 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' statistics (i.e. length(what)>1), it must be a list with the x limits for each statistic.
 #' Default to NULL.
 #' @param main Title for the plot.
-#' @param mfrow A vector of the form \code{c(nrows, ncols)} describing the layout 
-#' of multiple histogram plots. Default to \code{c(1,1)}.
 #' @param ... Other graphical parameters passed to \code{\link{wtd.hist}}.
 #' @importFrom weights wtd.hist
 #' @importFrom graphics segments
@@ -55,7 +53,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' @export
 plot.amis <- function(x, what="prev", type="hist", locations=1, time=1, 
                       measure_central="mean", alpha=0.05, 
-                      breaks=500, cex=1, lwd=1, xlim=NULL, main=NULL, mfrow=c(1,1), ...){
+                      breaks=500, cex=1, lwd=1, xlim=NULL, main=NULL, ...){
   if(!inherits(x, "amis")){
     stop("'x' must be of type 'amis'")
   }
@@ -89,7 +87,6 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   
   # Histograms
   if(type=="hist"){
-    par(mfrow=mfrow)
     for(location in locations){
       amis_params <- x$amis_params
       weights <- x$weight_matrix[,location]
@@ -136,13 +133,11 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
                         main=main_, ...)
       
     }
-    par(mfrow=c(1,1))
   }
   
   # Credible intervals
   if(type=="CI"){
     if(!measure_central%in%c("mean","median")){stop("Argument 'measure_central' must be either 'mean' or 'median'.")}
-    par(mfrow=mfrow)
     i <- 1
     for(what_ in what){
       xlim_ <- xlim[[i]]
@@ -171,7 +166,6 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       }
       i <- i + 1
     }
-    par(mfrow=c(1,1))
   }
   
 }

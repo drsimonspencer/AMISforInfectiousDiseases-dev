@@ -17,7 +17,6 @@
   lwd = 1,
   xlim = NULL,
   main = NULL,
-  mfrow = c(1, 1),
   ...
 )
 }
@@ -55,9 +54,6 @@ statistics (i.e. length(what)>1), it must be a list with the x limits for each s
 Default to NULL.}
 
 \item{main}{Title for the plot.}
-
-\item{mfrow}{A vector of the form \code{c(nrows, ncols)} describing the layout
-of multiple histogram plots. Default to \code{c(1,1)}.}
 
 \item{...}{Other graphical parameters passed to \code{\link{wtd.hist}}.}
 }

@@ -141,6 +141,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   # Credible intervals
   if(type=="CI"){
     if(!measure_central%in%c("mean","median")){stop("Argument 'measure_central' must be either 'mean' or 'median'.")}
+    name <- paste0(toupper(substr(measure_central, 1, 1)), substr(measure_central, 2, nchar(measure_central)))
     i <- 1
     for(what_ in what){
       xlim_ <- xlim[[i]]
@@ -160,7 +161,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       plot(mu, 1:n_locs, pch=20, cex=cex,
            xlim = xlim_,
            ylim = c(0.5,n_locs+0.5),
-           xlab = paste0("Mean and ", 100-alpha*100,"% credible interval"),
+           xlab = paste0(name, " and ", 100-alpha*100,"% credible interval"),
            ylab = "Location",
            main = CItitle
       )

@@ -28,7 +28,7 @@ It can be 'prev' (default) for plotting prevalences, or one of the parameter nam
 \item{type}{Type of plot. It can be 'hist' (default) for histogram,
 or 'CI' for credible intervals}
 
-\item{locations}{Integer identifying the location. Default to 1.}
+\item{locations}{Integer identifying the locations. Default to 1.}
 
 \item{time}{Integer identifying the timepoint. Default to 1.}
 

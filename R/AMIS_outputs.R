@@ -1,3 +1,26 @@
+#' Sample parameters from their weighted distributions given an AMIS output
+#'
+#' @param x The output from the function \code{\link{amis}}.
+#' @param n_samples Number of samples to draw. Default to 200.
+#' @param locations Integer identifying the locations. Default to 1.
+#' @return Matrix with parameter values and corresponding prevalences for each location.
+#' @export
+sample_parameters <- function(x, n_samples=200, locations=1) {
+  log <- x$amis_params[["log"]]
+  n_tims <- ncol(x$simulated_prevalences)
+  sampled_pars <- data.frame(matrix(NA, 0, 1 + ncol(x$param) + n_tims))
+  weight_matrix <- x$weight_matrix
+  param <- x$param
+  simulated_prevalences <- x$simulated_prevalences
+  for (l in locations) {
+    idx <- systematic_sample(n_samples, weight_matrix[,l], log)
+    sampled_pars_p <- cbind(l, param[idx, , drop=F], simulated_prevalences[idx, , drop=F])
+    sampled_pars <- rbind(sampled_pars, sampled_pars_p)
+  }
+  colnames(sampled_pars) <- c("location",colnames(x$param),paste0("prev_t",n_tims))
+  return(sampled_pars)
+}
+
 #' Plot histogram or credible interval of weighted distributions for a given an object of class \code{amis}.
 #'
 #' @param x The output from the function \code{\link{amis}}.
@@ -5,7 +28,7 @@
 #' It can be 'prev' (default) for plotting prevalences, or one of the parameter names. 
 #' @param type Type of plot. It can be 'hist' (default) for histogram, 
 #' or 'CI' for credible intervals
-#' @param locations Integer identifying the location. Default to 1.
+#' @param locations Integer identifying the locations. Default to 1.
 #' @param time Integer identifying the timepoint. Default to 1.
 #' @param measure_central Measure of central tendency for credible interval plots. 
 #' It can be 'mean' (default) or 'median'.
@@ -20,7 +43,7 @@
 #' @param mfrow A vector of the form \code{c(nrows, ncols)} describing the layout 
 #' of multiple histogram plots. Default to \code{c(1,1)}.
 #' @param ... Other graphical parameters passed to \code{\link{wtd.hist}}.
-#' @importFrom  weights wtd.hist
+#' @importFrom weights wtd.hist
 #' @importFrom graphics segments
 #' @importFrom graphics par
 #' @return A plot.

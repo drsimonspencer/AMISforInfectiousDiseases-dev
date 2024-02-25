@@ -41,7 +41,8 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' Default to 1
 #' @param lwd Argument passed to plots of credible intervals.
 #' Default to 1.
-#' @param xlim The x limits of the plots. 
+#' @param xlim The x limits of the plots. For for credible intervals of multiple 
+#' statistics (i.e. length(what)>1), it must be a list with the x limits for each statistic.
 #' Default to NULL.
 #' @param main Title for the plot.
 #' @param mfrow A vector of the form \code{c(nrows, ncols)} describing the layout 
@@ -74,8 +75,15 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
     if(!all(what%in%c("prev", param_names))){
       stop("All entries of argument 'what' must be 'prev' or model parameter names.")
     }
+    if(length(what)==1){
+      xlim <- list(xlim)
+    }else{
+      if(!(is.list(xlim) && length(xlim)==length(what))){
+        stop("If length(what)>1, 'xlim' must be a list of length(what) elements")
+      }
+    }
   }
-  
+
   n_locs <- length(locations)
   location_names <- colnames(x$weight_matrix)[locations]
   
@@ -135,7 +143,9 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   if(type=="CI"){
     if(!measure_central%in%c("mean","median")){stop("Argument 'measure_central' must be either 'mean' or 'median'.")}
     par(mfrow=mfrow)
+    i <- 1
     for(what_ in what){
+      xlim_ <- xlim[[i]]
       summaries <- calculate_summaries(x=x, what=what_, time=1, locations=locations, alpha=alpha)
       if(measure_central=="mean"){
         mu <- summaries[["mean"]]
@@ -146,11 +156,11 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       lo <- summaries[["quantiles"]][1, ]
       up <- summaries[["quantiles"]][2, ]
       CItitle <- ifelse(what_=="prev", "Prevalences", what_)
-      if(is.null(xlim)){
-        xlim <- c(min(lo), max(up))
+      if(is.null(xlim_)){
+        xlim_ <- c(min(lo), max(up))
       }
       plot(mu, 1:n_locs, pch=20, cex=cex,
-           xlim = xlim,
+           xlim = xlim_,
            ylim = c(0.5,n_locs+0.5),
            xlab = paste0("Mean and ", 100-alpha*100,"% credible interval"),
            ylab = "Location",
@@ -159,6 +169,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       for(l in 1:n_locs){
         graphics::segments(lo[l], l, up[l], l, lwd = lwd)
       }
+      i <- i + 1
     }
     par(mfrow=c(1,1))
   }

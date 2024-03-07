@@ -64,8 +64,7 @@
 #' \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
 #' \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
 #' \item{\code{q}}{Parameter (between 0 and 1) controlling how the weights are calculated for active locations. 
-#' If q=0 (default), simple average of individual weights will be calculated. 
-#' If q>0, more weight will be assigned to locations with low ESS.}
+#' Default to 0. See Details below.}
 #' \item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to 0.01.}
 #' \item{\code{sigma}}{Optional smoothing parameter if Gaussian kernel is used. Default to NULL.}
 #' \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to NULL.
@@ -110,6 +109,16 @@
 #' \item{\code{last_simulation_seed}}{Last simulation seed that was used.}
 #' \item{\code{amis_params}}{List supplied by the user.}
 #' }
+#' @details The average weight of parameter vectors for active locations at iteration \eqn{i} (\eqn{A_i}) 
+#' has weights determined by how far the effective sample size for location \eqn{l} (\eqn{\text{ESS}_l}) 
+#' is from the target (\eqn{\text{ESS}_R}):
+#' \deqn{
+#'  \bar{w}_j^i = 
+#'  \frac{\sum_{l \in A_i}    \left(\text{ESS}^R-\text{ESS}_l^i\right)^q \hat{w}_{lj}^i   }{
+#'  \sum_{l \in A_i} \left(\text{ESS}^R-\text{ESS}_l^i\right)^q} , \qquad q \in [0,1].
+#'  }
+#' If q=0 (default), the simple average of individual weights will be calculated. 
+#' If q>0, more weight will be assigned to locations with low ESS.
 #' @export
 amis <- function(prevalence_map, transmission_model, prior, amis_params = default_amis_params(), 
                  seed = NULL, output_dir = NULL, initial_amis_vals = NULL) {

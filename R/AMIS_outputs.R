@@ -462,6 +462,8 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL,
     # mclust::plot.Mclust(clustering, what=what, xlab=xlab, ylab=ylab, ...)
     if(d==1){
       mclust::plot.Mclust(clustering, what=what, xlab=param_names, xlim=xlim, ylim=ylim, ...)
+    }else if(d==2){
+      mclust::plot.Mclust(clustering, what=what, xlab=param_names[1], ylab=param_names[2], xlim=xlim, ylim=ylim, ...)
     }else{
       mclust::plot.Mclust(clustering, what=what, xlim=xlim, ylim=ylim, ...)  
     }

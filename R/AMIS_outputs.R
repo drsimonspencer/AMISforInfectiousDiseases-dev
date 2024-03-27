@@ -443,7 +443,11 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL,
       cat(paste0("Plotting components of the fitted mixture model at iteration ", iteration, " and weighted samples of the previous iteration...\n"))
     }
     colnames(clustering$data) <- colnames(x$param)
-    mclust::plot.Mclust(clustering, what = what, xlim=xlim, ylim=ylim, ...)
+    if(d==1){
+      mclust::plot.Mclust(clustering, what = what, xlim=xlim, ylim=ylim, xlab=colnames(x$param), ...)
+    }else{
+      mclust::plot.Mclust(clustering, what = what, xlim=xlim, ylim=ylim, ...)
+    }
     if(datapoints=="proposed"){
       default_main <- "Proposed Parameter Values"
     }else if(datapoints=="fitted"){

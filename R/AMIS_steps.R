@@ -455,6 +455,7 @@ calculate_ess <- function(weight_mat,log) {
 #' @param q Parameter (between 0 and 1) controlling how the weights are calculated for active locations. 
 #' @return Vector containing the row sums of the active columns of the weight matrix.
 update_according_to_ess_value <- function(weight_matrix, ess, target_size, log, q) {
+  n <- nrow(weight_matrix)
   active_cols <- which(ess < target_size)
   if (log) {
     ## original version:
@@ -465,8 +466,14 @@ update_according_to_ess_value <- function(weight_matrix, ess, target_size, log, 
     
     ## re-scaling depending on q:
     diffs <- ((target_size - ess)^q)[active_cols]
-    ratio <- log(diffs/sum(diffs))                                        # |A|-length vector
-    ratio <- t(replicate(nrow(weight_matrix), ratio))                     # N by |A|
+    ratio <- log(diffs/sum(diffs))                                        # an |A|-length vector
+    if(length(active_cols)==1){
+      ratio <- as.matrix(rep(ratio, n))
+    }else{
+      ratio <- t(replicate(n, ratio))
+    }
+    # ratio is N by |A|
+
     new_weight_matrix <- weight_matrix[,active_cols,drop=FALSE] + ratio   # both in log-scale
     M <- apply(new_weight_matrix,1,max)
     wh <- which(M==-Inf)
@@ -478,8 +485,12 @@ update_according_to_ess_value <- function(weight_matrix, ess, target_size, log, 
     
     ## re-scaling depending on q:
     diffs <- ((target_size - ess)^q)[active_cols]
-    ratio <- diffs/sum(diffs)                           # |A|-length vector
-    ratio <- t(replicate(nrow(weight_matrix), ratio))   # N by |A|
+    ratio <- diffs/sum(diffs)
+    if(length(active_cols)==1){
+      ratio <- as.matrix(rep(ratio, n))
+    }else{
+      ratio <- t(replicate(n, ratio))
+    }
     new_weight_matrix <- weight_matrix[,active_cols,drop=FALSE] * ratio
     out <- rowSums(new_weight_matrix)
   }

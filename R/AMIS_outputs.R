@@ -154,7 +154,11 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       names(mu) <- location_names
       lo <- summaries[["quantiles"]][1, ]
       up <- summaries[["quantiles"]][2, ]
-      CItitle <- ifelse(what_=="prev", "Prevalences", what_)
+      if(is.null(main)){
+        CItitle <- ifelse(what_=="prev", paste0("Prevalences at time ", time), what_)
+      }else{
+        CItitle <- main
+      }
       if(is.null(xlim_)){
         xlim_ <- c(min(lo), max(up))
       }

@@ -17,7 +17,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
     sampled_pars_p <- cbind(l, param[idx, , drop=F], simulated_prevalences[idx, , drop=F])
     sampled_pars <- rbind(sampled_pars, sampled_pars_p)
   }
-  colnames(sampled_pars) <- c("location",colnames(x$param),paste0("prev_t",n_tims))
+  colnames(sampled_pars) <- c("location",colnames(x$param),paste0("prev_t",1:n_tims))
   return(sampled_pars)
 }
 

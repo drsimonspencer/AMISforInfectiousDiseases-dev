@@ -145,7 +145,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
     i <- 1
     for(what_ in what){
       xlim_ <- xlim[[i]]
-      summaries <- calculate_summaries(x=x, what=what_, time=1, locations=locations, alpha=alpha)
+      summaries <- calculate_summaries(x=x, what=what_, time=time, locations=locations, alpha=alpha)
       if(measure_central=="mean"){
         mu <- summaries[["mean"]]
       }else if(measure_central=="median"){

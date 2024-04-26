@@ -8,7 +8,8 @@
 sample_parameters <- function(x, n_samples=200, locations=1) {
   log <- x$amis_params[["log"]]
   n_tims <- ncol(x$simulated_prevalences)
-  sampled_pars <- data.frame(matrix(NA, 0, 1 + 1 + ncol(x$param) + n_tims))
+  n_cols <- 1 + 1 + ncol(x$param) + n_tims
+  sampled_pars <- data.frame(matrix(NA, 0, n_cols))
   weight_matrix <- x$weight_matrix
   param <- x$param
   simulated_prevalences <- x$simulated_prevalences
@@ -18,6 +19,10 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
     sampled_pars <- rbind(sampled_pars, sampled_pars_p)
   }
   colnames(sampled_pars) <- c("location","seed",colnames(x$param),paste0("prev_t",1:n_tims))
+  sampled_pars$seed <- as.integer(sampled_pars$seed)
+  for(j in 3:n_cols){
+    sampled_pars[,j] <- as.numeric(sampled_pars[,j])
+  }
   return(sampled_pars)
 }
 

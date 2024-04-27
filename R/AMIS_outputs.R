@@ -50,6 +50,8 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' statistics (i.e. length(what)>1), it must be either NULL or a list with 
 #' the x limits for each statistic. Default to NULL.
 #' @param main Title for the plot.
+#' @param xlab Lable for the x axis.
+#' @param ylab Lable for the y axis.
 #' @param ... Other graphical parameters passed to \code{\link{wtd.hist}}.
 #' @importFrom weights wtd.hist
 #' @importFrom graphics segments
@@ -58,7 +60,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' @export
 plot.amis <- function(x, what="prev", type="hist", locations=1, time=1, 
                       measure_central="mean", alpha=0.05, 
-                      breaks=500, cex=1, lwd=1, xlim=NULL, main=NULL, ...){
+                      breaks=500, cex=1, lwd=1, xlim=NULL, main=NULL, xlab=NULL, ylab=NULL, ...){
   if(!inherits(x, "amis")){
     stop("'x' must be of type 'amis'")
   }
@@ -132,12 +134,18 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       }else{
         main_ <- NULL
       }
-      hist_title <- ifelse(what=="prev", "Weighted prevalence", 
-                           paste0("Weighted ", what))
+      if(is.null(ylab)){
+        ylab <- "Density"
+      }
+      if(is.null(xlab)){
+        xlab <- ifelse(what=="prev", "Weighted prevalence", 
+                       paste0("Weighted ", what))
+      }
       weights::wtd.hist(x=statistic, breaks=breaks, 
                         weight=weights,
                         probability=T, xlim=xlim,
-                        xlab=hist_title,
+                        xlab=xlab,
+                        ylab=ylab,
                         main=main_, ...)
       
     }
@@ -167,11 +175,17 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       if(is.null(xlim_)){
         xlim_ <- c(min(lo), max(up))
       }
+      if(is.null(ylab)){
+        ylab <- "Location"
+      }
+      if(is.null(xlab)){
+        xlab <- paste0(name, " and ", 100-alpha*100,"% credible interval")
+      }
       plot(mu, 1:n_locs, pch=20, cex=cex,
            xlim = xlim_,
            ylim = c(0.5,n_locs+0.5),
-           xlab = paste0(name, " and ", 100-alpha*100,"% credible interval"),
-           ylab = "Location",
+           xlab = xlab,
+           ylab = ylab,
            main = CItitle
       )
       for(l in 1:n_locs){

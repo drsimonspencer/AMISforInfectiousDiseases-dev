@@ -17,6 +17,8 @@
   lwd = 1,
   xlim = NULL,
   main = NULL,
+  xlab = NULL,
+  ylab = NULL,
   ...
 )
 }
@@ -54,6 +56,10 @@ statistics (i.e. length(what)>1), it must be either NULL or a list with
 the x limits for each statistic. Default to NULL.}
 
 \item{main}{Title for the plot.}
+
+\item{xlab}{Lable for the x axis.}
+
+\item{ylab}{Lable for the y axis.}
 
 \item{...}{Other graphical parameters passed to \code{\link{wtd.hist}}.}
 }

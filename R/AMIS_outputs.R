@@ -186,7 +186,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
            ylim = c(0.5,n_locs+0.5),
            xlab = xlab,
            ylab = ylab,
-           main = CItitle
+           main = CItitle, ...
       )
       for(l in 1:n_locs){
         graphics::segments(lo[l], l, up[l], l, lwd = lwd)

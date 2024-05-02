@@ -194,9 +194,11 @@ compute_likelihood <- function(param,prevalence_map,simulated_prevalences,amis_p
   n_sims <- dim(simulated_prevalences)[1]
   lik <- array(NA, c(n_tims,n_locs,n_sims)) # this way around to avoid abind -- different to elsewhere
   for (t in 1:n_tims) {
-    log_norm_const_gaussian_t <- log_norm_const_gaussian[t,,]
-    if(n_locs==1){
-      log_norm_const_gaussian_t <- t(log_norm_const_gaussian_t)  
+    if(!is.null(amis_params[["sigma"]])){
+      log_norm_const_gaussian_t <- log_norm_const_gaussian[t,,]
+      if(n_locs==1){
+        log_norm_const_gaussian_t <- t(log_norm_const_gaussian_t)  
+      }
     }
     lik[t,,] <- evaluate_likelihood(param,prevalence_map[[t]],simulated_prevalences[,t],amis_params,
                                     which_valid_sim_prev_iter[[t]],which_valid_prev_map[[t]],log_norm_const_gaussian_t) 

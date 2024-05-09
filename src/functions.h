@@ -60,7 +60,7 @@ arma::mat f_estimator_histogram(arma::mat& prevalence_map,
                                 arma::vec& breaks, 
                                 List& which_valid_prev_map_t, 
                                 bool logar);
-                                
+
 NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun, 
                                NumericMatrix param,
                                NumericMatrix prevalence_map, 
@@ -68,7 +68,7 @@ NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun,
                                IntegerVector which_valid_sim_prev_iter, 
                                List& which_valid_prev_map_t, 
                                bool logar);
-                               
+
 NumericMatrix f_user_defined_l_r(Rcpp::Function likelihood_fun, 
                                  NumericMatrix param,
                                  NumericMatrix prevalence_map, 

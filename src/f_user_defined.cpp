@@ -26,11 +26,9 @@ NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun,
  int L = prevalence_map.nrow();
  NumericMatrix f(L, R);
  NumericVector prevalence_map_l = prevalence_map(0,_);
- double logf;
  int M_l;
  int R_l = which_valid_sim_prev_iter.length();
  int r_valid_idx;
- double cmax;
  if(R_l>0){
    NumericVector prev_sim_valid = prev_sim[which_valid_sim_prev_iter];
    for (int l=0; l<L; l++) {
@@ -44,14 +42,10 @@ NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun,
          r_valid_idx = which_valid_sim_prev_iter[r];
          NumericVector x = xMat(_,r);
          if(logar){
-           cmax = max(x);
-           logf = cmax + log(sum(exp(x - cmax)));
-           f(l, r_valid_idx) = logf;
+           f(l, r_valid_idx) = sum(x);
          }else{
            x = log(x);
-           cmax = max(x);
-           logf = cmax + log(sum(exp(x - cmax)));
-           f(l, r_valid_idx) = exp(logf);
+           f(l, r_valid_idx) = exp(sum(x));
          }
        }
      }

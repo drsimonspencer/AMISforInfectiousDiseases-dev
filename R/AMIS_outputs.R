@@ -37,6 +37,10 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' @param time Integer identifying the timepoint. Default to 1.
 #' @param measure_central Measure of central tendency for credible interval plots. 
 #' It can be 'mean' (default) or 'median'.
+#' @param order_locations_by How the credible intervals of multiple locations should be ordered. 
+#' If NULL (default), locations are displayed according to the argument 'locations'.
+#' Otherwise, it must be either 'prev' or one of the parameter names, and then the 
+#' locations are ranked by the corresponding measure of central tendency.
 #' @param alpha Numeric value between 0 and 1 indicating the endpoints of the 
 #' credible intervals, which are evaluated at (alpha/2, 1-alpha/2)% quantiles. 
 #' Default (0.05) will create 95% credible intervals.
@@ -59,7 +63,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' @return A plot.
 #' @export
 plot.amis <- function(x, what="prev", type="hist", locations=1, time=1, 
-                      measure_central="mean", alpha=0.05, 
+                      measure_central="mean", order_locations_by=NULL, alpha=0.05, 
                       breaks=500, cex=1, lwd=1, xlim=NULL, main=NULL, xlab=NULL, ylab=NULL, ...){
   if(!inherits(x, "amis")){
     stop("'x' must be of type 'amis'")
@@ -79,6 +83,9 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   }else{
     if(!all(what%in%c("prev", param_names))){
       stop("All entries of argument 'what' must be 'prev' or model parameter names.")
+    }
+    if(!is.null(order_locations_by) && (length(order_locations_by)!=1 || !(order_locations_by%in%c("prev", param_names)))){
+      stop("Argument 'order_locations_by' must be NULL, 'prev', or one of the model parameters.")
     }
     if(length(what)==1){
       xlim <- list(xlim)
@@ -155,9 +162,22 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   if(type=="CI"){
     if(!measure_central%in%c("mean","median")){stop("Argument 'measure_central' must be either 'mean' or 'median'.")}
     name <- paste0(toupper(substr(measure_central, 1, 1)), substr(measure_central, 2, nchar(measure_central)))
+    
+    if(!is.null(order_locations_by) && length(locations)>1){
+      summaries <- calculate_summaries(x=x, what=order_locations_by, time=time, locations=locations, alpha=alpha)  
+      if(measure_central=="mean"){
+        ord <- order(summaries[["mean"]])
+      }else if(measure_central=="median"){
+        ord <- order(summaries[["median"]])
+      }
+      locations <- locations[ord]
+      location_names <- location_names[ord]
+    }
+    
     i <- 1
     for(what_ in what){
       xlim_ <- xlim[[i]]
+
       summaries <- calculate_summaries(x=x, what=what_, time=time, locations=locations, alpha=alpha)
       if(measure_central=="mean"){
         mu <- summaries[["mean"]]

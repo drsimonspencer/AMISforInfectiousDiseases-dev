@@ -124,8 +124,13 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
                  seed = NULL, output_dir = NULL, initial_amis_vals = NULL) {
 
   if(!is.null(initial_amis_vals)){
+    cat("Initialising algorithm from a previous run provided by the user. \n")
     amis_params <- initial_amis_vals$amis_params
-    cat("'amis_params' used to generate intermittent outputs will be used again.\n")
+    niter <- ncol(initial_amis_vals$ess_per_iteration) # number of completed iterations
+    cat(paste0("The previous run has completed ", niter, " iterations. \n"))
+    amis_params[["max_iters"]] <- amis_params[["max_iters"]] + niter
+    cat("'amis_params' used to generate the previous outputs will be used again.\n")
+    cat("----------------------- \n")
   }
   
   directory <- output_dir
@@ -208,7 +213,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
   # Initialise
   if(!is.null(seed)){set.seed(seed)}
   iter <- 1
-  ess_per_iteration <- NULL
   components_per_iteration <- list()
   components_per_iteration[[1]] <- NA
   
@@ -266,37 +270,56 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
       probs = list() # probability of each component (unnormalised)
     )
     seeds <- function(iter) ((iter - 1) * n_samples + 1):(iter * n_samples)  # function to calculate the seeds for iteration iter.
-    niter <- 1 # number of completed iterations 
+    niter <- 1 # number of completed iterations
+    ess_per_iteration <- NULL
+    ess_per_iteration <- cbind(ess_per_iteration, ess)
     if (!is.null(directory)){
       res <- save_output()
       saveRDS(res, file = paste0(directory,"amis_output.rds"))
     }
   } else {
-    cat("----------------------- \n")
-    cat("AMIS iteration 1\n")
-    cat("Initialising algorithm from a previous run provided by the user. \n")
     # Check inputs of previous run provided by the user 
-    check_initial_vals = function(d){
+    check_initial_vals <- function(d){
       if(!is.null(initial_amis_vals[[d]])){
         initial_amis_vals[[d]]
       } else {
-        stop(paste0("Cannot find object 'initial_amis_vals[['",d,"']]'. To initialise from a previous run, use object saved by specifying 'output_dir'.\n"))
+        if(d!="locations_with_no_data"){
+          stop(paste0("Cannot find object 'initial_amis_vals[['",d,"']]'. To initialise from a previous run, use object saved by specifying 'output_dir'.\n"))
+        }
       }
     }
-    simulated_prevalences = check_initial_vals("simulated_prevalences")
+
+    locations_with_no_data <- check_initial_vals("locations_with_no_data")
+    simulated_prevalences <- check_initial_vals("simulated_prevalences")
     likelihoods <- check_initial_vals("likelihoods")
     weight_matrix <- check_initial_vals("weight_matrix")
     ess <- check_initial_vals("ess")
+    ess_per_iteration <- check_initial_vals("ess_per_iteration")
     components <- check_initial_vals("components")
+    components_per_iteration <- check_initial_vals("components_per_iteration")
     param <- check_initial_vals("param")
     prior_density <- check_initial_vals("prior_density")
     seeds <- function(iter) ((iter - 2) * n_samples + 1):((iter - 1) * n_samples) + initial_amis_vals$last_simulation_seed #function to calculate the seeds for iteration iter.
-    niter <- 0 # number of completed iterations
+
+    # Terms needed to recalculated as they are not in the AMIS output
+    n_samples_previous_run <- n_samples*niter
+    bool_valid_sim_prev <- (simulated_prevalences>=boundaries[1]) & (simulated_prevalences<=boundaries[2]) & is.finite(simulated_prevalences)
+    if(!is.null(boundaries_param)){
+      bool_valid_sim_param <- rep(T, n_samples_previous_run)
+      for(i_samp in 1:n_samples_previous_run){
+        bool_valid_sim_param[i_samp] <- all((param[i_samp,]>=boundaries_param[,1])&(param[i_samp,]<=boundaries_param[,2]))
+      }
+      prior_density[!bool_valid_sim_param] <- ifelse(amis_params[["log"]], -Inf, 0)
+      bool_valid_sim_prev <- bool_valid_sim_prev & bool_valid_sim_param
+    }
+    which_valid_sim_prev <- lapply(1:n_tims, function(t) which(bool_valid_sim_prev[,t])-1L)
+    which_invalid_sim_prev <- lapply(1:n_tims, function(t) which(!bool_valid_sim_prev[,t])-1L)
+
   }
   
-  ess_per_iteration <- cbind(ess_per_iteration, ess)
+  
   # Define first_weight object in case target_ess reached in first iteration
-  first_weight = rep(1-amis_params[["log"]], n_samples)
+  first_weight <- rep(1-amis_params[["log"]], n_samples)
   # Continue if target_ess not yet reached
   if (min(ess) >= amis_params[["target_ess"]]){
     cat("----------------------- \n")
@@ -304,7 +327,12 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
   }else{
     mixt_samples <- NULL
     mixt_samples_z <- NULL
-    for (iter in 2:amis_params[["max_iters"]]) {
+    if(!is.null(initial_amis_vals)){
+      next_iter <- niter + 1
+    }else{
+      next_iter <- 2
+    }
+    for (iter in next_iter:amis_params[["max_iters"]]) {
       cat("----------------------- \n")
       cat("AMIS iteration ",iter,"\n")
       # Fit mixture cluster model and sample from it

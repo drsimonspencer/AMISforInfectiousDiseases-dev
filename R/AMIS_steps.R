@@ -21,7 +21,7 @@ default_amis_params <- function() {
 #' @inheritParams amis
 #' @noRd
 # #' @export
-check_inputs <- function(prevalence_map, transmission_model, prior, amis_params, seed, output_dir) {
+check_inputs <- function(prevalence_map, transmission_model, prior, amis_params, seed, output_dir, initial_amis_vals) {
 
   if (!is.null(output_dir)){
     if(!is.character(output_dir)){
@@ -29,6 +29,12 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     }  
     if(!dir.exists(output_dir)){dir.create(output_dir)}
     message("Outputs will be saved in the user-specified directory after each iteration (this will use data storage space).\n")
+  }
+  
+  if (!is.null(initial_amis_vals)){
+    if(!inherits(initial_amis_vals, "amis")){
+      stop("'initial_amis_vals' must be either NULL or an object of class 'amis'.")
+    }
   }
   
   if(is.data.frame(prevalence_map)){
@@ -87,7 +93,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   }
   if(!is.null(boundaries_param)){
     stopifnot("'boundaries_param' must be a (#parameters x 2) matrix" = (is.matrix(boundaries_param)) && 
-                (ncol(boundaries_param)==2) && (nrow(boundaries_param)==ncol(prior$rprior(1))))
+                (ncol(boundaries_param)==2) && (is.null(initial_amis_vals) && nrow(boundaries_param)==ncol(prior$rprior(1))))
   }
   stopifnot("'delta' must be either NULL or a single positive numeric value" = ((length(delta)==1 && is.numeric(delta) && delta>0) || is.null(delta)))
   stopifnot("'sigma' must be either NULL or a single positive numeric value" = ((length(sigma)==1 && is.numeric(sigma) && sigma>0) || is.null(sigma)))

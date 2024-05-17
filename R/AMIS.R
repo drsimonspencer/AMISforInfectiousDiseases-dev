@@ -123,6 +123,12 @@
 amis <- function(prevalence_map, transmission_model, prior, amis_params = default_amis_params(), 
                  seed = NULL, output_dir = NULL, initial_amis_vals = NULL) {
 
+  if(!is.null(seed)){set.seed(seed)}
+  
+  # Checks
+  checks <- check_inputs(prevalence_map, transmission_model, prior, amis_params, seed, output_dir, initial_amis_vals)
+  locations_with_no_data <- checks$locs_no_data
+  
   if(!is.null(initial_amis_vals)){
     cat("Initialising algorithm from a previous run provided by the user. \n")
     amis_params <- initial_amis_vals$amis_params
@@ -130,24 +136,16 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
     cat(paste0("The previous run has completed ", niter, " iterations. \n"))
     amis_params[["max_iters"]] <- amis_params[["max_iters"]] + niter
     cat("'amis_params' used to generate the previous outputs will be used again.\n")
-    cat("----------------------- \n")
   }
   
   directory <- output_dir
 
-  # Checks
-  checks <- check_inputs(prevalence_map, transmission_model, prior, amis_params, seed, output_dir)
-  locations_with_no_data <- checks$locs_no_data
   if(is.data.frame(prevalence_map)){
     prevalence_map <- as.matrix(prevalence_map)
   }
   
   save_output <- function(){
-    if (is.null(initial_amis_vals)){
-      allseeds <- 1:(niter * n_samples)
-    } else {
-      allseeds <- c(1:(initial_amis_vals$last_simulation_seed + (niter * n_samples)))
-    }
+    allseeds <- 1:(niter * n_samples)
     if (is.null(rownames(prevalence_map[[1]]$data))) {
       iunames <- sapply(1:dim(weight_matrix)[2], function(idx) sprintf("iu%g", idx))
     } else {
@@ -161,7 +159,11 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
     if (is.null(colnames(simulated_prevalences))) {
       prevnames <- sapply(1:dim(simulated_prevalences)[2], function(idx) sprintf("prev%g", idx))
     } else {
-      prevnames <- paste0("prev",colnames(simulated_prevalences))
+      if(is.null(initial_amis_vals)){
+        prevnames <- paste0("prev",colnames(simulated_prevalences))
+      }else{
+        prevnames <- colnames(simulated_prevalences)
+      }
     }
     colnames(weight_matrix) <- iunames
     colnames(simulated_prevalences) <- prevnames
@@ -192,7 +194,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
   boundaries <- amis_params[["boundaries"]]
   boundaries_param <- amis_params[["boundaries_param"]]
   n_samples <- amis_params[["n_samples"]]
-  nparams <- ncol(prior$rprior(1))
   n_tims <- length(prevalence_map)
   n_locs <- dim(prevalence_map[[1]]$data)[1]
   # Check which prevalence map samples are valid (non-NA, finite, and within boundaries)
@@ -211,10 +212,11 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
   }
   
   # Initialise
-  if(!is.null(seed)){set.seed(seed)}
   iter <- 1
   components_per_iteration <- list()
   components_per_iteration[[1]] <- NA
+  
+  seeds <- function(iter) ((iter - 1) * n_samples + 1):(iter * n_samples)  # function to calculate the seeds for iteration iter.
   
   if(is.null(initial_amis_vals)){
     cat("----------------------- \n")
@@ -269,7 +271,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
       Mean = list(), # list of means for each component
       probs = list() # probability of each component (unnormalised)
     )
-    seeds <- function(iter) ((iter - 1) * n_samples + 1):(iter * n_samples)  # function to calculate the seeds for iteration iter.
     niter <- 1 # number of completed iterations
     ess_per_iteration <- NULL
     ess_per_iteration <- cbind(ess_per_iteration, ess)
@@ -299,8 +300,8 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
     components_per_iteration <- check_initial_vals("components_per_iteration")
     param <- check_initial_vals("param")
     prior_density <- check_initial_vals("prior_density")
-    seeds <- function(iter) ((iter - 2) * n_samples + 1):((iter - 1) * n_samples) + initial_amis_vals$last_simulation_seed #function to calculate the seeds for iteration iter.
-
+    
+    
     # Terms needed to recalculated as they are not in the AMIS output
     n_samples_previous_run <- n_samples*niter
     bool_valid_sim_prev <- (simulated_prevalences>=boundaries[1]) & (simulated_prevalences<=boundaries[2]) & is.finite(simulated_prevalences)

@@ -41,6 +41,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' If NULL (default), locations are displayed according to the argument 'locations'.
 #' Otherwise, it must be either 'prev' or one of the parameter names, and then the 
 #' locations are ranked by the corresponding measure of central tendency.
+#' @param display_location_names Logical indicating whether location names are to be shown or not in credible interval plots.
 #' @param alpha Numeric value between 0 and 1 indicating the endpoints of the 
 #' credible intervals, which are evaluated at (alpha/2, 1-alpha/2)% quantiles. 
 #' Default (0.05) will create 95% credible intervals.
@@ -63,7 +64,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' @return A plot.
 #' @export
 plot.amis <- function(x, what="prev", type="hist", locations=1, time=1, 
-                      measure_central="mean", order_locations_by=NULL, alpha=0.05, 
+                      measure_central="mean", order_locations_by=NULL, display_location_names=F, alpha=0.05, 
                       breaks=500, cex=1, lwd=1, xlim=NULL, main=NULL, xlab=NULL, ylab=NULL, ...){
   if(!inherits(x, "amis")){
     stop("'x' must be of type 'amis'")
@@ -201,15 +202,20 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       if(is.null(xlab)){
         xlab <- paste0(name, " and ", 100-alpha*100,"% credible interval")
       }
+      yaxt <- ifelse(display_location_names, "n", "s")
       plot(mu, 1:n_locs, pch=20, cex=cex,
            xlim = xlim_,
            ylim = c(0.5,n_locs+0.5),
            xlab = xlab,
            ylab = ylab,
-           main = CItitle, ...
+           main = CItitle, 
+           yaxt = yaxt, ...
       )
       for(l in 1:n_locs){
         graphics::segments(lo[l], l, up[l], l, lwd = lwd)
+      }
+      if(display_location_names){
+        axis(2, at=1:length(location_names), labels=location_names, las=2)
       }
       i <- i + 1
     }

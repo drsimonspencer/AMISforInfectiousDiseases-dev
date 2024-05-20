@@ -41,7 +41,8 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' If NULL (default), locations are displayed according to the argument 'locations'.
 #' Otherwise, it must be either 'prev' or one of the parameter names, and then the 
 #' locations are ranked by the corresponding measure of central tendency.
-#' @param display_location_names Logical indicating whether location names are to be shown or not in credible interval plots.
+#' @param display_location_names Logical indicating whether location names are to be shown or not 
+#' in credible interval plots. Default to FALSE.
 #' @param alpha Numeric value between 0 and 1 indicating the endpoints of the 
 #' credible intervals, which are evaluated at (alpha/2, 1-alpha/2)% quantiles. 
 #' Default (0.05) will create 95% credible intervals.

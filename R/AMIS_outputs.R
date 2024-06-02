@@ -328,14 +328,16 @@ summary.amis <- function(object, ...) {
 #' summaries should be calculated for. If not specified, summary statistics of 
 #' all locations will be provided.
 #' @param alpha Numeric value between 0 and 1. Calculations are for the (alpha/2, 1-alpha/2)% quantiles.
+#' @param exceedance_prob_threshold Numeric value. Default to 0.35, i.e. the 
+#' probability that the prevalence is higher than 0.35.
 #' @return A list with mean, median, and quantiles of the weighted distribution
 #' @importFrom  Hmisc wtd.mean
 #' @importFrom  Hmisc wtd.quantile
 #' @export
-calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.05) {
+calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.05, exceedance_prob_threshold=0.35) {
 
-  out <- vector(mode='list', length=3)
-  names(out) <- c("mean","median","quantiles")
+  out <- vector(mode='list', length=4)
+  names(out) <- c("mean","median","quantiles","exceedance_probability")
   
   if(is.null(locations)){
     n_locs <- nrow(x$prevalence_map[[1]]$data)
@@ -343,8 +345,9 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
   }
   
   if(alpha < 0 || alpha > 1){stop("'alpha' must be within 0 and 1.")}
+
   if(what=="prev"){
-    statistic <- x$simulated_prevalences[,time]  #    #     #   
+    statistic <- x$simulated_prevalences[,time]
   }else{
     if(!(what%in%colnames(x$param))){
       stop("'parameter' must be either 'prev' or have a valid parameter name.")
@@ -355,7 +358,9 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
   wtd <- x$weight_matrix[,locations,drop=F]
   if(x$amis_params$log){wtd <- exp(wtd)}
   
-  location_names <- colnames(x$weight_matrix)[locations]
+  # location_names <- colnames(x$weight_matrix)[locations]   # revise this 
+  location_names <- locations
+  
   # weighted mean
   out[[1]] <- sapply(1:length(locations), function(l) Hmisc::wtd.mean(statistic, weights=wtd[,l], normwt = T))
   names(out[[1]]) <- location_names
@@ -365,7 +370,15 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
   # weighted quantiles
   out[[3]] <- sapply(1:length(locations), function(l) Hmisc::wtd.quantile(statistic, weights=wtd[,l], probs=c(alpha/2, 1-alpha/2), normwt = T))
   colnames(out[[3]]) <- location_names
-  
+  # weighted exceedance probability
+  exceedance_prob <- rep(NA, length(locations))
+  for(l in 1:length(locations)){
+    ecdf_obj <- Hmisc::wtd.Ecdf(statistic, weights=wtd[,l], normwt = T)
+    wh <- which.min(abs(ecdf_obj$x - exceedance_prob_threshold))
+    exceedance_prob[l] <- 1 - ecdf_obj$ecdf[wh]
+  }
+  out[[4]] <- exceedance_prob
+  names(out[[4]]) <- location_names
   return(out)
   
 }

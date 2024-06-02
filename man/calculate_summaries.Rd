@@ -28,7 +28,7 @@ all locations will be provided.}
 \item{alpha}{Numeric value between 0 and 1. Calculations are for the (alpha/2, 1-alpha/2)\% quantiles.}
 
 \item{exceedance_prob_threshold}{Numeric value. Default to 0.35, i.e. the
-probability that the prevalence is higher than 0.35.}
+probability that the statistic of interest (e.g. prevalence) is higher than 0.35.}
 }
 \value{
 A list with mean, median, and quantiles of the weighted distribution

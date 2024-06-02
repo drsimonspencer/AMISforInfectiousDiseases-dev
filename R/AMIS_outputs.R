@@ -329,7 +329,7 @@ summary.amis <- function(object, ...) {
 #' all locations will be provided.
 #' @param alpha Numeric value between 0 and 1. Calculations are for the (alpha/2, 1-alpha/2)% quantiles.
 #' @param exceedance_prob_threshold Numeric value. Default to 0.35, i.e. the 
-#' probability that the prevalence is higher than 0.35.
+#' probability that the statistic of interest (e.g. prevalence) is higher than 0.35.
 #' @return A list with mean, median, and quantiles of the weighted distribution
 #' @importFrom  Hmisc wtd.mean
 #' @importFrom  Hmisc wtd.quantile

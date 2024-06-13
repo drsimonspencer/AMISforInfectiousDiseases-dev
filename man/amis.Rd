@@ -15,10 +15,10 @@ amis(
 )
 }
 \arguments{
-\item{prevalence_map}{An \eqn{L \times M} matrix containing samples from the fitted prevalence map,
-where \eqn{L} is the number of locations and \eqn{M} the number of samples.
-\cr \cr Alternatively, a list with \eqn{T} elements, one for each timepoint \eqn{t=1,\dots,T}.
-Each entry must be a list with:
+\item{prevalence_map}{For a single timepoint, \code{prevalence_map} can be an \eqn{L \times M} matrix or data frame containing samples from a geostatistical model,
+where \eqn{L} is the number of locations and \eqn{M} the number of samples per location.
+\cr \cr If there are multiple timepoints and/or a 'likelihood' function is to be used, \code{prevalence_map} must be a list with \eqn{T} elements, one for each timepoint \eqn{t=1,\dots,T}.
+Each element must itself be a list with:
 \describe{
 \item{\code{data}}{An \eqn{L \times M} matrix as above}
 \item{\code{likelihood}}{(optional) A function taking arguments:

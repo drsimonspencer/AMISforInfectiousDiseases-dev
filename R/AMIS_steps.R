@@ -37,17 +37,45 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     }
   }
   
+  if(is.list(prevalence_map)){
+    n_tims <- length(prevalence_map)  
+  }else if(is.data.frame(prevalence_map) || is.matrix(prevalence_map)){
+    n_tims <- 1
+  }else{
+    stop(("prevalence_map must be either \n - a matrix or data frame of size #locations by #samples (for one timepoint); or \n - a list with n_tims timepoints, each one with a matrix named 'data'."))
+  }
+  
   if(is.data.frame(prevalence_map)){
     prevalence_map <- as.matrix(prevalence_map)
   }
-  if (!(is.matrix(prevalence_map) || is.list(prevalence_map))) {
-    stop(("prevalence_map must be either \n - a matrix or data frame of size #locations by #samples (for one timepoint); or \n - a list with n_tims timepoints, each one with a matrix named 'data'."))
+  
+  if (is.list(prevalence_map)) {
+    if(!all(sapply(prevalence_map, function(i) inherits(i, "list"))) || 
+       !all(sapply(prevalence_map, function(i) "data"%in%names(i))) ||
+       !all(sapply(prevalence_map, function(i) all(names(i)%in%c("data","likelihood"))))
+       ) {
+      stop("Since prevalence_map was provided as a list, each of its elements must itself be a list with an object called 'data' (and optionally an object called 'likelihood').\n")
+    }
+
+    if(any( sapply(prevalence_map, function(i) "likelihood"%in%names(i)) )){
+      if(!all( sapply(prevalence_map, function(i) "likelihood"%in%names(i)) )){
+        stop("If 'likelihood' is to be used, it must be supplied for each time point in 'prevalence_map'.\n")  
+      }
+      for(i in 1:n_tims){
+        stopifnot("'likelihood' must be a function." = is.function(prevalence_map[[i]]$likelihood))
+      }
+      cat("A likelihood function was provided and will be used to calculate likelihood terms. \n")
+    }
   }
+  
+  # if matrix/data.frame, convert it to list
   if (is.matrix(prevalence_map)) {prevalence_map=list(list(data=prevalence_map))}
+
   dims <- lapply(prevalence_map, dim)
   if(!all(sapply(dims, FUN = identical, dims[[1]]))){
     stop("'prevalence_map' must have the same dimension (number of spatial units and number of samples) at each time point. If data for some locations are missing at a timepoint, set to NA.")
   }
+  
   stopifnot("'transmission_model' must be a function." = is.function(transmission_model))
   stopifnot("'prior' must be a list." = is.list(prior))
   stopifnot("'prior' must be a list of two elements." = (length(prior)==2))
@@ -109,9 +137,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   if(use_induced_prior && is.null(c(delta, sigma, breaks))){
     stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL if 'use_induced_prior' is set to TRUE.")
   }
-  if(!is.null(prevalence_map[[1]]$likelihood)){
-    cat("Likelihood function was provided and will be used to calculate likelihood terms. \n")
-  }
+  
   if(is.null(prevalence_map[[1]]$likelihood) && !use_induced_prior){
     if(!is.null(breaks)){
       cat("Histogram method will be used in the estimation of the likelihood as 'breaks' was provided. \n")
@@ -149,7 +175,6 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     }
   }
   
-  n_tims <- length(prevalence_map)
   locs_no_data <- NULL
   n_locs <- dim(prevalence_map[[1]]$data)[1]
   for(l in 1:n_locs){

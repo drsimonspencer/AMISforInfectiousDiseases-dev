@@ -190,13 +190,23 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
   
   # Formatting
   if (is.matrix(prevalence_map) || is.data.frame(prevalence_map)) {prevalence_map=list(list(data=prevalence_map))}
+  likelihood_approach <- ifelse(is.null(prevalence_map[[1]]$likelihood), "nonparametric", "parametric")
+  nonparametric_method <- NULL
+  if(likelihood_approach=="nonparametric"){
+    if(!is.null(amis_params[["breaks"]])){
+      nonparametric_method <- "histogram"
+    }else if(!is.null(amis_params[["sigma"]])){
+      nonparametric_method <- "gaussian"
+    }else{
+      nonparametric_method <- "uniform"
+    }
+  }
   use_gaussian_kernel <- ifelse(is.null(amis_params[["breaks"]]) && !is.null(amis_params[["sigma"]]), TRUE, FALSE)
   boundaries <- amis_params[["boundaries"]]
   boundaries_param <- amis_params[["boundaries_param"]]
   n_samples <- amis_params[["n_samples"]]
   n_tims <- length(prevalence_map)
   n_locs <- dim(prevalence_map[[1]]$data)[1]
-  likelihood_approach <- ifelse(is.null(prevalence_map[[1]]$likelihood), "nonparametric", "parametric")
   if(likelihood_approach=="nonparametric"){
     # Check which prevalence map samples are valid (non-NA, finite, and within boundaries)
     which_valid_prev_map <- get_which_valid_prev_map(prevalence_map, boundaries)
@@ -344,13 +354,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
       cat("AMIS iteration ",iter,"\n")
       # Fit mixture cluster model and sample from it
       mean_weights <- update_according_to_ess_value(weight_matrix, ess, amis_params[["target_ess"]],amis_params[["log"]], amis_params[["q"]])
-      if ((amis_params[["log"]] && max(mean_weights)==-Inf) || (!amis_params[["log"]] && max(mean_weights)==0)) {
-        if(likelihood_approach=="nonparametric"){
-          stop("No weight on any particles for locations in the active set.\n")
-        }else{
-          stop("No weight on any particles for locations in the active set. Check whether the prevalence map data are correct for all locations.\n")
-        }
-      }
+      check_zero_weight_for_all_particles(amis_params, mean_weights, likelihood_approach, nonparametric_method)
       mixture <- weighted_mixture(param, amis_params[["mixture_samples"]], mean_weights, amis_params[["log"]])
       cat("  A",mixture$G,"component mixture has been fitted.\n")
       components <- update_mixture_components(mixture, components, iter)

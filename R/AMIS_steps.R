@@ -200,6 +200,32 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   return(list(locs_no_data=locs_no_data)) 
 }
 
+#' Print error message if all particles are assigned weight zero for locations in the active set
+#' 
+#' @inheritParams amis
+#' @param likelihood_approach A string saying the likelihood approach: "parametric" or "nonparametric".
+#' @param nonparametric_method A string specifying which nonparametric method are used. Default to NULL.
+#' @noRd
+# #' @export
+check_zero_weight_for_all_particles <- function(amis_params, mean_weights, likelihood_approach, nonparametric_method=NULL){
+  if ((amis_params[["log"]] && max(mean_weights)==-Inf) || (!amis_params[["log"]] && max(mean_weights)==0)) {
+    if(likelihood_approach=="nonparametric"){
+      prefix <- "No weight on any particles for locations in the active set. "
+      if(nonparametric_method=="histogram"){
+        errorMessage <- paste0(prefix, "Try to use breakpoints more distant to each other.\n")
+      }
+      if(nonparametric_method=="gaussian"){
+        errorMessage <- paste0(prefix, "Try to use larger sigma.\n")
+      }
+      if(nonparametric_method=="uniform"){
+        errorMessage <- paste0(prefix, "Try to use larger delta.\n")
+      }
+      stop(errorMessage)
+    }else{
+      stop("No weight on any particles for locations in the active set. Check whether the prevalence map data are correct for all locations.\n")
+    }
+  }
+}
 
 #' Compute likelihood for each additional simulation across timepoints
 #'

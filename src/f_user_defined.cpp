@@ -163,3 +163,41 @@ arma::mat f_user_defined_l_m_r(Rcpp::Function likelihood_fun,
   }
   return(f);
 }
+
+
+//' @title Calculates likelihood matrix given user-defined likelihood function
+//' @param likelihood_fun User-defined likelihood function evaluated at simulation r at location l 
+//' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
+//' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
+//' @param logar Logical indicating if the outputs should be in log-scale or not
+//' @param param An (n_locs x d) matrix with the d-dimensional model parameters
+//' @return An (n_locs x n_sims) matrix with the parametric likelihood model evaluated at the simulated prevalences.
+//' @noRd
+// [[Rcpp::export]]
+arma::mat f_user_defined(Rcpp::Function likelihood_fun, 
+                         arma::mat& prevalence_map, 
+                         arma::vec& prev_sim, 
+                         arma::uvec& which_valid_sim_prev_iter,
+                         bool logar, 
+                         NumericMatrix param){
+  int L = prevalence_map.n_rows;
+  int R = prev_sim.n_elem;
+  arma::mat f = arma::zeros<arma::mat>(L, R);
+  NumericVector param_l;
+  double prev_sim_r;
+  for (int l=0; l<L; l++) {
+   param_l = param(l,_);
+   for(auto & r : which_valid_sim_prev_iter){
+     prev_sim_r = prev_sim[r];
+     f(l,r) = Rcpp::as<double>(likelihood_fun(prev_sim_r, param_l));
+   }
+  }
+  if(logar){
+    for (int l=0; l<L; l++) {
+      for (int r=0; r<R; r++) {
+        f(l,r) = log(f(l,r));
+      }
+    }
+  }
+  return(f);
+}

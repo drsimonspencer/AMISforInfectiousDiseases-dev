@@ -193,6 +193,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// f_user_defined
+arma::mat f_user_defined(Rcpp::Function likelihood_fun, arma::mat& prevalence_map, arma::vec& prev_sim, arma::uvec& which_valid_sim_prev_iter, bool logar, NumericMatrix param);
+RcppExport SEXP _AMISforInfectiousDiseases_f_user_defined(SEXP likelihood_funSEXP, SEXP prevalence_mapSEXP, SEXP prev_simSEXP, SEXP which_valid_sim_prev_iterSEXP, SEXP logarSEXP, SEXP paramSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::Function >::type likelihood_fun(likelihood_funSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type prevalence_map(prevalence_mapSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type prev_sim(prev_simSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type which_valid_sim_prev_iter(which_valid_sim_prev_iterSEXP);
+    Rcpp::traits::input_parameter< bool >::type logar(logarSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type param(paramSEXP);
+    rcpp_result_gen = Rcpp::wrap(f_user_defined(likelihood_fun, prevalence_map, prev_sim, which_valid_sim_prev_iter, logar, param));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_which_valid_prev_map
 List get_which_valid_prev_map(const List& prevalence_map, NumericVector boundaries);
 RcppExport SEXP _AMISforInfectiousDiseases_get_which_valid_prev_map(SEXP prevalence_mapSEXP, SEXP boundariesSEXP) {
@@ -268,6 +284,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_AMISforInfectiousDiseases_f_user_defined_l", (DL_FUNC) &_AMISforInfectiousDiseases_f_user_defined_l, 7},
     {"_AMISforInfectiousDiseases_f_user_defined_l_r", (DL_FUNC) &_AMISforInfectiousDiseases_f_user_defined_l_r, 7},
     {"_AMISforInfectiousDiseases_f_user_defined_l_m_r", (DL_FUNC) &_AMISforInfectiousDiseases_f_user_defined_l_m_r, 7},
+    {"_AMISforInfectiousDiseases_f_user_defined", (DL_FUNC) &_AMISforInfectiousDiseases_f_user_defined, 6},
     {"_AMISforInfectiousDiseases_get_which_valid_prev_map", (DL_FUNC) &_AMISforInfectiousDiseases_get_which_valid_prev_map, 2},
     {"_AMISforInfectiousDiseases_get_which_valid_locs_prev_map", (DL_FUNC) &_AMISforInfectiousDiseases_get_which_valid_locs_prev_map, 3},
     {"_AMISforInfectiousDiseases_get_locations_first_t", (DL_FUNC) &_AMISforInfectiousDiseases_get_locations_first_t, 3},

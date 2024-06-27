@@ -84,7 +84,14 @@ arma::mat f_user_defined_l_m_r(Rcpp::Function likelihood_fun,
                                arma::uvec& which_valid_sim_prev_iter,
                                List& which_valid_prev_map_t, 
                                bool logar);
-                                
+
+arma::mat f_user_defined(Rcpp::Function likelihood_fun, 
+                         arma::mat& prevalence_map, 
+                         arma::vec& prev_sim, 
+                         arma::uvec& which_valid_sim_prev_iter,
+                         bool logar, 
+                         NumericMatrix param);
+                         
 List get_which_valid_prev_map(const List& prevalence_map, 
                               NumericVector boundaries);
                               

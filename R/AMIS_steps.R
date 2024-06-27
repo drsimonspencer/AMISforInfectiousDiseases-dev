@@ -264,16 +264,24 @@ evaluate_likelihood <- function(param,prevalence_map,prev_sim,amis_params,
     
     likelihood_fun <- prevalence_map$likelihood
     
-    
     # Here, the user-defined 'likelihood_fun' returns an (M_l x nsims) matrix 
     # for a particular location l
-    f <- f_user_defined_l(likelihood_fun,
-                          param,
-                          prevalence_map=prevalence_map$data, 
-                          prev_sim=prev_sim, 
-                          which_valid_sim_prev_iter=which_valid_sim_prev_iter, 
-                          which_valid_prev_map_t=which_valid_prev_map_t, 
-                          logar=logar)
+    f <- f_user_defined(likelihood_fun=likelihood_fun, 
+                        prevalence_map=prevalence_map$data, 
+                        prev_sim=prev_sim, 
+                        which_valid_sim_prev_iter=which_valid_sim_prev_iter, 
+                        logar=logar, 
+                        param=param)
+
+    # # Here, the user-defined 'likelihood_fun' returns an (M_l x nsims) matrix 
+    # # for a particular location l
+    # f <- f_user_defined_l(likelihood_fun,
+    #                       param,
+    #                       prevalence_map=prevalence_map$data, 
+    #                       prev_sim=prev_sim, 
+    #                       which_valid_sim_prev_iter=which_valid_sim_prev_iter, 
+    #                       which_valid_prev_map_t=which_valid_prev_map_t, 
+    #                       logar=logar)
 
     # # Here, the user-defined 'likelihood_fun' returns an M_l-length vector
     # # for a particular location l and a single simulated prevalence

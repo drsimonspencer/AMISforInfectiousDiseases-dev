@@ -177,6 +177,18 @@ f_user_defined_l_m_r <- function(likelihood_fun, param, prevalence_map, prev_sim
     .Call('_AMISforInfectiousDiseases_f_user_defined_l_m_r', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar)
 }
 
+#' @title Calculates likelihood matrix given user-defined likelihood function
+#' @param likelihood_fun User-defined likelihood function evaluated at simulation r at location l 
+#' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
+#' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
+#' @param logar Logical indicating if the outputs should be in log-scale or not
+#' @param param An (n_locs x d) matrix with the d-dimensional model parameters
+#' @return An (n_locs x n_sims) matrix with the parametric likelihood model evaluated at the simulated prevalences.
+#' @noRd
+f_user_defined <- function(likelihood_fun, prevalence_map, prev_sim, which_valid_sim_prev_iter, logar, param) {
+    .Call('_AMISforInfectiousDiseases_f_user_defined', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, prevalence_map, prev_sim, which_valid_sim_prev_iter, logar, param)
+}
+
 #' @title Check which prevalence samples are valid for each location at each time point.
 #' @param prevalence_map List where each element is prevalence_map data for a time point.
 #' @param boundaries Vector of length two.

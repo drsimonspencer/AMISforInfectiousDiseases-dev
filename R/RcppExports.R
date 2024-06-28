@@ -129,64 +129,18 @@ f_estimator_uniform <- function(prevalence_map, prev_sim, delta, which_valid_sim
     .Call('_AMISforInfectiousDiseases_f_estimator_uniform', PACKAGE = 'AMISforInfectiousDiseases', prevalence_map, prev_sim, delta, which_valid_sim_prev_iter, which_valid_prev_map_t, boundaries, logar)
 }
 
-#' @title Calculates likelihood matrix given user-defined likelihood function (1st version)
-#' @param likelihood_fun User-defined likelihood function evaluated at simulation r at location l 
-#' (i.e., it is vectorised for the M valid samples and r valid simulations and 
-#' returns an M x R matrix)
-#' @param param An (n x d) matrix with the d-dimensional model parameters, 
-#' one for each of the n seeds, used in the simulation.
-#' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
-#' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
-#' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
-#' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
-#' @param logar Logical indicating if the outputs should be in log-scale or not
-#' @return An (n_locs x n_sims) matrix with the empirical estimates for the likelihood.
-#' @noRd
-f_user_defined_l <- function(likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar) {
-    .Call('_AMISforInfectiousDiseases_f_user_defined_l', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar)
-}
-
-#' @title Calculates likelihood matrix given user-defined likelihood function (2nd version)
-#' @param likelihood_fun User-defined likelihood function evaluated at simulation r at location l 
-#' (i.e., it is vectorised for the M valid samples and returns an M-length vector)
-#' @param param An (n x d) matrix with the d-dimensional model parameters, 
-#' one for each of the n seeds, used in the simulation.
-#' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
-#' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
-#' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
-#' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
-#' @param logar Logical indicating if the outputs should be in log-scale or not
-#' @return An (n_locs x n_sims) matrix with the empirical estimates for the likelihood.
-#' @noRd
-f_user_defined_l_r <- function(likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar) {
-    .Call('_AMISforInfectiousDiseases_f_user_defined_l_r', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar)
-}
-
-#' @title Calculates likelihood matrix given user-defined likelihood function (3rd version)
-#' @param likelihood_fun User-defined likelihood function evaluated at simulation r for sample m at location l 
-#' @param param An (n x d) matrix with the d-dimensional model parameters, 
-#' one for each of the n seeds, used in the simulation.
-#' @param prevalence_map An L x M matrix containing samples from the fitted prevalence map.
-#' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
-#' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
-#' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point. 
-#' @param logar Logical indicating if the outputs should be in log-scale or not
-#' @return An (n_locs x n_sims) matrix with the empirical estimates for the likelihood.
-#' @noRd
-f_user_defined_l_m_r <- function(likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar) {
-    .Call('_AMISforInfectiousDiseases_f_user_defined_l_m_r', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, param, prevalence_map, prev_sim, which_valid_sim_prev_iter, which_valid_prev_map_t, logar)
-}
-
-#' @title Calculates likelihood matrix given user-defined likelihood function
-#' @param likelihood_fun User-defined likelihood function evaluated at simulation r at location l 
+#' @title Calculates an (n_locs x n_sims) matrix of likelihood values using a parametric likelihood function
+#' @param likelihood_fun User-defined parametric likelihood function.
+#' @param prevalence_map An (n_locs x M) matrix, where M is the number of samples from a geostatistical model 
+#' or the number of likelihood parameters.
+#' @param which_valid_prev_map_t List showing which samples are valid for each location at a time point.
 #' @param prev_sim A vector containing the simulated prevalence value for each parameter sample.
 #' @param which_valid_sim_prev_iter Vector showing which simulated values are valid.
 #' @param logar Logical indicating if the outputs should be in log-scale or not
-#' @param param An (n_locs x d) matrix with the d-dimensional model parameters
-#' @return An (n_locs x n_sims) matrix with the parametric likelihood model evaluated at the simulated prevalences.
+#' @return An (n_locs x n_sims) matrix with the parametric likelihood function evaluated at the simulated prevalences.
 #' @noRd
-f_user_defined <- function(likelihood_fun, prevalence_map, prev_sim, which_valid_sim_prev_iter, logar, param) {
-    .Call('_AMISforInfectiousDiseases_f_user_defined', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, prevalence_map, prev_sim, which_valid_sim_prev_iter, logar, param)
+f_user_defined <- function(likelihood_fun, prevalence_map, which_valid_prev_map_t, prev_sim, which_valid_sim_prev_iter, logar) {
+    .Call('_AMISforInfectiousDiseases_f_user_defined', PACKAGE = 'AMISforInfectiousDiseases', likelihood_fun, prevalence_map, which_valid_prev_map_t, prev_sim, which_valid_sim_prev_iter, logar)
 }
 
 #' @title Check which prevalence samples are valid for each location at each time point.

@@ -23,14 +23,14 @@ Each element must itself be a list with:
 \item{\code{data}}{An \eqn{L \times M} matrix as above}
 \item{\code{likelihood}}{(optional) A function taking arguments:
 \itemize{
-\item \code{param}: An \eqn{n \times d} matrix with the \eqn{d}-dimensional
-model parameter vectors, one for each of the \eqn{n} seeds used in the simulation;
-\item \code{data}: A vector with a given number \eqn{M_l} of valid samples for a particular location \eqn{l};
-\item \code{sim_prev}: An \eqn{n}-length vector with the prevalences simulated by the transmission model;
+\item \code{data}: A vector of length \eqn{M_l}, where \eqn{M_l}
+is the number of geostatistical map samples for location \eqn{l} or
+the number of likelihood parameters.
+\item \code{sim_prev}: A numeric value for a prevalence simulated from the transmission model;
 \item \code{log}: Optional logical. If set to \code{TRUE}, the function returns the log-likelihoods.
 }
-The function \code{likelihood} must return an \eqn{M_l \times n} matrix which will be used to
-calculate the likelihood of observing the simulated prevalences at a particular location.
+The function \code{likelihood} must return a numeric value representing the likelihood of
+observing a simulated prevalence value given the data from a particular location.
 }
 }
 The location names are inherited from \code{rownames(prevalence_map)}

@@ -5,7 +5,6 @@
 \title{Evaluate likelihood for each additional simulation for a single timepoint}
 \usage{
 evaluate_likelihood(
-  param,
   prevalence_map,
   prev_sim,
   amis_params,
@@ -15,8 +14,6 @@ evaluate_likelihood(
 )
 }
 \arguments{
-\item{param}{A matrix containing the sampled parameter vectors.}
-
 \item{prevalence_map}{A list containing objects \code{data} (an L x M matrix of data);
 and \code{likelihood} a function taking arguments \code{data} (a matrix of data as above),
 \code{prevalence} (a matrix of output from the transmission model) and optional logical \code{log}, which returns the vector of (log)-likelihoods.}

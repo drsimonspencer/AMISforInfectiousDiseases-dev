@@ -61,37 +61,13 @@ arma::mat f_estimator_histogram(arma::mat& prevalence_map,
                                 List& which_valid_prev_map_t, 
                                 bool logar);
 
-NumericMatrix f_user_defined_l(Rcpp::Function likelihood_fun, 
-                               NumericMatrix param,
-                               NumericMatrix prevalence_map, 
-                               NumericVector prev_sim, 
-                               IntegerVector which_valid_sim_prev_iter, 
-                               List& which_valid_prev_map_t, 
-                               bool logar);
-
-NumericMatrix f_user_defined_l_r(Rcpp::Function likelihood_fun, 
-                                 NumericMatrix param,
-                                 NumericMatrix prevalence_map, 
-                                 NumericVector prev_sim, 
-                                 arma::uvec& which_valid_sim_prev_iter, 
-                                 List& which_valid_prev_map_t, 
-                                 bool logar);
-                                       
-arma::mat f_user_defined_l_m_r(Rcpp::Function likelihood_fun, 
-                               NumericMatrix param,
-                               arma::mat& prevalence_map, 
-                               arma::vec& prev_sim, 
-                               arma::uvec& which_valid_sim_prev_iter,
-                               List& which_valid_prev_map_t, 
-                               bool logar);
-
 arma::mat f_user_defined(Rcpp::Function likelihood_fun, 
-                         arma::mat& prevalence_map, 
-                         arma::vec& prev_sim, 
-                         arma::uvec& which_valid_sim_prev_iter,
-                         bool logar, 
-                         NumericMatrix param);
-                         
+                         NumericMatrix prevalence_map,
+                         List& which_valid_prev_map_t,
+                         NumericVector prev_sim, 
+                         NumericVector which_valid_sim_prev_iter,
+                         bool logar);
+                                    
 List get_which_valid_prev_map(const List& prevalence_map, 
                               NumericVector boundaries);
                               

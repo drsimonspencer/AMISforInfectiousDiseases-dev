@@ -270,7 +270,6 @@ compute_likelihood <- function(param,prevalence_map,simulated_prevalences,amis_p
 #'
 #' Implements analytical likelihoods if a likelihood function is available; otherwise histogram or empirical
 #' likelihoods are generated based on samples from a geostatistical map.
-#' @param param A matrix containing the sampled parameter vectors.
 #' @param prevalence_map A list containing objects \code{data} (an L x M matrix of data);
 #' and \code{likelihood} a function taking arguments \code{data} (a matrix of data as above),
 #' \code{prevalence} (a matrix of output from the transmission model) and optional logical \code{log}, which returns the vector of (log)-likelihoods.    
@@ -280,7 +279,7 @@ compute_likelihood <- function(param,prevalence_map,simulated_prevalences,amis_p
 #' @param which_valid_prev_map_t List showing which prevalence map samples are valid at time t.
 #' @param log_norm_const_gaussian_t Normalising constant (in log scale) for the Gaussian kernel at time t. It is only used if Gaussian kernel is used.
 #' @return A locations x simulations matrix of (log-)likelihoods.
-evaluate_likelihood <- function(param,prevalence_map,prev_sim,amis_params, 
+evaluate_likelihood <- function(prevalence_map,prev_sim,amis_params, 
                                 which_valid_sim_prev_iter,which_valid_prev_map_t,log_norm_const_gaussian_t) {
 
   logar <- amis_params[["log"]]
@@ -290,47 +289,14 @@ evaluate_likelihood <- function(param,prevalence_map,prev_sim,amis_params,
     
     likelihood_fun <- prevalence_map$likelihood
     
-    # Here, the user-defined 'likelihood_fun' returns an (M_l x nsims) matrix 
-    # for a particular location l
     f <- f_user_defined(likelihood_fun=likelihood_fun, 
                         prevalence_map=prevalence_map$data, 
+                        which_valid_prev_map_t=which_valid_prev_map_t,
                         prev_sim=prev_sim, 
                         which_valid_sim_prev_iter=which_valid_sim_prev_iter, 
-                        logar=logar, 
-                        param=param)
+                        logar=logar)
 
-    # # Here, the user-defined 'likelihood_fun' returns an (M_l x nsims) matrix 
-    # # for a particular location l
-    # f <- f_user_defined_l(likelihood_fun,
-    #                       param,
-    #                       prevalence_map=prevalence_map$data, 
-    #                       prev_sim=prev_sim, 
-    #                       which_valid_sim_prev_iter=which_valid_sim_prev_iter, 
-    #                       which_valid_prev_map_t=which_valid_prev_map_t, 
-    #                       logar=logar)
-
-    # # Here, the user-defined 'likelihood_fun' returns an M_l-length vector
-    # # for a particular location l and a single simulated prevalence
-    # f <- f_user_defined_l_r(likelihood_fun,
-    #                         param,
-    #                         prevalence_map=prevalence_map$data, 
-    #                         prev_sim=prev_sim, 
-    #                         which_valid_sim_prev_iter=which_valid_sim_prev_iter, 
-    #                         which_valid_prev_map_t=which_valid_prev_map_t, 
-    #                         logar=logar)
-    # 
-    # # Here, the user-defined 'likelihood_fun' returns a single point:
-    # # the likelihood of observing a simulated value r given a sample m at a particular location l
-    # # This approach can be slow because the R function has to be called from Rcpp too many times
-    # f <- f_user_defined_l_m_r(likelihood_fun,
-    #                           param,
-    #                           prevalence_map=prevalence_map$data,
-    #                           prev_sim=prev_sim,
-    #                           which_valid_sim_prev_iter=which_valid_sim_prev_iter,
-    #                           which_valid_prev_map_t=which_valid_prev_map_t,
-    #                           logar=logar)
-
-    # # R code of previous version of the package
+    # # R code of previous version of the package (note that 'param' had to be an argument of evaluate_likelihood().)
     # locs<-which(!is.na(prevalence_map$data[,1])) # if there is no data for a location, do not update weights.
     # f[locs,]<-t(prevalence_map$likelihood(param,prevalence_map$data[locs,,drop=FALSE],prev_sim,amis_params[["log"]])) # likelihood function must be vectorised.
   } else {

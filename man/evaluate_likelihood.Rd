@@ -32,6 +32,6 @@ and \code{likelihood} a function taking arguments \code{data} (a matrix of data 
 A locations x simulations matrix of (log-)likelihoods.
 }
 \description{
-Implements analytical likelihoods if a likelihood function is available; otherwise histogram or empirical
-likelihoods are generated based on samples from a geostatistical map.
+Implements a parametric likelihood function if it is supplied by the user; otherwise it implements a
+nonparametric method (histogram or kernel density smoothing) based on samples from a geostatistical map.
 }

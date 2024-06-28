@@ -230,13 +230,9 @@ check_zero_weight_for_all_particles <- function(amis_params, mean_weights, likel
 #' Compute likelihood for each additional simulation across timepoints
 #'
 #' Calls evaluate likelihood for each timepoint.
-#' @param param A matrix containing the sampled parameter vectors.
 #' @param prevalence_map A list with one entry for each timepoint.
 #' Each entry must be a list containing objects \code{data} (an L x M matrix of data);
-#' and optional function \code{likelihood} taking arguments \code{param} (model parameters used in the simulation), \code{data} (a matrix of data as above),
-#' \code{prevalence} (a matrix of output from the transmission model) and optional logical \code{log}, which returns the vector of (log)-likelihoods.
-#' If a likelihood is not specified then it is assumed that
-#' the data consist of samples from a geo-statistical model and empirical methods are used.
+#' and optional function \code{likelihood} (see \code{\link{amis}})
 #' @param simulated_prevalences An n x timepoints matrix of prevalences simulated from the transmission model.
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
 #' @param likelihoods An array with dimension n_tims,n_locs,n_sims -- ie timepoints x locations x simulations (optional).
@@ -244,7 +240,7 @@ check_zero_weight_for_all_particles <- function(amis_params, mean_weights, likel
 #' @param which_valid_prev_map List showing which prevalence map samples are valid
 #' @param log_norm_const_gaussian Normalising constant (in log scale) for the Gaussian kernel. It is only used if Gaussian kernel is used.
 #' @return A larger array with the likelihoods of the new simulations joined to the existing array \code{likelihoods}.
-compute_likelihood <- function(param,prevalence_map,simulated_prevalences,amis_params,likelihoods=NULL,
+compute_likelihood <- function(prevalence_map,simulated_prevalences,amis_params,likelihoods=NULL,
                                which_valid_sim_prev_iter,which_valid_prev_map,log_norm_const_gaussian) {
   n_tims <- length(prevalence_map)
   n_locs <- dim(prevalence_map[[1]]$data)[1]
@@ -257,7 +253,7 @@ compute_likelihood <- function(param,prevalence_map,simulated_prevalences,amis_p
         log_norm_const_gaussian_t <- t(log_norm_const_gaussian_t)  
       }
     }
-    lik[t,,] <- evaluate_likelihood(param,prevalence_map[[t]],simulated_prevalences[,t],amis_params,
+    lik[t,,] <- evaluate_likelihood(prevalence_map[[t]],simulated_prevalences[,t],amis_params,
                                     which_valid_sim_prev_iter[[t]],which_valid_prev_map[[t]],log_norm_const_gaussian_t) 
   }
   if (!is.null(likelihoods)) {
@@ -268,8 +264,8 @@ compute_likelihood <- function(param,prevalence_map,simulated_prevalences,amis_p
 
 #' Evaluate likelihood for each additional simulation for a single timepoint
 #'
-#' Implements analytical likelihoods if a likelihood function is available; otherwise histogram or empirical
-#' likelihoods are generated based on samples from a geostatistical map.
+#' Implements a parametric likelihood function if it is supplied by the user; otherwise it implements a 
+#' nonparametric method (histogram or kernel density smoothing) based on samples from a geostatistical map.
 #' @param prevalence_map A list containing objects \code{data} (an L x M matrix of data);
 #' and \code{likelihood} a function taking arguments \code{data} (a matrix of data as above),
 #' \code{prevalence} (a matrix of output from the transmission model) and optional logical \code{log}, which returns the vector of (log)-likelihoods.    

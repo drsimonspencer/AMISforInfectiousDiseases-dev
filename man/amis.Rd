@@ -30,14 +30,14 @@ the number of likelihood parameters.
 \item \code{log}: Optional logical. If set to \code{TRUE}, the function returns the log-likelihoods.
 }
 The function \code{likelihood} must return a numeric value representing the likelihood of
-observing a simulated prevalence value given the data from a particular location.
+observing a simulated prevalence given the data from a particular location.
 }
 }
 The location names are inherited from \code{rownames(prevalence_map)}
 if \code{prevalence_map} is a matrix, and
 from \code{rownames(prevalence_map[[1]]$data)} if \code{prevalence_map} is a list.
 \cr \cr If \code{likelihood} is not specified, then it is assumed that the data consist of
-samples from a geo-statistical model and empirical methods are used.
+samples from a geo-statistical model and nonparametric method (histogram or kernel density smoothing) is used.
 \cr \cr}
 
 \item{transmission_model}{A function taking arguments:

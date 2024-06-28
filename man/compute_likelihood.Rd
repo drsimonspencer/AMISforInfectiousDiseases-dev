@@ -5,7 +5,6 @@
 \title{Compute likelihood for each additional simulation across timepoints}
 \usage{
 compute_likelihood(
-  param,
   prevalence_map,
   simulated_prevalences,
   amis_params,
@@ -16,14 +15,9 @@ compute_likelihood(
 )
 }
 \arguments{
-\item{param}{A matrix containing the sampled parameter vectors.}
-
 \item{prevalence_map}{A list with one entry for each timepoint.
 Each entry must be a list containing objects \code{data} (an L x M matrix of data);
-and optional function \code{likelihood} taking arguments \code{param} (model parameters used in the simulation), \code{data} (a matrix of data as above),
-\code{prevalence} (a matrix of output from the transmission model) and optional logical \code{log}, which returns the vector of (log)-likelihoods.
-If a likelihood is not specified then it is assumed that
-the data consist of samples from a geo-statistical model and empirical methods are used.}
+and optional function \code{likelihood} (see \code{\link{amis}})}
 
 \item{simulated_prevalences}{An n x timepoints matrix of prevalences simulated from the transmission model.}
 

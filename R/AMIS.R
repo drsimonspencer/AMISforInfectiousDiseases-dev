@@ -23,14 +23,14 @@
 #'    \item \code{log}: Optional logical. If set to \code{TRUE}, the function returns the log-likelihoods.
 #' }
 #' The function \code{likelihood} must return a numeric value representing the likelihood of 
-#' observing a simulated prevalence value given the data from a particular location.
+#' observing a simulated prevalence given the data from a particular location.
 #' }
 #' }
 #' The location names are inherited from \code{rownames(prevalence_map)} 
 #' if \code{prevalence_map} is a matrix, and 
 #' from \code{rownames(prevalence_map[[1]]$data)} if \code{prevalence_map} is a list.
 #' \cr \cr If \code{likelihood} is not specified, then it is assumed that the data consist of 
-#' samples from a geo-statistical model and empirical methods are used.
+#' samples from a geo-statistical model and nonparametric method (histogram or kernel density smoothing) is used.
 #' \cr \cr
 #' @param transmission_model A function taking arguments:
 #' \itemize{
@@ -265,7 +265,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
     which_valid_sim_prev <- lapply(1:n_tims, function(t) which(bool_valid_sim_prev[,t])-1L)
     which_invalid_sim_prev <- lapply(1:n_tims, function(t) which(!bool_valid_sim_prev[,t])-1L)
     # Evaluate likelihood
-    likelihoods <- compute_likelihood(param,prevalence_map,simulated_prevalences,amis_params,
+    likelihoods <- compute_likelihood(prevalence_map,simulated_prevalences,amis_params,
                                       likelihoods=NULL, which_valid_sim_prev,
                                       which_valid_prev_map,log_norm_const_gaussian)
     if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
@@ -384,7 +384,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
       which_invalid_sim_prev <- lapply(1:n_tims, function(t) c(which_invalid_sim_prev[[t]], which_invalid_sim_prev_iter[[t]]+n_samples*(iter-1)))
       simulated_prevalences <- rbind(simulated_prevalences,new_prevalences)
       # Evaluate likelihood
-      likelihoods <- compute_likelihood(new_params$params,prevalence_map,new_prevalences,amis_params, 
+      likelihoods <- compute_likelihood(prevalence_map,new_prevalences,amis_params, 
                                         likelihoods,which_valid_sim_prev_iter,
                                         which_valid_prev_map,log_norm_const_gaussian)
       if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least one NaN value. \n")}

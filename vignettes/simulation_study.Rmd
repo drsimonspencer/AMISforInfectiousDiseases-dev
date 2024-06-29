@@ -1,0 +1,377 @@
+---
+title: "Simulation study"
+output: rmarkdown::html_vignette
+# output: pdf_document
+bibliography: refs.bib
+vignette: >
+  %\VignetteIndexEntry{Simulation study}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  cache = FALSE,
+  echo = TRUE, results = 'hold', warning=F, message=F, 
+  #dev = 'pdf', 
+  fig.width=8, fig.height=5,
+  tidy.opts=list(width.cutoff=75), tidy=FALSE
+)
+old <- options(scipen = 1, digits = 4)
+set.seed(123)
+```
+
+\newcommand{\Exp}{\text{Exp}}
+\newcommand{\N}{{\cal N}}
+
+In this simulation study, we aim to see whether AMIS is capable of recovering the true parameter values used to simulate data.
+
+### Data generating process
+
+\cite{anderson1991infectious} \citep{anderson1991infectious}
+We assumed that the number of worms $X$ per host has negative binomial distribution NB($W$,$k$), where $W$ is the mean number of worms and $k$ the dispersion parameter describing the degree of clumping of parasites. The probability mass function is given by
+\begin{equation}
+\text{Pr}(X=x) = \frac{\Gamma(x+k)}{\Gamma(k)x!} \left(\frac{k}{k+W}\right)^k \left(\frac{W}{k+W}\right)^x, \quad x=0,1,2,\dots.
+\end{equation}
+
+As such, the prevalence is given by the probability of observing worms:
+
+\begin{align}
+P &= 1 - \text{Pr}\big(X=0 \ \vert \ W, k \big)\\
+  &= 1 - \left( 1 + \frac{W}{k} \right)^{-k}.
+\end{align}
+
+We assumed that the mean number of worms is spatially-varying:
+\[
+W_l = 3 \exp\big\{-0.5 \ \mathbf{s}_l'\Sigma \mathbf{s}_l \big\}, \quad l=1,\dots,L.
+\]
+where $\mathbf{s}_l = (\text{lon}_l, \text{lat}_l)'$ are the spatial coordinates of location $l$ and $\Sigma$ is a $2 \times 2$ matrix with entries $\Sigma_{11}=\Sigma_{22}=1$ and $\Sigma_{12}=\Sigma_{21}=0.7$. We generated data on a regular grid of $L=50\times50=2500$ coordinate values, with $\text{lon}_l \in [-4,4]$ and $\text{lat}_l \in [-2,2]$.
+
+Finally, we assumed the dispersion parameter is given by
+\[
+k_l = 0.5 \exp \big\{0.3 W_l\big\}, \quad l=1,\dots,L,
+\]
+so that it is also spatially-varying.
+
+We assumed each location $l$ has $n_l$ hosts, so that the number of worms per host in location $l$ at time $t$ was simulated by
+\[
+X_{i,l,t} \sim \text{NB}(W_l, k_l), \quad i=1,\dots,n_l,
+\]
+so that the prevalence in location $l$ at time $t$ is given by
+\[
+   P_{l,t} = \frac{1}{n_l}\sum_{i=1}^{n_l}\text{I}_{\{X_{i,l,t}>0\}}.
+\]
+
+We set $n_l=500$ and generated $M=100$ map samples for each location at each time $t \in \{1,2,3\}$. Then, we fit AMIS to these map samples using a maximum of $10$ iterations, with $1000$ samples per iteration, and putting independent exponential priors on $W$ and $k$.
+
+
+
+### Loading packages
+
+```{r, echo=TRUE}
+library("AMISforInfectiousDiseases")
+library("ggplot2")
+library("patchwork")
+library("viridis")
+library("dplyr")
+```
+
+### Generating spatially-varying mean number of worms
+
+```{r, echo=TRUE}
+lon <- seq(-4, 4, length.out=50)
+lat <- seq(-2, 2, length.out=50)
+simData <- expand.grid(lon=lon, lat=lat, W=NA, k=NA, expectedPrev=NA)
+L <- nrow(simData) # number of locations
+Sigma <- diag(2)
+Sigma[1,2] <- Sigma[2,1] <- 0.7
+for(l in 1:L){
+  pos <- as.numeric(simData[l,c("lon","lat")])
+  W <- 5*exp(-0.5*c(pos%*%Sigma%*%pos))
+  k <- 0.4
+  simData$W[l] <- W
+  simData$k[l] <- k
+  simData$expectedPrev[l] <- 1 - (1 + W/k)^(-k)
+}
+```
+
+Below we can see how the mean number of worms and the corresponding prevalence (at the equilibrium distribution) vary over space.
+
+```{r, echo=TRUE, fig.width=7, fig.height=2.5}
+simData_sf <- sf::st_as_sf(simData %>% dplyr::select(lon,lat,W,k,expectedPrev),
+                           coords=c("lon","lat"))
+th <- theme(axis.text=element_text(size=10), 
+            legend.text=element_text(size=10))
+plots_true_data <- vector(mode = "list", length = 2)
+plots_true_data[[1]] <- ggplot(data=simData_sf) + 
+  geom_sf(aes(colour=W),shape=15,size=5) + xlab("Lon") + ylab("Lat") + th + 
+  scale_colour_gradientn(colours=rev(viridis::magma(6)), name="W", na.value="grey100")
+plots_true_data[[2]] <- ggplot(data=simData_sf) + 
+  geom_sf(aes(colour=expectedPrev),shape=15,size=5) + 
+  xlab("Lon") + ylab("Lat") + th + 
+  scale_colour_gradientn(colours=rev(viridis::magma(6)), 
+                         name="E[P]", na.value="grey100", 
+                         limits=c(0,1))
+wrap_plots(plots_true_data, guides = 'keep', ncol = 2)
+```
+
+### Generating map samples for multiple time points
+
+```{r, echo=TRUE, results=FALSE}
+set.seed(1)
+n_hosts <- 500  # number of hosts per location
+M <- 100        # number of statistical map samples per location
+n_tims <- 3     # number of time points
+prevalence_map <- vector(mode = "list", length = n_tims)
+for(t in 1:n_tims){
+  prevs_t <- matrix(NA,L,M)
+  for (l in 1:L) {
+    for(m in 1:M){
+      W <- simData$W[l]
+      k <- simData$k[l]
+      num_worms_l <- rnbinom(n=n_hosts, mu=W, size=k)
+      prevs_t[l,m] <- sum(num_worms_l>0)/n_hosts
+    }
+  }
+  prevalence_map[[t]]$data <- prevs_t
+}
+```
+
+### Choosing the transmission model function
+
+```{r, echo=TRUE, results=FALSE}
+transmission_model <- function(seeds, params, n_tims){
+  n_samples <- nrow(params)
+  p <- matrix(NA, nrow=n_samples, ncol=n_tims)
+  for(tt in 1:n_tims){
+    for (i in 1:n_samples){
+      W <- params[i,1]
+      k <- params[i,2]
+      p[i,tt] <- 1-(1+W/k)^(-k)
+    }
+  }
+  return(p)
+}
+```
+
+### Choosing the prior distributions and AMIS control parameters
+
+```{r, echo=TRUE, results=FALSE}
+# Prior distribution for the model parameters
+rprior <- function(n) {
+  params <- matrix(NA, n, 2)
+  colnames(params) <- c("W", "k")
+  params[,1] <- rexp(n=n, rate=lambda_W)
+  params[,2] <- rexp(n=n, rate=lambda_k)
+  return(params)
+}
+dprior <- function(x, log=FALSE) {
+  if (log) {
+    return(dexp(x=x[1], rate=lambda_W, log=T) + dexp(x=x[2], rate=lambda_k, log=T))
+  } else {
+    return(dexp(x=x[1], rate=lambda_W) * dexp(x=x[2], rate=lambda_k))
+  }
+}
+prior <- list(rprior=rprior,dprior=dprior)
+
+amis_params <- AMISforInfectiousDiseases:::default_amis_params()
+amis_params$nsamples <- 1000
+amis_params$target_ess <- 10000
+amis_params$max_iters <- 10
+amis_params$delta <- 0.1
+```
+
+### Running AMIS
+
+In the lines below, we fit AMIS to the statistical maps by using different prior specifications for $k$, namely $\Exp(\lambda_k), \ \lambda_k \in \{0.1, 0.3, 1\}$.
+```{r, echo=TRUE, results=FALSE}
+lambda_W <- 1/3
+lambda_k_values <- c(0.1,0.3,1)
+num_lambda_k <- length(lambda_k_values)
+outList <- vector("list", num_lambda_k)
+i <- 1
+for(lambda_k in lambda_k_values){
+  outList[[i]] <- amis(prevalence_map, transmission_model, prior, amis_params, seed=1)
+  i <- i + 1
+}
+```
+
+### Looking at posterior distribution of parameters
+
+We can look at the posterior distribution for $k$ at some particular location, e.g. the location with the largest mean number of worms:
+
+```{r, echo=TRUE, results=FALSE, fig.width=3.3, fig.height=3, fig.show="hide"}
+loc <- which.max(simData$W)
+xlimW <- c(0,10)
+Wvals <- seq(xlimW[1],xlimW[2],len=100)
+W_prior_dens <- dexp(Wvals, rate=lambda_W)
+xlimk <- c(0,10)
+kvals <- seq(xlimk[1],xlimk[2],len=100) 
+i <- 1
+plots_k <- vector(mode = "list", length = num_lambda_k)
+plots_W <- vector(mode = "list", length = num_lambda_k)
+for(lambda_k in lambda_k_values){
+  k_prior_dens <- dexp(kvals, rate=lambda_k)
+  out <- outList[[i]]
+  # plotting W
+  plot(out, what = "W", type="hist", breaks=50, xlim=xlimW, 
+	     locations=loc, main=NA)
+  lines(Wvals, W_prior_dens, col="blue", lwd=2, lty=2)
+	abline(v = simData$W[loc], col="red", lwd=2, lty=2)
+	plots_W[[i]] <- recordPlot()
+  # plotting k
+	plot(out, what = "k", type="hist", breaks=100, xlim=xlimk, 
+       locations=loc, main=bquote(lambda[k]*"="*.(lambda_k)))
+  lines(kvals, k_prior_dens, col="blue", lwd=2, lty=2)
+	abline(v = simData$k[loc], col="red", lwd=2, lty=2)
+	plots_k[[i]] <- recordPlot()
+	i <- i + 1
+}
+```
+
+
+```{r, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
+plots_W[[1]]
+plots_k[[1]]
+```
+
+```{r, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
+plots_W[[2]]
+plots_k[[2]]
+```
+
+```{r, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
+plots_W[[3]]
+plots_k[[3]]
+```
+
+We can clearly see that the posterior distribution of $k$ is largely determined by the prior, and that the existence of multiple time points did not help the recovery of the true parameter values.
+
+
+### Introducing intervention
+
+Now, we assume that an intervention (reduction of the mean number of worms by $70\%$) occurs at time $t=2$ and still has effect at $t=3$.
+
+```{r, echo=TRUE, results=FALSE}
+for(t in 2:3){
+  prevs_t <- matrix(NA,L,M)
+  for (l in 1:L) {
+    for(m in 1:M){
+      W <- simData$W[l] * 0.3
+      k <- simData$k[l]
+      num_worms_l <- rnbinom(n=n_hosts, mu=W, size=k)
+      prevs_t[l,m] <- sum(num_worms_l>0)/n_hosts
+    }
+  }
+  prevalence_map[[t]]$data <- prevs_t
+}
+```
+
+The intervention is known and is also taken into account in the transmission model:
+
+```{r, echo=TRUE, results=FALSE}
+transmission_model <- function(seeds, params, n_tims){
+  n_samples <- nrow(params)
+  p <- matrix(NA, nrow=n_samples, ncol=n_tims)
+  for(t in 1:n_tims){
+    for (i in 1:n_samples){
+      if(t==1){
+        W <- params[i,1]
+      }else{
+        W <- params[i,1] * 0.3
+      }
+      k <- params[i,2]
+      p[i,t] <- 1-(1+W/k)^(-k)
+    }
+  }
+  return(p)
+}
+```
+
+We then fit AMIS using different priors for $k$ as before.
+```{r, echo=TRUE, results=FALSE}
+outList <- vector("list", num_lambda_k)
+i <- 1
+for(lambda_k in lambda_k_values){
+  outList[[i]] <- amis(prevalence_map, transmission_model, prior, amis_params, seed=1)
+  i <- i + 1
+}
+```
+
+Now, after introducing intervention, the posterior distribution for $k$ is no longer determined by the prior:
+
+```{r, echo=TRUE, results=FALSE, fig.width=3.3, fig.height=3, fig.show="hide"}
+xlimk <- c(0,3)
+kvals <- seq(xlimk[1],xlimk[2],len=100)
+i <- 1
+for(lambda_k in lambda_k_values){
+  k_prior_dens <- dexp(kvals, rate=lambda_k)
+  out <- outList[[i]]
+  # plotting W
+  plot(out, what = "W", type="hist", breaks=50, xlim=xlimW, 
+	     locations=loc, main=NA)
+  lines(Wvals, W_prior_dens, col="blue", lwd=2, lty=2)
+	abline(v = simData$W[loc], col="red", lwd=2, lty=2)
+	plots_W[[i]] <- recordPlot()
+	# plotting k
+	plot(out, what = "k", type="hist", breaks=100/lambda_k, xlim=xlimk, 
+	     locations=loc, main=bquote(lambda[k]*"="*.(lambda_k)))
+  lines(kvals, k_prior_dens, col="blue", lwd=2, lty=2)
+	abline(v = simData$k[loc], col="red", lwd=2, lty=2)
+	plots_k[[i]] <- recordPlot()
+	i <- i + 1
+}
+```
+
+
+```{r, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
+plots_W[[1]]
+plots_k[[1]]
+```
+
+```{r, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
+plots_W[[2]]
+plots_k[[2]]
+```
+
+```{r, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
+plots_W[[3]]
+plots_k[[3]]
+```
+
+In what follows, using the model with $\Exp(0.1)$ prior on k, we look at the posterior median for $W$ over space at time $t=1$.
+```{r, echo=TRUE, fig.width=7, fig.height=2.5}
+out <- outList[[3]]
+th <- theme(plot.title = element_text(size = 16, hjust = 0.5))
+limits <- c(0,5)
+W_post_medians <- sapply(1:L, function(l) calculate_summaries(out, what="W", locations=l)$median)
+simData_sf$W_post_medians <- W_post_medians
+plot_W_post_median <- ggplot(data=simData_sf) + 
+    geom_sf(aes(colour=W_post_medians),shape=15,size=5) +
+    scale_colour_gradientn(colours=viridis::turbo(10),
+                           name="Value",
+                           na.value = "grey100",
+                           limits = limits) + 
+    xlab("Lon") + ylab("Lat") + th + 
+  ggtitle("Posterior median of W")
+pWtrue <- ggplot(data=simData_sf) + 
+  geom_sf(aes(colour=W),shape=15,size=5) +
+  scale_colour_gradientn(colours=viridis::turbo(10),
+                         name="Value",
+                         na.value = "grey100", 
+                         limits = limits) + xlab("Lon") + ylab("Lat") + th + 
+  ggtitle("True W")
+wrap_plots(list(pWtrue, plot_W_post_median), guides = 'collect', ncol = 2)
+```
+
+Note that we assumed a constant true parameter value $k=0.4$ for all locations, but obtained posterior samples for each location. To see how much the estimates for $k$ varied over space, we can look at the posterior median of each location:
+```{r, echo=TRUE, results=TRUE}
+k_post_medians <- sapply(1:L, function(l) calculate_summaries(out, what="k", locations=l)$median)
+summary(k_post_medians)
+```
+
+
+
+

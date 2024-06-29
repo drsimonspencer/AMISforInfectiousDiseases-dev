@@ -116,7 +116,7 @@ it simulated a total of \eqn{N = I \times} \code{n_samples}, and therefore the l
 \item{\code{param}}{An \eqn{N \times d} matrix with the \eqn{d}-dimensional transmission model parameters simulated by the algorithm.}
 \item{\code{simulated_prevalences}}{An \eqn{N \times T} matrix with the simulated prevalences, where \eqn{T} is the number of timepoints.}
 \item{\code{weight_matrix}}{An \eqn{N \times L}, where \eqn{L} is the number of locations.}
-\item{\code{likelihoods}}{An \eqn{T \times L \times N} array with the likelihood of observing a simulated prevalence in each location at each time.}
+\item{\code{likelihoods}}{A \eqn{T \times L \times N} array with the likelihood of observing a simulated prevalence in each location at each time.}
 \item{\code{ess}}{An \eqn{L}-length vector with the final effective sample size (ESS) for each location.}
 \item{\code{prevalence_map}}{List with the prevalence map supplied by the user.}
 \item{\code{locations_with_no_data}}{Vector indicating which locations have no data at any time point.}
@@ -132,7 +132,6 @@ it simulated a total of \eqn{N = I \times} \code{n_samples}, and therefore the l
 This object is used in \code{\link{plot_mixture_components}}.}
 \item{\code{ess_per_iteration}}{An \eqn{L \times I} matrix with with the ESS for each location after each iteration.}
 \item{\code{prior_density}}{An \eqn{N}-length vector with the density function evaluated at the simulated parameter values.}
-\item{\code{last_simulation_seed}}{Last simulation seed that was used.}
 \item{\code{amis_params}}{List supplied by the user.}
 }
 }

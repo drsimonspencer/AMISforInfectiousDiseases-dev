@@ -117,7 +117,6 @@
 #' This object is used in \code{\link{plot_mixture_components}}.}
 #' \item{\code{ess_per_iteration}}{An \eqn{L \times I} matrix with with the ESS for each location after each iteration.}
 #' \item{\code{prior_density}}{An \eqn{N}-length vector with the density function evaluated at the simulated parameter values.}
-#' \item{\code{last_simulation_seed}}{Last simulation seed that was used.}
 #' \item{\code{amis_params}}{List supplied by the user.}
 #' }
 #' @details The average weight of parameter vectors for the set of active locations at iteration \eqn{i} (\eqn{A_i})
@@ -193,7 +192,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
                    components_per_iteration=components_per_iteration,
                    ess_per_iteration=ess_per_iteration,
                    prior_density=prior_density,
-                   last_simulation_seed=max(allseeds), 
                    amis_params=amis_params)
     class(output) <- 'amis'
     return(output)

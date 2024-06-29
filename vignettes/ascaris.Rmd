@@ -1,130 +1,88 @@
 ---
-title: "Application to Ascaris data in Ethiopia"
+title: "Fitting ascaris data"
 output: rmarkdown::html_vignette
 # output: pdf_document
 bibliography: refs.bib
 vignette: >
-  %\VignetteIndexEntry{Application to Ascaris data in Ethiopia}
+  %\VignetteIndexEntry{Fitting ascaris data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  echo = TRUE, results = 'hold', warning=F, cache=F, message=F, 
+  cache = FALSE,
+  echo = TRUE, results = 'hold', warning=F, message=F, 
   #dev = 'pdf', 
-  fig.width=5, fig.height=5,
+  fig.width=8, fig.height=5,
   tidy.opts=list(width.cutoff=75), tidy=FALSE
 )
 old <- options(scipen = 1, digits = 4)
 set.seed(123)
 ```
 
-
-
-This vignette demonstrates the amis package through a case study considering Ascariasis in Ethiopia. Ascariasis is one of the most common worm infections in people worldwide. This disease is caused by Ascaris lumbricoides, also known as roundworms, which are an intestinal nematode.  This was chosen as an example to illustrate the following package features: modelling from a single prevalence map, using various types of kernels, enforcing boundary conditions on model parameters, and post-processing of the results to produce forward projections of prevalence using sub-national estimates of the model parameters.
+This vignette demonstrates the `AMISforInfectiousDiseases` package through a case study considering Ascariasis in Ethiopia. Ascariasis is one of the most common worm infections in people worldwide. This disease is caused by Ascaris lumbricoides, also known as roundworms, which are an intestinal nematode.  This was chosen as an example to illustrate the following package features: modelling from a single prevalence map, enforcing boundary conditions on model parameters, and post-processing of the results to produce forward projections of prevalence using sub-national estimates of the model parameters.
 
 <!-- \subsection*{Prevalence map} -->
-## Prevalence map
+### Prevalence map
 
 Ascaris surveys for Ethiopia are available upon request from the Global Atlas of Helminth Infection developed by the London Applied \& Spatial Epidemiology Research Group (LASER) [@pullan2014ascaris]. [@retkute2021integrating] uses these surveys to obtain national level prevalence maps, which will be used in this analysis. These maps consist of $M=100$ samples of a prevalence map for Ascaris in Ethiopia with $11369$ locations at 10km $\times$ 10km resolution. 
 <!-- The data are available in the package by calling \code{data(ascaris)}. -->
 
 <!-- The mean prevalence values for all locations are presented in Figure~\ref{fig:ascaris_data}.  -->
 
-#### Loading packages
+### Loading packages
 
-```{r setup}
-library(AMISforInfectiousDiseases)
-library(ggplot2)
-library(viridis)
-library(dplyr)
-library(magrittr)
-library(gridExtra)
+```{r}
+library("AMISforInfectiousDiseases")
+library("ggplot2")
+library("viridis")
 ```
 
-#### Loading data
-
+In this example, we will use a subset of the data and convert the percentage prevalence values to their decimals:
 ```{r}
 data("ascaris")
-dim(ascaris)
-```
-
-```{r}
-ascaris[1:5, 1:7]
-```
-
-
-#### Taking a subset of the map
-
-```{r}
-wh <- which(ascaris$lon > 35 & ascaris$lon < 40 & ascaris$lat > 5 & ascaris$lat < 10)
+wh <- which(ascaris$lon > 36 & ascaris$lon < 40 & ascaris$lat > 5 & ascaris$lat < 12)
 ascaris <- ascaris[wh, ]
+ascaris[,-c(1,2)] <- ascaris[,-c(1,2)]/100
 ```
 
-
+The first two columns of the ascaris data frame are the geographical coordinates (longitude and latitude). The third column 
+contains the observed prevalence in the location (row). The remaining columns are the $M=100$ samples from a geostatistical map.
 ```{r}
 ascaris_obs_prev <- ascaris[, 1:3]
 ascaris_map <- ascaris[, -(1:3)]
+L <- nrow(ascaris_map)
 ```
-
-
-#### Plotting observed prevalences
-
-```{r}
-obs_prev <- ascaris[, 1:3]
-obs_prev <- sf::st_as_sf(obs_prev %>% dplyr::select(lon,lat,prevalence), coords = c("lon", "lat"))
-ggplot(data=obs_prev) + 
-  geom_sf(aes(colour=prevalence),shape=15,size=3) +
-  scale_colour_gradientn(colours=rev(viridis::magma(6)),
-                         name="prevalence",
-                         na.value = "grey100")
-```
-
-#### Plotting mean prevalences from the map
-
-```{r}
-map_mean_prev <- cbind(ascaris[, 1:2], prevalence=apply(ascaris[, -(1:3)], 1, mean))
-map_mean_prev <- sf::st_as_sf(map_mean_prev %>% dplyr::select(lon,lat,prevalence), coords = c("lon", "lat"))
-ggplot(data=map_mean_prev) + 
-  geom_sf(aes(colour=prevalence),shape=15,size=3) +
-  scale_colour_gradientn(colours=rev(viridis::magma(6)),
-                         name="prevalence",
-                         na.value = "grey100")
-```
-
-Map means are identical to observed prevalences.
 
 
 <!-- \subsection*{Transmission model} -->
-## Transmission model
+### Transmission model
 
 The transmission model for Ascaris lumbricoides can be described by the mathematical relationship between prevalence and the mean intensity of infection. From [@retkute2021integrating], the transmission model for Ascaris uses the negative binomial model where $W>0$ is the mean number of worms per host and $k$ is the worm clumping coefficient,
+\begin{equation}
+P = 1 - \left( 1 + \frac{W}{k} \right)^{-k}
+\end{equation}
 
-$$ P = 1- \bigg(1+\frac{W}{k}\bigg)^{-k} $$
 
-In this example, the natural logarithm of the model parameter $W$ is sampled. Thus the transmission model passed to function amis is given by,
-
+In this example, the natural logarithm of the model parameter $W$ is sampled. Thus the transmission model passed to function `amis` is given by
 
 ```{r}
 ascaris_model <- function(seeds, params, n_tims=1){
-  n_samples <- nrow(params)
-  p <- matrix(NA,nrow=n_samples,ncol=n_tims)
-  for(tt in 1:n_tims){
-    for (i in 1:n_samples){
-      W <- exp(params[i,1])
-      k <- params[i,2]
-      p[i,tt] <- 1-(1+W/k)^(-k)
-    }
+  p <- matrix(NA, nrow=nrow(params), ncol=n_tims)
+  for(t in 1:n_tims){
+    W <- exp(params[,1])
+    k <- params[,2]
+    p[,t] <- 1-(1+W/k)^(-k)
   }
   return(p)
 }
 ```
 
-<!-- \subsection*{Priors} -->
-## Priors
+
+### Priors
 
 The priors from [@retkute2021integrating] for the model parameters are borrowed in this example. These priors reflect what is currently known about the interaction between the worm burden and clumping coefficient based on the literature. In summary, a uniform prior is placed on the log worm burden and the relationship between the clumping coefficient and worm burden is estimated through a linear regression. Formally this is
 
@@ -139,13 +97,13 @@ where $\hat{\alpha}$ and $\hat{\beta}$ are the intercept and slope coefficients 
 The prior object passed to \fct{amis} is given by
 
 ```{r}
-fit.v<-c(0.33371009, 0.01719462)
-fit.inflation.factor<-5
+fit.v <- c(0.33371009, 0.01719462)
+fit.inflation.factor <- 5
 fit.hess<-matrix(0, nrow = 2, ncol = 2)
-fit.hess[[1,1]]<-5138.97
-fit.hess[[1,2]]<-49499.4
-fit.hess[[2,1]]<-49499.4
-fit.hess[[2,2]]<-677831
+fit.hess[[1,1]] <- 5138.97
+fit.hess[[1,2]] <- 49499.4
+fit.hess[[2,1]] <- 49499.4
+fit.hess[[2,2]] <- 677831
 
 rprior <- function(n) {
   params <- matrix(NA,n,2)
@@ -158,11 +116,11 @@ rprior <- function(n) {
   return(params)
 }
 
-dprior <- function(x,log=FALSE) {
+dprior <- function(x, log=FALSE) {
   if (log) {
     dlogW <- dunif(x[1],log(0.01),log(60),log=T)
     dk <- dnorm(x[2], mean = fit.v[1] + fit.v[2]*exp(x[1]), 
-                sd = fit.inflation.factor*sqrt(c(1,exp(x[1]))%*%solve(fit.hess,c(1,exp(x[1])))),log=T) 
+               sd = fit.inflation.factor*sqrt(c(1,exp(x[1]))%*%solve(fit.hess,c(1,exp(x[1])))),log=T) 
     return(sum(dlogW,dk))
   } else {
     dlogW <- dunif(x[1],log(0.01),log(60))
@@ -175,10 +133,10 @@ ascaris_prior <- list(rprior=rprior, dprior=dprior)
 ```
 
 <!-- \subsection*{Running \fct{amis}} -->
-#### Running amis
+### Running amis
 
 <!-- \subsubsection*{Default \fct{amis} settings (with boundaries)} -->
-##### Default amis settings (with boundaries)
+#### Default amis settings (with parameter boundaries)
 
 ```{r}
 amis_params <- AMISforInfectiousDiseases:::default_amis_params()
@@ -188,258 +146,96 @@ boundaries_param[2,] <- c(0, Inf)
 amis_params$boundaries_param <- boundaries_param
 ```
 
+
 <!-- Note that instead of defining boundaries through the object \code{amis_params}, the user could alternatively set the prevalence to \code{NA} directly in the transmission model when $k$ is negative and thus out of bounds.  -->
-Note that instead of defining boundaries through the object amis_params, the user could alternatively set the prevalence to NA directly in the transmission model when $k$ is negative and thus out of bounds. 
+Note that instead of defining boundaries through the object `amis_params`, the user could alternatively set the prevalence to `NA` directly in the transmission model when $k$ is negative and thus out of bounds. 
 
-#### Running AMIS using Uniform kernel
-
-```{r}
-amis_params$delta <- 0.3
-ascaris_res <- amis(ascaris_map, ascaris_model, ascaris_prior, amis_params)
-```
-
-```{r}
-print(ascaris_res)
-```
-
-```{r}
-summary(ascaris_res)
-```
-
-```{r}
-plot(ascaris_res, what = "prev", type="hist", locations=1:6, time=1, mfrow = c(2,3), breaks = 50)
-```
-```{r}
-plot(ascaris_res, what = "logW", type="hist", locations=1:6, mfrow = c(2,3))
-```
-```{r}
-plot(ascaris_res, what = "k", type="hist", locations=1:6, mfrow = c(2,3))
-```
-```{r}
-calculate_summaries(ascaris_res, what="prev", time=1, locations=1:6, alpha=0.05)
-```
-```{r}
-plot(ascaris_res, what = "prev", type="CI", locations=1:6, time=1)
-```
-```{r}
-plot(ascaris_res, what = "logW", type="CI", locations=1:6)
-```
-```{r}
-plot(ascaris_res, what = "k", type="CI", locations=1:6)
-```
-```{r}
-plot(ascaris_res, what=c("prev","logW","k"), type="CI", locations=1:6, time=1, mfrow=c(1,3), xlim = c(0,3))
-```
-```{r}
-plot_mixture_components(ascaris_res, what = "uncertainty", iteration = 2)
-```
-```{r}
-plot_mixture_components(ascaris_res, what = "density", nlevels=500)
-```
-
-
-
-#### Running AMIS using Gaussian kernel
+The boundaries for prevalence values, which are in $[0,1]$, are taken into account by default (through `amis_params$boundaries`).
 
 <!-- This example instead uses the Gaussian kernel for density estimation. To define this in the package, one needs to define \code{sigma} in the object \code{amis_params}. -->
-This example instead uses the Gaussian kernel for density estimation. To define this in the package, one needs to define sigma in the object amis_params.
+This example instead uses the Gaussian kernel for density estimation. To define this in the package, one needs to define `sigma` in the object `amis_params`.
 
 ```{r}
-amis_params$sigma = 0.5
-ascaris_res_gauss_kernel <- amis(ascaris_map, ascaris_model, ascaris_prior, amis_params)
-```
-```{r}
-print(ascaris_res_gauss_kernel)
-```
-```{r}
-summary(ascaris_res_gauss_kernel)
-```
-```{r}
-plot(ascaris_res_gauss_kernel, what = "prev", type="hist", locations=1:6, time=1, mfrow = c(2,3), breaks = 50)
-```
-```{r}
-plot(ascaris_res_gauss_kernel, what = "logW", type="hist", locations=1:6, mfrow = c(2,3))
-```
-```{r}
-plot(ascaris_res_gauss_kernel, what = "k", type="hist", locations=1:6, mfrow = c(2,3))
-```
-```{r}
-calculate_summaries(ascaris_res_gauss_kernel, what="prev", time=1, locations=1:6, alpha=0.05)
-```
-```{r}
-plot(ascaris_res_gauss_kernel, what = "prev", type="CI", locations=1:6, time=1)
-```
-```{r}
-plot(ascaris_res_gauss_kernel, what = "logW", type="CI", locations=1:6)
-```
-```{r}
-plot(ascaris_res_gauss_kernel, what = "k", type="CI", locations=1:6)
-```
-```{r}
-plot(ascaris_res_gauss_kernel, what=c("prev","logW","k"), type="CI", locations=1:6, time=1, mfrow=c(1,3), xlim = c(0,3))
-```
-```{r}
-plot_mixture_components(ascaris_res_gauss_kernel, what = "uncertainty")
-```
-```{r}
-plot_mixture_components(ascaris_res_gauss_kernel, what = "density", nlevels=500)
+amis_params$sigma <- 0.1
+set.seed(123)
+out <- amis(ascaris_map, ascaris_model, ascaris_prior, amis_params)
 ```
 
+<!-- \subsection*{Analysing \fct{amis} outputs} -->
+### Analysing AMIS outputs
+
+Given the output returned by `amis` above, we can use the function `print` to see the data dimensions, model choices, and control parameters used to run the AMIS algorithm. The function `summary` provides some brief information about the number of samples and effective sample sizes achieved by the algorithm.
+```{r}
+print(out)
+```
+
+```{r}
+summary(out)
+```
+
+It is possible to look at the parameter samples proposed at a given iteration (by default, the last iteration) and the corresponding proposal density:
+```{r, echo=TRUE, fig.width=7, fig.height=4}
+par(mfrow=c(1,2))
+plot_mixture_components(out, what = "uncertainty", cex=3)
+plot_mixture_components(out, what = "density", nlevels=200)
+par(mfrow=c(1,1))
+```
+
+For two arbitrary locations, we show below the posterior distribution of weighted samples for the model parameters and corresponding simulated prevalences.
+```{r, echo=TRUE, fig.width=7, fig.height=7}
+locs <- sample(1:L, 2)
+par(mfrow=c(3,2))
+plot(out, what = "logW", type="hist", locations=locs, breaks = 50)
+plot(out, what = "k", type="hist", locations=locs, breaks = 50)
+plot(out, what = "prev", type="hist", locations=locs, time=1, breaks = 50)
+```
+
+We can also produce plots of credible intervals for these statistics for all locations as follows:
+```{r, echo=TRUE, fig.width=7, fig.height=7}
+par(mfrow=c(1,3))
+plot(out, what=c("logW","k","prev"), type="CI", locations=1:L, 
+     cex=0.1, lwd=0.1, measure_central = "median",
+     time=1, mfrow=c(1,3))
+```
+
+To obtain the numerical values of summary statistics for specific locations, we can run
+```{r}
+calculate_summaries(out, what="prev", time=1, locations=locs, alpha=0.05)
+```
 
 <!-- \subsection*{Forward projection} -->
-## Forward projection
+### Forward projection
 
 <!-- To produce a projection of future prevalence under different treatment scenarios, for each pixel 200 parameter sets are sampled from the weighted set of parameters obtained from \code{ascaris_res} (i.e. using default \fct{amis} settings). The sub-sampled model parameters are then fed into the transmission model.  -->
-To produce a projection of future prevalence under different treatment scenarios, for each pixel 200 parameter sets are sampled from the weighted set of parameters obtained from ascaris_res (i.e. using default amis settings). The sub-sampled model parameters are then fed into the transmission model. 
+To produce a projection of future prevalence under different treatment scenarios, for each pixel 100 parameter sets are sampled from the weighted set of parameters obtained from `out` (i.e. using default `amis` settings). The sub-sampled model parameters are then fed into the transmission model. 
 
-```{r}
-res <- ascaris_res
-# res <- ascaris_res_gauss_kernel
-```
+```{r, echo=TRUE}
+sampled_pars <- sample_parameters(x=out, n_samples=100, locations=1:nrow(ascaris_map))
 
-
-
-
-```{r}
-sample_values = function(params, weights, seeds, nsamples) {
-  sampled_idx <- sample.int(
-    nrow(params),
-    nsamples,
-    replace = F,
-    prob = weights
-  )
-  sampled <- cbind(seeds[sampled_idx], params[sampled_idx,,drop=FALSE])
-  colnames(sampled) = c("seed","logW","k")
-  return(sampled)
-}
-
-sampled_pars <- data.frame(matrix(NA, 0, 5))
-# for (p in 1:49) { # really need to be character?
-for (p in 1:nrow(ascaris_map)) { # really need to be character?
-  if(amis_params[["log"]]){
-    weights <- exp(res$weight_matrix[,p])
-  }else{
-    weights <- res$weight_matrix[,p]
-  }
-  sampled_params <- sample_values(params=cbind(exp(res$param[,"logW"]),
-                                               res$param[,"k"]),
-                                  weights=weights, 
-                                  seeds=res$seeds,
-                                  nsamples = 200)
-  seeds_pixel <- as.data.frame(sampled_params)$seed
-  wh <- which(res$seeds %in% (seeds_pixel))
-  sampled_pars_p <- cbind(p, res$seeds[wh], res$param[wh,"logW"], 
-                          res$param[wh,"k"], res$simulated_prevalences[wh,1])
-  sampled_pars <- rbind(sampled_pars, sampled_pars_p)
-  if(p%%500==0){cat(paste0("Finished sampling for ", p , " locations \n"))}
-}
-colnames(sampled_pars) <- c("pixel","seed","logW","k","prevalence")
-```
-
-
-```{r}
-mnW <- aggregate(exp(logW)~pixel, data=sampled_pars, FUN="median")
-lwrW <- aggregate(exp(logW)~pixel, data=sampled_pars, FUN=quantile, probs=0.05)
-uprW <- aggregate(exp(logW)~pixel, data=sampled_pars, FUN=quantile, probs=0.95)
-
-W <- (cbind(mnW, lwrW[,2], uprW[,2]))
-colnames(W) <- c("pixel", "W", "Wlwr", "Wupr")
-
-mnK <- aggregate(k~pixel, data=sampled_pars, FUN="median")
-lwrK <- aggregate(k~pixel, data=sampled_pars, FUN=quantile, probs=0.05)
-uprK <- aggregate(k~pixel, data=sampled_pars, FUN=quantile, probs=0.95)
-
-k <- (cbind(mnK, lwrK[,2], uprK[,2]))
-colnames(k) <- c("pixel", "k", "klwr", "kupr")
-
-mnprev <- aggregate(prevalence~pixel, data=sampled_pars, FUN="median")
-lwrprev <- aggregate(prevalence~pixel, data=sampled_pars, FUN=quantile, probs=0.05)
-uprprev <- aggregate(prevalence~pixel, data=sampled_pars, FUN=quantile, probs=0.95)
-
-prev <- (cbind(mnprev, lwrprev[,2], uprprev[,2]))
-colnames(prev) <- c("pixel", "prev", "prevlwr", "prevupr")
-
-df <- cbind(W, k[,2:4], prev[,2:4])
-df <- df[order(df$W),]
-df$pixelN <- seq(1,nrow(df))
-
-
-pW <- ggplot(data=df, aes(y=pixelN, x=W))+
-  geom_segment(aes(x=Wlwr, xend=Wupr, y=pixelN, yend=pixelN), col="grey", linewidth=0.1)+
-  geom_point() +
-  xlab("W") +
-  theme(axis.text.y = element_blank()) +
-  theme_bw() +
-  scale_y_continuous(name="Pixel")+
-  scale_x_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::number_format(accuracy = 1))
-#labels = scales::trans_format("log10", scales::math_format(10^.x)))
-
-pk <- ggplot(data=df, aes(y=pixelN, x=k))+
-  geom_segment(aes(x=klwr, xend=kupr, y=pixelN, yend=pixelN), col="grey", linewidth=0.1)+
-  geom_point() +
-  xlab("k") +
-  theme(axis.text.y = element_blank()) +
-  theme_bw() +
-  scale_y_continuous(name="Pixel")+
-  scale_x_continuous(trans="log10",
-                     breaks = scales::trans_breaks("log10", function(x) 10^x),
-                     labels = scales::number_format())
-
-pprev <- ggplot(data=df, aes(y=pixelN, x=prev))+
-  geom_segment(aes(x=prevlwr, xend=prevupr, y=pixelN, yend=pixelN), col="grey", linewidth=0.1)+
-  geom_point() +
-  xlab("Prevalence") +
-  theme(axis.text.y = element_blank()) +
-  theme_bw() +
-  scale_y_continuous(name="Pixel")
-```
-
-```{r}
-grid.arrange(pW, pk, pprev, nrow=1)
-```
-
-The transmission model defined previously does not account for treatment. Thus a new transmission model that considers treatment being applied over a number of years, such that each year of treatment results in a 10\% reduction in $W$, the average number of worms per host, is defined here.
-
-```{r}
-ascaris_model_with_treatment <- function(param, n_treat_years){
-  n_samples <- nrow(param)
-  W <- exp(param[,1]) * 0.9^n_treat_years
-  k <- param[,2]
-  p <- matrix((1-(1+W/k)^(-k)), nrow=n_samples, ncol=1)
+ascaris_model_with_treatment <- function(params, n_treat_years){
+  W <- exp(params[,"logW"]) * 0.9^n_treat_years
+  k <- params[,"k"]
+  p <- 1-(1+W/k)^(-k)
   return(p)
 }
+prev_after_treatment <- ascaris_model_with_treatment(params = sampled_pars, n_treat_years = 5)
+sampled_pars <- cbind(sampled_pars, prev_after_treatment)
+treat_res <- aggregate(prev_after_treatment~location, data=sampled_pars, FUN="median")
 ```
 
-Now calculate the future prevalence under two competing treatment scenarios: 5 years and 10 years of consecutive treatment.
 
-```{r}
-treat_res <- data.frame(pixel=sampled_pars$pixel, 
-                       prevalence=ascaris_model_with_treatment(param=sampled_pars %>% dplyr::select(logW,k), n_treat_years=10)) %>%
-  dplyr::group_by(pixel) %>%
-  dplyr::summarise(prevalence=mean(prevalence)*100)
-```
+```{r, echo=TRUE, fig.width=7, fig.height=4}
+ascaris_proj_prev <- ascaris_obs_prev
+ascaris_proj_prev$prevalence <- treat_res$prev_after_treatment
+data_proj <- rbind(cbind(type="Precontrol",ascaris_obs_prev),
+                  cbind(type="Postcontrol",ascaris_proj_prev))
+data_proj$type <- factor(data_proj$type, levels=c("Precontrol","Postcontrol"))
+data_proj_sf <- sf::st_as_sf(data_proj, coords = c("lon", "lat"))
 
-```{r}
-prev_coords_proj <- suppressMessages(ascaris_obs_prev %>%
-                                    dplyr::select(lon,lat) %>%
-                                    dplyr::mutate(pixel = dplyr::row_number()) %>%
-                                    dplyr::left_join(treat_res))
-
-precontrol <- sf::st_as_sf(ascaris_obs_prev %>% dplyr::select(lon,lat,prevalence), coords = c("lon", "lat"))
-proj <- sf::st_as_sf(prev_coords_proj %>% dplyr::select(lon,lat,prevalence), coords = c("lon", "lat"))
-data_proj <- rbind(cbind(type="Precontrol",precontrol),cbind(type="Postcontrol",proj))
-```
-
-```{r}
-ggplot(data=data_proj) + 
-  geom_sf(aes(colour=prevalence),shape=15,size=1) +
+ggplot(data=data_proj_sf) + 
+  geom_sf(aes(colour=prevalence),shape=15,size=3) +
   facet_wrap(~type) +
   scale_colour_gradientn(colours=rev(viridis::magma(6)),
-                         name="prevalence",
-                         na.value = "grey100")
+                         name="Prevalence")
 ```
-
-
 

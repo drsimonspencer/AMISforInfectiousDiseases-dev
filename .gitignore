@@ -8,3 +8,5 @@ tests/.Rhistory
 files/
 output/
 inst/doc
+/doc/
+/Meta/

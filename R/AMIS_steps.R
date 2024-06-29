@@ -37,10 +37,10 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     }
   }
   
-  if(is.list(prevalence_map)){
-    n_tims <- length(prevalence_map)  
-  }else if(is.data.frame(prevalence_map) || is.matrix(prevalence_map)){
+  if(is.data.frame(prevalence_map) || is.matrix(prevalence_map)){
     n_tims <- 1
+  }else if(is.list(prevalence_map)) {
+    n_tims <- length(prevalence_map)
   }else{
     stop(("prevalence_map must be either \n - a matrix or data frame of size #locations by #samples (for one timepoint); or \n - a list with n_tims timepoints, each one with a matrix named 'data'."))
   }
@@ -49,7 +49,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     prevalence_map <- as.matrix(prevalence_map)
   }
   
-  if (is.list(prevalence_map)) {
+  if (is.list(prevalence_map) && !is.data.frame(prevalence_map)) {
     if(!all(sapply(prevalence_map, function(i) inherits(i, "list"))) || 
        !all(sapply(prevalence_map, function(i) "data"%in%names(i))) ||
        !all(sapply(prevalence_map, function(i) all(names(i)%in%c("data","likelihood"))))

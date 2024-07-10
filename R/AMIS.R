@@ -221,7 +221,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
     which_valid_prev_map <- get_which_valid_prev_map(prevalence_map, boundaries)
   }else{
     M <- ncol(prevalence_map[[1]]$data)
-    which_valid_prev_map <- replicate(n = n_tims, 0:(M-1), simplify = F)
+    which_valid_prev_map <- replicate(n = n_tims, lapply(1:n_locs, function(l) {0:(M-1)}), simplify = F)
   }
   which_valid_locs_prev_map <- get_which_valid_locs_prev_map(which_valid_prev_map, n_tims, n_locs)
   # Determine at which time, for each location, denominator g will be calculated for

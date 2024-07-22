@@ -1,4 +1,4 @@
-#' Sample parameters from their weighted distributions given an AMIS output
+#' Sample parameters from their weighted distributions given a model fitted by \code{\link{amis}}
 #'
 #' @param x The output from the function \code{\link{amis}}.
 #' @param n_samples Number of samples to draw. Default to 200.
@@ -26,7 +26,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
   return(sampled_pars)
 }
 
-#' Plot histogram or credible interval of weighted distributions for a given an object of class \code{amis}.
+#' Plot histogram or credible interval of weighted distributions given a model fitted by \code{\link{amis}}
 #'
 #' @param x The output from the function \code{\link{amis}}.
 #' @param what What posterior distribution should be plotted. 

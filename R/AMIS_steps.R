@@ -240,6 +240,8 @@ check_zero_weight_for_all_particles <- function(amis_params, mean_weights, likel
 #' @param which_valid_prev_map List showing which prevalence map samples are valid
 #' @param log_norm_const_gaussian Normalising constant (in log scale) for the Gaussian kernel. It is only used if Gaussian kernel is used.
 #' @return A larger array with the likelihoods of the new simulations joined to the existing array \code{likelihoods}.
+#' @noRd
+# #' @export
 compute_likelihood <- function(prevalence_map,simulated_prevalences,amis_params,likelihoods=NULL,
                                which_valid_sim_prev_iter,which_valid_prev_map,log_norm_const_gaussian) {
   n_tims <- length(prevalence_map)
@@ -275,6 +277,8 @@ compute_likelihood <- function(prevalence_map,simulated_prevalences,amis_params,
 #' @param which_valid_prev_map_t List showing which prevalence map samples are valid at time t.
 #' @param log_norm_const_gaussian_t Normalising constant (in log scale) for the Gaussian kernel at time t. It is only used if Gaussian kernel is used.
 #' @return A locations x simulations matrix of (log-)likelihoods.
+#' @noRd
+# #' @export
 evaluate_likelihood <- function(prevalence_map,prev_sim,amis_params, 
                                 which_valid_sim_prev_iter,which_valid_prev_map_t,log_norm_const_gaussian_t) {
 
@@ -363,6 +367,8 @@ evaluate_likelihood <- function(prevalence_map,prev_sim,amis_params,
 #' @param which_valid_locs_prev_map List showing which locations have valid data at each time
 #' @param locations_with_no_data Vector indicating which locations have no data at any time point
 #' @return normalised weight matrix.
+#' @noRd
+# #' @export
 compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params, first_weight, 
                                   locs_with_g, locs_without_g,
                                   bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, 
@@ -453,12 +459,14 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
 #' \deqn{(\sum_{i=1}^{N} w_{i}^2 )^{-1}}
 #' where \eqn{N} is the number of sampled parameter values for each location.
 #'
-#' @param weight_mat The weight matrix. A N x L matrix with L the number of locations
+#' @param weight_mat The weight matrix. A \eqn{N \times L} matrix with L the number of locations
 #'     and N the number of sampled parameter values.
 #' @param log logical indicating if the weights are on the log scale. 
 #' @return A vector containing the ESS value for each location.
 #'
 #' @seealso \code{\link{compute_weight_matrix}}
+#' @noRd
+# #' @export
 calculate_ess <- function(weight_mat,log) {
   ess<-rep(0,dim(weight_mat)[2])
   if (log) {
@@ -487,6 +495,8 @@ calculate_ess <- function(weight_mat,log) {
 #' @param log A logical indicating if the weights are logged.
 #' @param q Parameter (between 0 and 1) controlling how the weights are calculated for active locations. 
 #' @return Vector containing the row sums of the active columns of the weight matrix.
+#' @noRd
+# #' @export
 update_according_to_ess_value <- function(weight_matrix, ess, target_size, log, q) {
   n <- nrow(weight_matrix)
   active_cols <- which(ess < target_size)
@@ -537,6 +547,8 @@ update_according_to_ess_value <- function(weight_matrix, ess, target_size, log, 
 #' @param log logical indicating if weights are log-weights
 #' @return vector of indices of the sampled particles 
 #' @export
+#' @noRd
+# #' @export
 systematic_sample <- function(n_samples,weights,log=F) {
   if (log) {
     M<-max(weights)
@@ -567,6 +579,8 @@ systematic_sample <- function(n_samples,weights,log=F) {
 #'     }
 #'
 #' @seealso \code{\link{fit_mixture}}
+#' @noRd
+# #' @export
 weighted_mixture <- function(parameters, n_samples, weights, log=F) {
   sampled_idx <- systematic_sample(n_samples,weights,log)
   if (length(unique(sampled_idx))==1) {warning("Only one particle with sufficient weight. Will result in a non-invertible covariance matrix for the mixture. \n")}
@@ -592,6 +606,8 @@ weighted_mixture <- function(parameters, n_samples, weights, log=F) {
 #' }
 #'
 #' @seealso \code{\link{fit_mixture}}
+#' @noRd
+# #' @export
 sample_new_parameters <- function(mixture, n_samples, df, prior, log) {
   prior_density <- rep(NA,n_samples)
   compon_proposal <- rep(NA,n_samples)
@@ -629,6 +645,8 @@ sample_new_parameters <- function(mixture, n_samples, df, prior, log) {
 #' @return The updated \code{components} list
 #'
 #' @seealso \code{\link{weighted_mixture}}, \code{\link{fit_mixture}}
+#' @noRd
+# #' @export
 update_mixture_components <- function(mixture, components, iter) {
   components$G[iter] <- mixture$G
   G_previous <- sum(components$G[1:(iter - 1)]) # Number of pre-existing components
@@ -647,6 +665,8 @@ update_mixture_components <- function(mixture, components, iter) {
 #' @param mixture A list of the mixture components returned by \code{\link{weighted_mixture}}
 #' @param sampled_params List of parameter values sampled from the mixture. It is returned by \code{\link{sample_new_parameters}}
 #' @return An updated list of class \code{Mclust}
+#' @noRd
+# #' @export
 update_Mclust_object <- function(mixture, sampled_params){
   if(!inherits(mixture$clustering, "Mclust")){
     stop("'mixture' must have an element called 'clustering' of class 'Mclust'.")
@@ -670,13 +690,12 @@ update_Mclust_object <- function(mixture, sampled_params){
 #' This function returns the ratio between the prior and proposal distribution
 #' for each sampled parameter value (i.e. each row in \code{param}).
 #' This function returns the first weight
-#' See step (4) of the AMIS algorithm in
-#' Integrating geostatistical maps and infectious disease transmission models 
-#' using adaptive multiple importance sampling.
-#' Renata Retkute, Panayiota Touloupou, Maria-Gloria Basanez,
-#' T. Deirdre Hollingsworth, Simon E.F. Spencer
-#' Ann. Appl. Stat. 15 (4) 1980 - 1998, December 2021.
-#' DOI: https://doi.org/10.1214/21-AOAS1486
+#' See step (4) of the AMIS algorithm in 
+#' Retkute, R., Touloupou, P., Basanez, M. G., Hollingsworth, T. D., 
+#' Spencer, S. E. (2021). \emph{Integrating geostatistical maps and infectious disease 
+#' transmission models using adaptive multiple importance sampling.} 
+#' The Annals of Applied Statistics, 15(4), 1980-1998. 
+#' DOI: \url{https://doi.org/10.1214/21-AOAS1486}.
 #'
 #' @param components A list of mixture components made of
 #'     \describe{
@@ -690,6 +709,8 @@ update_Mclust_object <- function(mixture, sampled_params){
 #' @param df The degrees of freedom for the t-distributed proposal distribution.
 #' @param log A logical indicating whether to work on the log scale.
 #' @return A vector containing the prior/proposal ratio for each row in \code{param}
+#' @noRd
+# #' @export
 compute_prior_proposal_ratio <- function(components, param, prior_density, df, log) {
   probs <- components$probs # /sum(unlist(components$probs)) # to normalise?
   Sigma <- components$Sigma

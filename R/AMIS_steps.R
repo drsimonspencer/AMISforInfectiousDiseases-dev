@@ -64,7 +64,6 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
       for(i in 1:n_tims){
         stopifnot("'likelihood' must be a function." = is.function(prevalence_map[[i]]$likelihood))
       }
-      cat("A likelihood function was provided and will be used to calculate likelihood terms. \n")
     }
   }
   
@@ -138,42 +137,48 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL if 'use_induced_prior' is set to TRUE.")
   }
   
+  mes <- NULL
+  mes_ <- NULL
   if(is.null(prevalence_map[[1]]$likelihood) && !use_induced_prior){
     if(!is.null(breaks)){
-      cat("Histogram method will be used in the estimation of the likelihood as 'breaks' was provided. \n")
+      mes_ <- "- Histogram method will be used in the estimation of the likelihood as 'breaks' was provided. \n"
     }else{
       if(!is.null(sigma)){
-        cat("Gaussian kernel will be used in the estimation of the likelihood as 'sigma' was provided. \n")
+        mes_ <- "- Gaussian kernel will be used in the estimation of the likelihood as 'sigma' was provided. \n"
       }else{
-        cat("Uniform kernel will be used in the estimation of the likelihood. \n")
+        mes_ <- "- Uniform kernel will be used in the estimation of the likelihood. \n"
       }
     }
   }
+  mes <- c(mes, mes_)
   if(!use_induced_prior){
-    cat("Induced prior will not be used in the update of the weights. \n")
+    mes_ <- "- Induced prior will not be used in the update of the weights. \n"
   }else{
     if(is.null(prevalence_map[[1]]$likelihood)){
       if(!is.null(breaks)){
-        cat("Histogram method will be used in the empirical Radon-Nikodym derivative as 'breaks' was provided. \n")
+        mes_ <- "- Histogram method will be used to estimate the likelihood and induced prior densities as 'breaks' was provided. \n"
       }else{
         if(!is.null(sigma)){
-          cat("Gaussian kernel will be used in the empirical Radon-Nikodym derivative as 'sigma' was provided. \n")
+          mes_ <- "- Gaussian kernel will be used to estimate the likelihood and induced prior densities as 'sigma' was provided. \n"
         }else{
-          cat("Uniform kernel will be used in the empirical Radon-Nikodym derivative. \n")
+          mes_ <- "- Uniform kernel will be used to estimate the likelihood and induced prior densities. \n"
         }
       }
     }else{
+      mes_0 <- "- A likelihood function was provided and will be used to calculate likelihood terms. \n"
       if(!is.null(breaks)){
-        cat("Histogram method will be used in the denominator of the empirical Radon-Nikodym derivative as 'breaks' was provided. \n")
+        mes_ <- "- Histogram method will be used to estimate the induced prior density as 'breaks' was provided. \n"
       }else{
         if(!is.null(sigma)){
-          cat("Gaussian kernel will be used in the denominator of the empirical Radon-Nikodym derivative as 'sigma' was provided. \n")
+          mes_ <- "- Gaussian kernel will be used to estimate the induced prior density as 'sigma' was provided. \n"
         }else{
-          cat("Uniform kernel will be used in the denominator of the empirical Radon-Nikodym derivative. \n")
+          mes_ <- "- Uniform kernel will be used to estimate the induced prior density. \n"
         }
       }
+      mes_ <- c(mes_0, mes_)
     }
   }
+  mes <- c(mes, mes_)
   
   locs_no_data <- NULL
   n_locs <- dim(prevalence_map[[1]]$data)[1]
@@ -199,7 +204,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
       }
     }
   }
-  return(list(locs_no_data=locs_no_data)) 
+  return(list(locs_no_data=locs_no_data, messages=mes)) 
 }
 
 #' Print error message if all particles are assigned weight zero for locations in the active set

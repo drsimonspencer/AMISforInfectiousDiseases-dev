@@ -225,14 +225,32 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
   boundaries_param <- amis_params[["boundaries_param"]]
   n_samples <- amis_params[["n_samples"]]
   n_tims <- length(prevalence_map)
-  n_locs <- dim(prevalence_map[[1]]$data)[1]
+  n_locs <- nrow(prevalence_map[[1]]$data)
+  M <- ncol(prevalence_map[[1]]$data)
+  cat("Data dimensions: \n")
+  cat(paste0("- Number of time points: ", n_tims, "\n"))
+  cat(paste0("- Number of locations: ", n_locs, "\n"))
   if(likelihood_approach=="nonparametric"){
     # Check which prevalence map samples are valid (non-NA, finite, and within boundaries)
     which_valid_prev_map <- get_which_valid_prev_map(prevalence_map, boundaries)
+    cat(paste0("- Number of map samples in each location: ", M, "\n"))
   }else{
-    M <- ncol(prevalence_map[[1]]$data)
     which_valid_prev_map <- replicate(n = n_tims, lapply(1:n_locs, function(l) {0:(M-1)}), simplify = F)
   }
+  cat("----------------------- \n")
+  cat("AMIS control parameters: \n")
+  cat(paste0("- Number of parameter vectors proposed at each iteration: ", n_samples, "\n"))
+  cat(paste0("- Target effective sample size: ", amis_params[["target_ess"]], "\n"))
+  cat(paste0("- Maximum number of iterations: ", amis_params[["max_iters"]], "\n"))
+  cat("\n")
+  cat("Density estimation methods: \n")
+  messages <- checks$messages
+  if(!is.null(messages)){
+    for(i in seq_along(messages)){
+      cat(messages[i])
+    }
+  }
+  
   which_valid_locs_prev_map <- get_which_valid_locs_prev_map(which_valid_prev_map, n_tims, n_locs)
   # Determine at which time, for each location, denominator g will be calculated for
   locations_first_t <- get_locations_first_t(which_valid_locs_prev_map, n_tims, n_locs)

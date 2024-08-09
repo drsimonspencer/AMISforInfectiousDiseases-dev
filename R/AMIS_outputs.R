@@ -236,11 +236,14 @@ print.amis <- function(x, ...) {
     stop("'x' must be of type 'amis'")
   }
   amis_params <- x$amis_params
-  cat(paste0("=============================================================", "\n"))
-  cat(paste0("Data description: \n"))
-  cat(paste0("- Number of locations:  ", nrow(x$prevalence_map[[1]]$data),"\n"))
-  cat(paste0("- Number of map samples for each location:  ",  ncol(x$prevalence_map[[1]]$data),"\n"))
+  likelihood_approach <- ifelse(is.null(x$prevalence_map[[1]]$likelihood), "nonparametric", "parametric")
+  
+  cat(paste0("Data dimensions: \n"))
   cat(paste0("- Number of time points:  ",  length(x$prevalence_map),"\n"))
+  cat(paste0("- Number of locations:  ", nrow(x$prevalence_map[[1]]$data),"\n"))
+  if(likelihood_approach=="nonparametric"){
+    cat(paste0("- Number of map samples in each location:  ",  ncol(x$prevalence_map[[1]]$data),"\n"))
+  }
   locs_no_data <- x$locations_with_no_data
   if(!is.null(locs_no_data)){
     if(length(locs_no_data)==1L){
@@ -250,7 +253,7 @@ print.amis <- function(x, ...) {
     }
   }
 
-  cat(paste0("=============================================================", "\n"))
+  cat(paste0("-------------------------------------------------------------", "\n"))
   cat(paste0("Model and algorithm specifications: \n"))
   cat(paste0("- For the nonparametric estimation of the density of the likelihood: \n"))
   if(!is.null(amis_params[["breaks"]])){
@@ -284,8 +287,7 @@ summary.amis <- function(object, ...) {
   x <- object
   amis_params <- x$amis_params
   
-  cat(paste0("=============================================================", "\n"))
-  cat(paste0("Fitted model: \n"))
+  cat(paste0("\n Fitted model: \n"))
   
   n_locs <- nrow(x$prevalence_map[[1]]$data)
   n_sims_total <- nrow(x$simulated_prevalences)

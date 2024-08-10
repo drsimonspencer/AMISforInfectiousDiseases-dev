@@ -34,7 +34,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' @param type Type of plot. It can be 'hist' (default) for histogram, 
 #' or 'CI' for credible intervals
 #' @param locations Integer identifying the locations. Default to 1.
-#' @param time Integer identifying the timepoint. Default to 1.
+#' @param time Integer index identifying the timepoint. Default to 1.
 #' @param measure_central Measure of central tendency for credible interval plots. 
 #' It can be 'mean' (default) or 'median'.
 #' @param order_locations_by How the credible intervals of multiple locations should be ordered. 
@@ -72,6 +72,11 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   }
   
   param_names <- colnames(x$param)
+  n_tims <- length(x$prevalence_map)
+  if(n_tims > 1){
+    time_name <- ifelse(is.null(names(out$prevalence_map)), time, 
+                        names(out$prevalence_map)[time])
+  }
   
   if(!type%in%c("hist","CI")){stop("Argument 'type' must be either 'hist' or 'CI'.")}
   
@@ -100,7 +105,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       }
     }
   }
-  n_tims <- length(x$prevalence_map)
+  
   n_locs <- length(locations)
   location_names <- colnames(x$weight_matrix)[locations]
   
@@ -139,7 +144,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
           if(n_tims==1){
             main_ <- paste0("Location '", location)
           }else{
-            main_ <- paste0("Location '", location, "' at time ", time)  
+            main_ <- paste0("Location '", location, "' at time ", time_name)  
           }
         }else{
           main_ <- paste0("Location '", location, "'")
@@ -197,7 +202,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
         if(n_tims==1){
           CItitle <- ifelse(what_=="prev", "Prevalences", what_)
         }else{
-          CItitle <- ifelse(what_=="prev", paste0("Prevalences at time ", time), what_)
+          CItitle <- ifelse(what_=="prev", paste0("Prevalences at time ", time_name), what_)
         }
       }else{
         CItitle <- main

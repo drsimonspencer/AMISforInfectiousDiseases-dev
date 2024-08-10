@@ -100,7 +100,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       }
     }
   }
-
+  n_tims <- length(x$prevalence_map)
   n_locs <- length(locations)
   location_names <- colnames(x$weight_matrix)[locations]
   
@@ -136,12 +136,16 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       
       if(is.null(main)){
         if(what=="prev"){
-          main_ <- paste0("Location '", location, "' at time ", time)
+          if(n_tims==1){
+            main_ <- paste0("Location '", location)
+          }else{
+            main_ <- paste0("Location '", location, "' at time ", time)  
+          }
         }else{
           main_ <- paste0("Location '", location, "'")
         }
       }else{
-        main_ <- NULL
+        main_ <- main
       }
       if(is.null(ylab)){
         ylab <- "Density"
@@ -190,7 +194,11 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       lo <- summaries[["quantiles"]][1, ]
       up <- summaries[["quantiles"]][2, ]
       if(is.null(main)){
-        CItitle <- ifelse(what_=="prev", paste0("Prevalences at time ", time), what_)
+        if(n_tims==1){
+          CItitle <- ifelse(what_=="prev", "Prevalences", what_)
+        }else{
+          CItitle <- ifelse(what_=="prev", paste0("Prevalences at time ", time), what_)
+        }
       }else{
         CItitle <- main
       }
@@ -287,7 +295,7 @@ summary.amis <- function(object, ...) {
   x <- object
   amis_params <- x$amis_params
   
-  cat(paste0("\n Fitted model: \n"))
+  cat(paste0("Fitted model: \n"))
   
   n_locs <- nrow(x$prevalence_map[[1]]$data)
   n_sims_total <- nrow(x$simulated_prevalences)

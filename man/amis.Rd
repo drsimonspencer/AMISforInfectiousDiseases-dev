@@ -30,7 +30,7 @@ the number of likelihood parameters;
 \item \code{log}: Logical indicating if calculations are to be performed on log scale
 (specified in \code{amis_params}, see below).
 }
-The function \code{likelihood} must return a numeric value representing the likelihood of
+The function \code{likelihood} must return a numeric value representing the (log-)likelihood of
 observing a simulated prevalence given the data from a particular location.
 }
 }
@@ -38,7 +38,9 @@ The location names are inherited from \code{rownames(prevalence_map)}
 if \code{prevalence_map} is a matrix, and
 from \code{rownames(prevalence_map[[1]]$data)} if \code{prevalence_map} is a list.
 \cr \cr If \code{likelihood} is not specified, then it is assumed that the data consist of
-samples from a geostatistical model and a nonparametric method (histogram or kernel density smoothing) is used.
+samples from a geostatistical model and a nonparametric method is used. The nonparametric
+method to be used is specified in \code{amis_params} using the options
+\code{breaks}, \code{delta}, or \code{sigma} (see \code{amis_params}).
 \cr \cr}
 
 \item{transmission_model}{A function taking arguments:
@@ -66,7 +68,7 @@ The only argument of \code{rprior} must be a single integer \eqn{n} that determi
 Parameter names are inherited from the \code{colnames} of the output of \code{rprior}.}
 
 \item{amis_params}{A list containing control parameters for the AMIS algorithm
-(\code{default_amis_params()} displays the default values):
+(\code{default_amis_params()} returns the default values):
 \describe{
 \item{\code{n_samples}}{Number of new samples drawn within each AMIS iteration. Default to 500.}
 \item{\code{target_ess}}{Target effective sample size. Default to 500.}
@@ -124,7 +126,7 @@ it simulated a total of \eqn{N = I \times} \code{n_samples}, and therefore the l
 \itemize{
 \item \code{G}: number of components in each iteration;
 \item \code{probs}: the mixture weights;
-\item \code{Mean}: the means of the components;
+\item \code{Mean}: the locations of the components;
 \item \code{Sigma}: the covariance matrices of the components.
 }
 }
@@ -136,18 +138,21 @@ This object is used in \code{\link{plot_mixture_components}}.}
 }
 }
 \description{
-For details of the algorithm, see
-\emph{Integrating geostatistical maps and infectious disease transmission models
-using adaptive multiple importance sampling.}
-Renata Retkute, Panayiota Touloupou, Maria-Gloria Basanez,
-T. Deirdre Hollingsworth, Simon E.F. Spencer.
-Ann. Appl. Stat. 15 (4) 1980 - 1998, December 2021.
-DOI: \url{https://doi.org/10.1214/21-AOAS1486}
+This implements the AMIS algorithm as described in \cite{Retkute et al. (2021)}.
+Each iteration of the algorithm produces a set of parameters from a proposal
+distribution (the prior in the first iteration). For each parameter set, a simulation
+is run from the transmission model. Then, each preceding simulation is weighted at
+each location according to the distribution of prevalences (or likelihood function)
+at that location. A Gaussian mixture model is then fitted to the parameter samples
+with weights averaged over the active locations (ie locations that have yet to reach
+the effective sample size target). This Gaussian mixture informs the proposal for the
+next iteration. The algorithm continues until every location has reached the ESS target,
+or the maximum number of iterations is reached.
 }
 \details{
-The average weight of parameter vectors for the set of active locations at iteration \eqn{i} (\eqn{A_i})
-has weights determined by how far the effective sample size for location \eqn{l} (\eqn{\text{ESS}_l})
-is from the target (\eqn{\text{ESS}_R}):
+The average weight of parameter vectors for the set of active locations at iteration \eqn{i} \eqn{\left(A_i\right)}
+has weights determined by how far the effective sample size for location \eqn{l} \eqn{\left(\text{ESS}_l^i\right)}
+is from the target \eqn{\left(\text{ESS}^R\right)}:
 \deqn{
  \bar{w}_j^i = 
  \frac{\sum_{l \in A_i}    \left(\text{ESS}^R-\text{ESS}_l^i\right)^q \hat{w}_{lj}^i   }{
@@ -155,4 +160,11 @@ is from the target (\eqn{\text{ESS}_R}):
  }
 If \eqn{q=0} (default), the simple average of individual weights will be calculated.
 If \eqn{q>0}, more weight will be assigned to locations with low ESS.
+}
+\references{
+Retkute, R., Touloupou, P., Basanez, M. G., Hollingsworth, T. D.,
+Spencer, S. E. (2021). \emph{Integrating geostatistical maps and infectious disease
+transmission models using adaptive multiple importance sampling.}
+The Annals of Applied Statistics, 15(4), 1980-1998.
+DOI: \url{https://doi.org/10.1214/21-AOAS1486}.
 }

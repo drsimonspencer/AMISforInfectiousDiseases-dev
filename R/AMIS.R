@@ -1,13 +1,21 @@
 #' Run the AMIS algorithm to fit a transmission model to a map
 #' 
-#' For details of the algorithm, see 
-#' \emph{Integrating geostatistical maps and infectious disease transmission models 
-#' using adaptive multiple importance sampling.}
-#' Renata Retkute, Panayiota Touloupou, Maria-Gloria Basanez,
-#' T. Deirdre Hollingsworth, Simon E.F. Spencer. 
-#' Ann. Appl. Stat. 15 (4) 1980 - 1998, December 2021.
-#' DOI: \url{https://doi.org/10.1214/21-AOAS1486}
+#' This implements the AMIS algorithm as described in \cite{Retkute et al. (2021)}. 
+#' Each iteration of the algorithm produces a set of parameters from a proposal 
+#' distribution (the prior in the first iteration). For each parameter set, a simulation 
+#' is run from the transmission model. Then, each preceding simulation is weighted at 
+#' each location according to the distribution of prevalences (or likelihood function) 
+#' at that location. A Gaussian mixture model is then fitted to the parameter samples 
+#' with weights averaged over the active locations (ie locations that have yet to reach 
+#' the effective sample size target). This Gaussian mixture informs the proposal for the 
+#' next iteration. The algorithm continues until every location has reached the ESS target, 
+#' or the maximum number of iterations is reached.
 #'
+#' @references Retkute, R., Touloupou, P., Basanez, M. G., Hollingsworth, T. D., 
+#' Spencer, S. E. (2021). \emph{Integrating geostatistical maps and infectious disease 
+#' transmission models using adaptive multiple importance sampling.} 
+#' The Annals of Applied Statistics, 15(4), 1980-1998. 
+#' DOI: \url{https://doi.org/10.1214/21-AOAS1486}.
 #' @param prevalence_map For a single timepoint, \code{prevalence_map} can be an \eqn{L \times M} matrix or data frame containing samples from a geostatistical model, 
 #' where \eqn{L} is the number of locations and \eqn{M} the number of samples per location.
 #' \cr \cr If there are multiple timepoints and/or a parametric \code{likelihood} function is to be used, \code{prevalence_map} must be a list with \eqn{T} elements, one for each timepoint \eqn{t=1,\dots,T}.
@@ -23,7 +31,7 @@
 #'    \item \code{log}: Logical indicating if calculations are to be performed on log scale 
 #'    (specified in \code{amis_params}, see below).
 #' }
-#' The function \code{likelihood} must return a numeric value representing the likelihood of 
+#' The function \code{likelihood} must return a numeric value representing the (log-)likelihood of 
 #' observing a simulated prevalence given the data from a particular location.
 #' }
 #' }
@@ -31,7 +39,9 @@
 #' if \code{prevalence_map} is a matrix, and 
 #' from \code{rownames(prevalence_map[[1]]$data)} if \code{prevalence_map} is a list.
 #' \cr \cr If \code{likelihood} is not specified, then it is assumed that the data consist of 
-#' samples from a geostatistical model and a nonparametric method (histogram or kernel density smoothing) is used.
+#' samples from a geostatistical model and a nonparametric method is used. The nonparametric 
+#' method to be used is specified in \code{amis_params} using the options 
+#' \code{breaks}, \code{delta}, or \code{sigma} (see \code{amis_params}).
 #' \cr \cr
 #' @param transmission_model A function taking arguments:
 #' \itemize{
@@ -56,7 +66,7 @@
 #' \code{rprior} must produce an \eqn{n \times d} \bold{matrix} of parameters even when \eqn{d=1}.
 #' Parameter names are inherited from the \code{colnames} of the output of \code{rprior}.
 #' @param amis_params A list containing control parameters for the AMIS algorithm 
-#' (\code{default_amis_params()} displays the default values):
+#' (\code{default_amis_params()} returns the default values):
 #' \describe{
 #' \item{\code{n_samples}}{Number of new samples drawn within each AMIS iteration. Default to 500.}
 #' \item{\code{target_ess}}{Target effective sample size. Default to 500.}
@@ -109,7 +119,7 @@
 #'  \itemize{
 #'    \item \code{G}: number of components in each iteration;
 #'    \item \code{probs}: the mixture weights;
-#'    \item \code{Mean}: the means of the components;
+#'    \item \code{Mean}: the locations of the components;
 #'    \item \code{Sigma}: the covariance matrices of the components.
 #'  }
 #' }
@@ -119,9 +129,9 @@
 #' \item{\code{prior_density}}{An \eqn{N}-length vector with the density function evaluated at the simulated parameter values.}
 #' \item{\code{amis_params}}{List supplied by the user.}
 #' }
-#' @details The average weight of parameter vectors for the set of active locations at iteration \eqn{i} (\eqn{A_i})
-#' has weights determined by how far the effective sample size for location \eqn{l} (\eqn{\text{ESS}_l}) 
-#' is from the target (\eqn{\text{ESS}_R}):
+#' @details The average weight of parameter vectors for the set of active locations at iteration \eqn{i} \eqn{\left(A_i\right)}
+#' has weights determined by how far the effective sample size for location \eqn{l} \eqn{\left(\text{ESS}_l^i\right)} 
+#' is from the target \eqn{\left(\text{ESS}^R\right)}:
 #' \deqn{
 #'  \bar{w}_j^i = 
 #'  \frac{\sum_{l \in A_i}    \left(\text{ESS}^R-\text{ESS}_l^i\right)^q \hat{w}_{lj}^i   }{
@@ -215,15 +225,32 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
   boundaries_param <- amis_params[["boundaries_param"]]
   n_samples <- amis_params[["n_samples"]]
   n_tims <- length(prevalence_map)
-  n_locs <- dim(prevalence_map[[1]]$data)[1]
+  n_locs <- nrow(prevalence_map[[1]]$data)
+  M <- ncol(prevalence_map[[1]]$data)
+  cat("Data dimensions: \n")
+  cat(paste0("- Number of time points: ", n_tims, "\n"))
+  cat(paste0("- Number of locations: ", n_locs, "\n"))
   if(likelihood_approach=="nonparametric"){
     # Check which prevalence map samples are valid (non-NA, finite, and within boundaries)
     which_valid_prev_map <- get_which_valid_prev_map(prevalence_map, boundaries)
+    cat(paste0("- Number of map samples in each location: ", M, "\n"))
   }else{
-    M <- ncol(prevalence_map[[1]]$data)
-    #which_valid_prev_map <- replicate(n = n_tims, lapply(1:n_locs, function(l) {0:(M-1)}), simplify = F)
     which_valid_prev_map <- lapply(1:n_tims, function(t) lapply(1:n_locs, function(l) {which(!is.na(prevalence_map[[t]]$data[l,]))-1}))
   }
+  cat("----------------------- \n")
+  cat("AMIS control parameters: \n")
+  cat(paste0("- Number of parameter vectors proposed at each iteration: ", n_samples, "\n"))
+  cat(paste0("- Target effective sample size: ", amis_params[["target_ess"]], "\n"))
+  cat(paste0("- Maximum number of iterations: ", amis_params[["max_iters"]], "\n"))
+  cat("\n")
+  cat("Density estimation methods: \n")
+  messages <- checks$messages
+  if(!is.null(messages)){
+    for(i in seq_along(messages)){
+      cat(messages[i])
+    }
+  }
+  
   which_valid_locs_prev_map <- get_which_valid_locs_prev_map(which_valid_prev_map, n_tims, n_locs)
   # Determine at which time, for each location, denominator g will be calculated for
   locations_first_t <- get_locations_first_t(which_valid_locs_prev_map, n_tims, n_locs)

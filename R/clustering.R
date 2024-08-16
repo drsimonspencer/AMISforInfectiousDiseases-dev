@@ -16,6 +16,8 @@
 #' \item{\code{ModelName}}{The model name from the package \code{mclust}.}
 #' }
 #' @import mclust
+#' @noRd
+# #' @export
 fit_mixture<-function(dat,max.components=10) {
   n <- nrow(dat)
   d <- ncol(dat)

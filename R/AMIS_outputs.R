@@ -1,4 +1,4 @@
-#' Sample parameters from their weighted distributions given an AMIS output
+#' Sample parameters from their weighted distributions given a model fitted by \code{\link{amis}}
 #'
 #' @param x The output from the function \code{\link{amis}}.
 #' @param n_samples Number of samples to draw. Default to 200.
@@ -26,7 +26,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
   return(sampled_pars)
 }
 
-#' Plot histogram or credible interval of weighted distributions for a given an object of class \code{amis}.
+#' Plot histogram or credible interval of weighted distributions given a model fitted by \code{\link{amis}}
 #'
 #' @param x The output from the function \code{\link{amis}}.
 #' @param what What posterior distribution should be plotted. 
@@ -34,7 +34,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' @param type Type of plot. It can be 'hist' (default) for histogram, 
 #' or 'CI' for credible intervals
 #' @param locations Integer identifying the locations. Default to 1.
-#' @param time Integer identifying the timepoint. Default to 1.
+#' @param time Integer index identifying the timepoint. Default to 1.
 #' @param measure_central Measure of central tendency for credible interval plots. 
 #' It can be 'mean' (default) or 'median'.
 #' @param order_locations_by How the credible intervals of multiple locations should be ordered. 
@@ -72,6 +72,11 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   }
   
   param_names <- colnames(x$param)
+  n_tims <- length(x$prevalence_map)
+  if(n_tims > 1){
+    time_name <- ifelse(is.null(names(out$prevalence_map)), time, 
+                        names(out$prevalence_map)[time])
+  }
   
   if(!type%in%c("hist","CI")){stop("Argument 'type' must be either 'hist' or 'CI'.")}
   
@@ -100,7 +105,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       }
     }
   }
-
+  
   n_locs <- length(locations)
   location_names <- colnames(x$weight_matrix)[locations]
   
@@ -136,12 +141,16 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       
       if(is.null(main)){
         if(what=="prev"){
-          main_ <- paste0("Location '", location, "' at time ", time)
+          if(n_tims==1){
+            main_ <- paste0("Location '", location)
+          }else{
+            main_ <- paste0("Location '", location, "' at time ", time_name)  
+          }
         }else{
           main_ <- paste0("Location '", location, "'")
         }
       }else{
-        main_ <- NULL
+        main_ <- main
       }
       if(is.null(ylab)){
         ylab <- "Density"
@@ -190,7 +199,11 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       lo <- summaries[["quantiles"]][1, ]
       up <- summaries[["quantiles"]][2, ]
       if(is.null(main)){
-        CItitle <- ifelse(what_=="prev", paste0("Prevalences at time ", time), what_)
+        if(n_tims==1){
+          CItitle <- ifelse(what_=="prev", "Prevalences", what_)
+        }else{
+          CItitle <- ifelse(what_=="prev", paste0("Prevalences at time ", time_name), what_)
+        }
       }else{
         CItitle <- main
       }
@@ -236,11 +249,14 @@ print.amis <- function(x, ...) {
     stop("'x' must be of type 'amis'")
   }
   amis_params <- x$amis_params
-  cat(paste0("=============================================================", "\n"))
-  cat(paste0("Data description: \n"))
-  cat(paste0("- Number of locations:  ", nrow(x$prevalence_map[[1]]$data),"\n"))
-  cat(paste0("- Number of map samples for each location:  ",  ncol(x$prevalence_map[[1]]$data),"\n"))
+  likelihood_approach <- ifelse(is.null(x$prevalence_map[[1]]$likelihood), "nonparametric", "parametric")
+  
+  cat(paste0("Data dimensions: \n"))
   cat(paste0("- Number of time points:  ",  length(x$prevalence_map),"\n"))
+  cat(paste0("- Number of locations:  ", nrow(x$prevalence_map[[1]]$data),"\n"))
+  if(likelihood_approach=="nonparametric"){
+    cat(paste0("- Number of map samples in each location:  ",  ncol(x$prevalence_map[[1]]$data),"\n"))
+  }
   locs_no_data <- x$locations_with_no_data
   if(!is.null(locs_no_data)){
     if(length(locs_no_data)==1L){
@@ -250,7 +266,7 @@ print.amis <- function(x, ...) {
     }
   }
 
-  cat(paste0("=============================================================", "\n"))
+  cat(paste0("-------------------------------------------------------------", "\n"))
   cat(paste0("Model and algorithm specifications: \n"))
   cat(paste0("- For the nonparametric estimation of the density of the likelihood: \n"))
   if(!is.null(amis_params[["breaks"]])){
@@ -284,7 +300,6 @@ summary.amis <- function(object, ...) {
   x <- object
   amis_params <- x$amis_params
   
-  cat(paste0("=============================================================", "\n"))
   cat(paste0("Fitted model: \n"))
   
   n_locs <- nrow(x$prevalence_map[[1]]$data)

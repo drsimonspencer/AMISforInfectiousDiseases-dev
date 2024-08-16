@@ -2,7 +2,7 @@
 % Please edit documentation in R/AMIS_outputs.R
 \name{plot.amis}
 \alias{plot.amis}
-\title{Plot histogram or credible interval of weighted distributions for a given an object of class \code{amis}.}
+\title{Plot histogram or credible interval of weighted distributions given a model fitted by \code{\link{amis}}}
 \usage{
 \method{plot}{amis}(
   x,
@@ -77,5 +77,5 @@ the x limits for each statistic. Default to NULL.}
 A plot.
 }
 \description{
-Plot histogram or credible interval of weighted distributions for a given an object of class \code{amis}.
+Plot histogram or credible interval of weighted distributions given a model fitted by \code{\link{amis}}
 }

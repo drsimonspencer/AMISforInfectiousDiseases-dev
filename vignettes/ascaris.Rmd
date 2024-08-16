@@ -1,10 +1,10 @@
 ---
-title: "Fitting ascaris data"
+title: "Fitting Ascariasis data"
 output: rmarkdown::html_vignette
 # output: pdf_document
 bibliography: refs.bib
 vignette: >
-  %\VignetteIndexEntry{Fitting ascaris data}
+  %\VignetteIndexEntry{Fitting Ascariasis data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,15 +23,10 @@ old <- options(scipen = 1, digits = 4)
 set.seed(123)
 ```
 
-This vignette demonstrates the `AMISforInfectiousDiseases` package through a case study considering Ascariasis in Ethiopia. Ascariasis is one of the most common worm infections in people worldwide. This disease is caused by Ascaris lumbricoides, also known as roundworms, which are an intestinal nematode.  This was chosen as an example to illustrate the following package features: modelling from a single prevalence map, enforcing boundary conditions on model parameters, and post-processing of the results to produce forward projections of prevalence using sub-national estimates of the model parameters.
-
-<!-- \subsection*{Prevalence map} -->
-### Prevalence map
-
-Ascaris surveys for Ethiopia are available upon request from the Global Atlas of Helminth Infection developed by the London Applied \& Spatial Epidemiology Research Group (LASER) [@pullan2014ascaris]. [@retkute2021integrating] uses these surveys to obtain national level prevalence maps, which will be used in this analysis. These maps consist of $M=100$ samples of a prevalence map for Ascaris in Ethiopia with $11369$ locations at 10km $\times$ 10km resolution. 
-<!-- The data are available in the package by calling \code{data(ascaris)}. -->
-
-<!-- The mean prevalence values for all locations are presented in Figure~\ref{fig:ascaris_data}.  -->
+This vignette demonstrates the `AMISforInfectiousDiseases` package through a case 
+study considering Ascariasis in Ethiopia in a single time point.
+It also shows how to conduct post-processing analysis of the results, e.g. to produce 
+forward projections of prevalence using sub-national estimates of the model parameters.
 
 ### Loading packages
 
@@ -41,33 +36,42 @@ library("ggplot2")
 library("viridis")
 ```
 
-In this example, we will use a subset of the data and convert the percentage prevalence values to their decimals:
+<!-- \subsection*{Prevalence map} -->
+### Prevalence map
+
+Ascariasis is one of the most common worm infections in people worldwide. This disease is caused by Ascaris lumbricoides, also known as roundworms, which are an intestinal nematode. Ascaris surveys for Ethiopia are available upon request from the Global Atlas of Helminth Infection developed by the London Applied \& Spatial Epidemiology Research Group (LASER) [@pullan2014ascaris]. @retkute2021integrating used these surveys to obtain national level prevalence maps and made them available as a supplementary material. We will use these maps, which consist of $M=100$ samples of a prevalence map for Ascaris in Ethiopia with 11,369 locations at 10km $\times$ 10km resolution.
+
+<!-- The data are available in the package by calling \code{data(ascaris)}. -->
+
+In this example, we will use a subset of the data and convert the percentage prevalence values to their decimals. 
+The first two columns of the ascaris data frame are the geographical coordinates (longitude and latitude). The third column contains the observed prevalence in the corresponding location. The remaining columns are the $M=100$ samples from a geostatistical map.
 ```{r}
 data("ascaris")
 wh <- which(ascaris$lon > 36 & ascaris$lon < 40 & ascaris$lat > 5 & ascaris$lat < 12)
 ascaris <- ascaris[wh, ]
 ascaris[,-c(1,2)] <- ascaris[,-c(1,2)]/100
-```
-
-The first two columns of the ascaris data frame are the geographical coordinates (longitude and latitude). The third column 
-contains the observed prevalence in the location (row). The remaining columns are the $M=100$ samples from a geostatistical map.
-```{r}
 ascaris_obs_prev <- ascaris[, 1:3]
 ascaris_map <- ascaris[, -(1:3)]
 L <- nrow(ascaris_map)
 ```
 
 
-<!-- \subsection*{Transmission model} -->
-### Transmission model
+<!-- \subsection*{Model} -->
+### Model
 
-The transmission model for Ascaris lumbricoides can be described by the mathematical relationship between prevalence and the mean intensity of infection. From [@retkute2021integrating], the transmission model for Ascaris uses the negative binomial model where $W>0$ is the mean number of worms per host and $k$ is the worm clumping coefficient,
+Following @anderson1991infectious, we assume that the number of worms $X$ per host has negative binomial distribution NB($W$,$k$), where $W$ is the mean number of worms and $k$ the dispersion parameter describing the degree of clumping of parasites. The probability mass function is given by
 \begin{equation}
-P = 1 - \left( 1 + \frac{W}{k} \right)^{-k}
+\text{Pr}(X=x) = \frac{\Gamma(x+k)}{\Gamma(k)x!} \left(\frac{k}{k+W}\right)^k \left(\frac{W}{k+W}\right)^x, \quad x=0,1,2,\dots.
 \end{equation}
 
+Therefore, the prevalence is given by the probability of observing worms:
 
-In this example, the natural logarithm of the model parameter $W$ is sampled. Thus the transmission model passed to function `amis` is given by
+\begin{align}
+P &= 1 - \text{Pr}\big(X=0 \ \vert \ W, k \big)\\
+  &= 1 - \left( 1 + \frac{W}{k} \right)^{-k}.
+\end{align}
+
+In this example, the natural logarithm of the model parameter $W$ is sampled. Thus, the model passed to function `amis` is given by
 
 ```{r}
 ascaris_model <- function(seeds, params, n_tims=1){
@@ -84,17 +88,14 @@ ascaris_model <- function(seeds, params, n_tims=1){
 
 ### Priors
 
-The priors from [@retkute2021integrating] for the model parameters are borrowed in this example. These priors reflect what is currently known about the interaction between the worm burden and clumping coefficient based on the literature. In summary, a uniform prior is placed on the log worm burden and the relationship between the clumping coefficient and worm burden is estimated through a linear regression. Formally this is
-
+The priors from @retkute2021integrating for the model parameters are borrowed in this example. These priors reflect what is currently known about the interaction between the worm burden and clumping coefficient based on the literature. In summary, a uniform prior is placed on the log worm burden and the relationship between the clumping coefficient and worm burden is estimated through a linear regression. Formally this is
 \begin{align}
-  \log(W) &\sim \mathcal{U}\bigg(\log(0.01),\log(60)\bigg) \\
-  k | W &\sim \mathcal{N}\bigg(\hat{\alpha}+ \hat{\beta} \times W,\sigma(W)^2\bigg)\\
+  \log(W) &\sim U\big(\log(0.01), \log(60)\big), \\
+  k | W &\sim N\left(\hat{\alpha}+ \hat{\beta} W, \sigma(W)^2\right), \\
 \end{align}
+where $\hat{\alpha}$ and $\hat{\beta}$ are the intercept and slope coefficients respectively for the regression line of worm burden against the clumping coefficient, and $\sigma(W)$ is five times the standard error from this analysis. Refer to @retkute2021integrating for further details on the prior selection.
 
-
-where $\hat{\alpha}$ and $\hat{\beta}$ are the intercept and slope coefficients respectively for the regression line of worm burden against the clumping coefficient, and $\sigma(W)$ is $5$ times the standard error from this analysis. Refer to [@retkute2021integrating] for further details on the prior selection.
-
-The prior object passed to \fct{amis} is given by
+The prior object passed to `amis()` is given by
 
 ```{r}
 fit.v <- c(0.33371009, 0.01719462)
@@ -133,30 +134,23 @@ ascaris_prior <- list(rprior=rprior, dprior=dprior)
 ```
 
 <!-- \subsection*{Running \fct{amis}} -->
-### Running amis
+### Running AMIS
 
-<!-- \subsubsection*{Default \fct{amis} settings (with boundaries)} -->
-#### Default amis settings (with parameter boundaries)
-
+The list of default control parameters can be seen in `default_amis_params()`. 
+This example uses the Gaussian kernel in the nonparametric estimation of the 
+probability density $f$. To use the Gaussian kernel, one needs 
+to define `sigma` in the object `amis_params`. 
+In addition, we will will set model parameter boundaries to ensure 
+that $-\infty < \log(W) < \infty$ and $k>0$. 
 ```{r}
-amis_params <- AMISforInfectiousDiseases:::default_amis_params()
-boundaries_param <- matrix(NA, 2, 2)  
-boundaries_param[1,] <- c(-Inf, Inf)
-boundaries_param[2,] <- c(0, Inf)
-amis_params$boundaries_param <- boundaries_param
+amis_params <- default_amis_params()
+amis_params$boundaries_param <- matrix(c(-Inf, Inf, 0, Inf), 2, 2, byrow=T)
+amis_params$sigma <- 0.0025
 ```
+Note that instead of defining boundaries through the object `amis_params`, the user could alternatively set the prevalence to `NA` directly in the model when $k$ is negative and thus out of bounds. The boundaries for prevalence values, which are in $[0,1]$, are taken into account by default (through `amis_params$boundaries`).
 
-
-<!-- Note that instead of defining boundaries through the object \code{amis_params}, the user could alternatively set the prevalence to \code{NA} directly in the transmission model when $k$ is negative and thus out of bounds.  -->
-Note that instead of defining boundaries through the object `amis_params`, the user could alternatively set the prevalence to `NA` directly in the transmission model when $k$ is negative and thus out of bounds. 
-
-The boundaries for prevalence values, which are in $[0,1]$, are taken into account by default (through `amis_params$boundaries`).
-
-<!-- This example instead uses the Gaussian kernel for density estimation. To define this in the package, one needs to define \code{sigma} in the object \code{amis_params}. -->
-This example instead uses the Gaussian kernel for density estimation. To define this in the package, one needs to define `sigma` in the object `amis_params`.
-
-```{r}
-amis_params$sigma <- 0.1
+Now we have all the objects we need to run the AMIS algorithm:
+```{r, results=FALSE}
 set.seed(123)
 out <- amis(ascaris_map, ascaris_model, ascaris_prior, amis_params)
 ```
@@ -164,7 +158,7 @@ out <- amis(ascaris_map, ascaris_model, ascaris_prior, amis_params)
 <!-- \subsection*{Analysing \fct{amis} outputs} -->
 ### Analysing AMIS outputs
 
-Given the output returned by `amis` above, we can use the function `print` to see the data dimensions, model choices, and control parameters used to run the AMIS algorithm. The function `summary` provides some brief information about the number of samples and effective sample sizes achieved by the algorithm.
+Given the output returned by `amis()`, we can use the function `print()` to see the data dimensions, model choices, and control parameters used to run the AMIS algorithm. The function `summary()` provides some brief information about the number of samples and effective sample sizes achieved by the algorithm.
 ```{r}
 print(out)
 ```
@@ -174,11 +168,10 @@ summary(out)
 ```
 
 It is possible to look at the parameter samples proposed at a given iteration (by default, the last iteration) and the corresponding proposal density:
-```{r, echo=TRUE, fig.width=7, fig.height=4}
+```{r, echo=TRUE, fig.width=7, fig.height=4, results=FALSE}
 par(mfrow=c(1,2))
 plot_mixture_components(out, what = "uncertainty", cex=3)
 plot_mixture_components(out, what = "density", nlevels=200)
-par(mfrow=c(1,1))
 ```
 
 For two arbitrary locations, we show below the posterior distribution of weighted samples for the model parameters and corresponding simulated prevalences.
@@ -194,8 +187,7 @@ We can also produce plots of credible intervals for these statistics for all loc
 ```{r, echo=TRUE, fig.width=7, fig.height=7}
 par(mfrow=c(1,3))
 plot(out, what=c("logW","k","prev"), type="CI", locations=1:L, 
-     cex=0.1, lwd=0.1, measure_central = "median",
-     time=1, mfrow=c(1,3))
+     cex=0.1, lwd=0.1, measure_central="median", order_locations_by="prev")
 ```
 
 To obtain the numerical values of summary statistics for specific locations, we can run
@@ -206,9 +198,10 @@ calculate_summaries(out, what="prev", time=1, locations=locs, alpha=0.05)
 <!-- \subsection*{Forward projection} -->
 ### Forward projection
 
-<!-- To produce a projection of future prevalence under different treatment scenarios, for each pixel 200 parameter sets are sampled from the weighted set of parameters obtained from \code{ascaris_res} (i.e. using default \fct{amis} settings). The sub-sampled model parameters are then fed into the transmission model.  -->
-To produce a projection of future prevalence under different treatment scenarios, for each pixel 100 parameter sets are sampled from the weighted set of parameters obtained from `out` (i.e. using default `amis` settings). The sub-sampled model parameters are then fed into the transmission model. 
-
+To produce projections of future prevalence under different treatment scenarios, 
+we use the function `sample_parameters()` to sample 100 parameter vectors from 
+the weighted set of parameters obtained from `out` in each location. 
+The sub-sampled model parameters are then fed into the model.
 ```{r, echo=TRUE}
 sampled_pars <- sample_parameters(x=out, n_samples=100, locations=1:nrow(ascaris_map))
 
@@ -239,3 +232,4 @@ ggplot(data=data_proj_sf) +
                          name="Prevalence")
 ```
 
+### References

@@ -2,7 +2,7 @@
 % Please edit documentation in R/AMIS_outputs.R
 \name{sample_parameters}
 \alias{sample_parameters}
-\title{Sample parameters from their weighted distributions given an AMIS output}
+\title{Sample parameters from their weighted distributions given a model fitted by \code{\link{amis}}}
 \usage{
 sample_parameters(x, n_samples = 200, locations = 1)
 }
@@ -17,5 +17,5 @@ sample_parameters(x, n_samples = 200, locations = 1)
 Matrix with parameter values and corresponding prevalences for each location.
 }
 \description{
-Sample parameters from their weighted distributions given an AMIS output
+Sample parameters from their weighted distributions given a model fitted by \code{\link{amis}}
 }

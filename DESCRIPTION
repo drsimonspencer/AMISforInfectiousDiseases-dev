@@ -1,5 +1,5 @@
 Package: AMISforInfectiousDiseases
-Title: Fit transmission models to maps using AMIS
+Title: Implement the Adaptive Importance Sampling Algorithm (AMIS) for infectious disease models
 Version: 0.1.0
 Authors@R:
     c(person(given = "Simon",
@@ -19,7 +19,7 @@ Authors@R:
     person(given = "Evandro",
            family = "Konzen",
            role = c("aut")))
-Description: Fits infectious disease models to prevalence maps using the Adaptive Multiple Importance Sampling algorithm.
+Description: Fits infectious disease models to prevalence maps using AMiS.
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false

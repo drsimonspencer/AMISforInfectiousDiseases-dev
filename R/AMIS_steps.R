@@ -398,9 +398,12 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
       # locs_without_g = which(locations_first_t < t)
 
       if(!is.null(locs_without_g[[t]])){
-        weight_matrix <- compute_weight_matrix_without_g(lik_mat, amis_params, weight_matrix,
-                                                             which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]],
-                                                             locs_without_g[[t]])
+        locs_with_data = locs_without_g[[t]][(which(locs_without_g[[t]][,1] %in% which_valid_locs_prev_map[[t]][,1])),]
+        if(!is.null(locs_with_data)){
+          weight_matrix <- compute_weight_matrix_without_g(lik_mat, amis_params, weight_matrix,
+                                                           which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]],
+                                                           locs_with_data)
+        }
       }
 
       if (is.null(amis_params[["breaks"]])){

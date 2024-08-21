@@ -256,14 +256,16 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
   locations_first_t <- get_locations_first_t(which_valid_locs_prev_map, n_tims, n_locs)
   locs_with_g <- get_locs_with_g(locations_first_t, n_tims)
   locs_without_g <- get_locs_without_g(locations_first_t, n_tims)
-  for(t in 1:n_tims){
+  # only include locations with data in locs_without_g and make NULL if empty
+  locs_without_g = lapply(1:n_tims, function(t){
     wh <- which(locs_without_g[[t]]%in%which_valid_locs_prev_map[[t]])
     if(length(wh)>0){
       locs_without_g[[t]] <- locs_without_g[[t]][wh]
     }else{
       locs_without_g[[t]] <- NULL
     }
-  }
+  })
+
   # calculate normalising constant for truncated Gaussian kernel
   log_norm_const_gaussian <- array(NA, c(1,1,1))  # for the Gaussian kernel case only, but needs to be declared
   if(use_gaussian_kernel){

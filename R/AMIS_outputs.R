@@ -74,8 +74,8 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   param_names <- colnames(x$param)
   n_tims <- length(x$prevalence_map)
   if(n_tims > 1){
-    time_name <- ifelse(is.null(names(out$prevalence_map)), time, 
-                        names(out$prevalence_map)[time])
+    time_name <- ifelse(is.null(names(x$prevalence_map)), time, 
+                        names(x$prevalence_map)[time])
   }
   
   if(!type%in%c("hist","CI")){stop("Argument 'type' must be either 'hist' or 'CI'.")}

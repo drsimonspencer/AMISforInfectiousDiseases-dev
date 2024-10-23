@@ -35,7 +35,7 @@ or 'CI' for credible intervals}
 
 \item{locations}{Integer identifying the locations. Default to 1.}
 
-\item{time}{Integer identifying the timepoint. Default to 1.}
+\item{time}{Integer index identifying the timepoint. Default to 1.}
 
 \item{measure_central}{Measure of central tendency for credible interval plots.
 It can be 'mean' (default) or 'median'.}

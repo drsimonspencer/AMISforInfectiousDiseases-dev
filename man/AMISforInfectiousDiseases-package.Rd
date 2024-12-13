@@ -6,7 +6,7 @@
 \alias{AMISforInfectiousDiseases-package}
 \title{AMISforInfectiousDiseases: Implement the Adaptive Importance Sampling Algorithm (AMIS) for infectious disease models}
 \description{
-Fits infectious disease models to prevalence maps using AMiS.
+Fits infectious disease models to prevalence maps using AMIS.
 }
 \author{
 \strong{Maintainer}: Simon Spencer \email{s.e.f.spencer@warwick.ac.uk} (\href{https://orcid.org/0000-0002-8375-5542}{ORCID})

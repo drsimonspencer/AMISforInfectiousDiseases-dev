@@ -19,7 +19,8 @@ Authors@R:
     person(given = "Evandro",
            family = "Konzen",
            role = c("aut")))
-Description: Fits infectious disease models to prevalence maps using AMiS.
+Description: Fits infectious disease models to prevalence maps using AMIS.
+Acknowledgements: This work was supported by the NTD Modelling Consortium grant INV-030046, funded by the Bill & Melinda Gates Foundation.
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false

@@ -60,6 +60,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' @param ylab Lable for the y axis.
 #' @param ... Other graphical parameters passed to \code{\link{wtd.hist}}.
 #' @importFrom weights wtd.hist
+#' @importFrom graphics axis
 #' @importFrom graphics segments
 #' @importFrom graphics par
 #' @return A plot.
@@ -422,6 +423,8 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 #'   The colour of a datapoint indicates the most likely mixture component the sample belongs to.}
 #' }
 #' @param main Title of the plot. If NULL, the default title will be displayed. Set to NA for omitting title.
+#' @param xlim The x limits of the plots. Default to NULL.
+#' @param ylim The y limits of the plots. Default to NULL.
 #' @param ... Other arguments to match the \code{plot.Mclust} function
 #' @importFrom graphics title
 #' @return A plot for model-based clustering results.

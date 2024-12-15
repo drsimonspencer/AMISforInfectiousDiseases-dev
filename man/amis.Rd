@@ -53,7 +53,7 @@ This function must return an \eqn{n \times T} \bold{matrix} of prevalences
 (it must be a matrix even when \eqn{T=1}). The vector \code{seeds} will be the
 vector of indexes of the simulated samples. If \code{n_samples} new samples are
 drawn within each iteration of the AMIS algorithm, then the vector \code{seeds} will be
-\code{1:n_samples} at the first iteration, \code{(n_samples+1):(2\eqn{\times}n_samples)} at
+\code{1:n_samples} at the first iteration, \code{(n_samples+1):(2*n_samples)} at
 the second iteration, and so on.}
 
 \item{prior}{A list containing the functions \code{dprior} and \code{rprior}

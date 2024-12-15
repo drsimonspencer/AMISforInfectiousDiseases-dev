@@ -41,6 +41,10 @@ The colour of a datapoint indicates the most likely mixture component the sample
 
 \item{main}{Title of the plot. If NULL, the default title will be displayed. Set to NA for omitting title.}
 
+\item{xlim}{The x limits of the plots. Default to NULL.}
+
+\item{ylim}{The y limits of the plots. Default to NULL.}
+
 \item{...}{Other arguments to match the \code{plot.Mclust} function}
 }
 \value{

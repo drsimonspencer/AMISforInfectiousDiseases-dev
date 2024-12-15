@@ -553,7 +553,6 @@ update_according_to_ess_value <- function(weight_matrix, ess, target_size, log, 
 #' @param weights vector of length equal to the number of particles, containing their weights
 #' @param log logical indicating if weights are log-weights
 #' @return vector of indices of the sampled particles 
-#' @export
 #' @noRd
 # #' @export
 systematic_sample <- function(n_samples,weights,log=F) {

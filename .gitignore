@@ -1,14 +1,7 @@
 .Rproj.user
-.Rproj
 *.Rproj
 .Rhistory
-tests/.Rhistory
-**/.Rhistory
-*/*.log
-files/
-output/
+.log
 inst/doc
 vignettes/figure
-doc/*.R
-doc/*.Rmd
-/Meta/
+

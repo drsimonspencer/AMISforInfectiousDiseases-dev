@@ -44,3 +44,5 @@ Suggests:
     sf,
     viridis
 VignetteBuilder: knitr
+URL: https://github.com/drsimonspencer/AMISforInfectiousDiseases-dev
+BugReports: https://github.com/drsimonspencer/AMISforInfectiousDiseases-dev/issues

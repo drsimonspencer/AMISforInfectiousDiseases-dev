@@ -1,6 +1,7 @@
-^trachoma$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^doc$
 ^Meta$
+figure$
+cache$

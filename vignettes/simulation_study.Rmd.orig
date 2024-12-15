@@ -9,7 +9,19 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r sim_setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  cache = FALSE,
+  echo = TRUE, results = 'hold', warning=F, message=F, 
+  #dev = 'pdf', 
+  fig.width=8, fig.height=5,
+  tidy.opts=list(width.cutoff=75), tidy=FALSE
+)
+old <- options(scipen = 1, digits = 4)
+set.seed(123)
+```
 
 \newcommand{\Exp}{\text{Exp}}
 \newcommand{\N}{{\cal N}}
@@ -56,8 +68,7 @@ We set $n_l=500$ and generated $M=100$ map samples for each location at each tim
 
 ### Loading packages
 
-
-``` r
+```{r sim_load_pkg, echo=TRUE}
 library("AMISforInfectiousDiseases")
 library("ggplot2")
 library("patchwork")
@@ -67,8 +78,7 @@ library("sf")
 
 ### Generating spatially-varying mean number of worms
 
-
-``` r
+```{r sim_true_param, echo=TRUE}
 lon <- seq(-4, 4, length.out=50)
 lat <- seq(-2, 2, length.out=50)
 simData <- expand.grid(lon=lon, lat=lat, W=NA, k=NA, expectedPrev=NA)
@@ -87,8 +97,7 @@ for(l in 1:L){
 
 Below we can see how the mean number of worms and the corresponding prevalence (at the equilibrium distribution) vary over space.
 
-
-``` r
+```{r sim_plot_true_data, echo=TRUE, fig.width=7, fig.height=2.5}
 simData_sf <- sf::st_as_sf(simData, coords=c("lon","lat"))
 th <- theme(axis.text=element_text(size=10), 
             legend.text=element_text(size=10))
@@ -105,12 +114,9 @@ plots_true_data[[2]] <- ggplot(data=simData_sf) +
 wrap_plots(plots_true_data, guides = 'keep', ncol = 2)
 ```
 
-![plot of chunk sim_plot_true_data](figure/sim_plot_true_data-1.png)
-
 ### Generating map samples for multiple time points
 
-
-``` r
+```{r sim_simulate_data, echo=TRUE, results=FALSE}
 set.seed(1)
 n_hosts <- 500  # number of hosts per location
 M <- 100        # number of statistical map samples per location
@@ -132,8 +138,7 @@ for(t in 1:n_tims){
 
 ### Choosing the transmission model function
 
-
-``` r
+```{r sim_model, echo=TRUE, results=FALSE}
 transmission_model <- function(seeds, params, n_tims){
   n_samples <- nrow(params)
   p <- matrix(NA, nrow=n_samples, ncol=n_tims)
@@ -150,8 +155,7 @@ transmission_model <- function(seeds, params, n_tims){
 
 ### Choosing the prior distributions and AMIS control parameters
 
-
-``` r
+```{r sim_prior, echo=TRUE, results=FALSE}
 # Prior distribution for the model parameters
 rprior <- function(n) {
   params <- matrix(NA, n, 2)
@@ -179,8 +183,7 @@ amis_params$delta <- 0.1
 ### Running AMIS
 
 In the lines below, we fit AMIS to the statistical maps by using different prior specifications for $k$, namely $\Exp(\lambda_k), \ \lambda_k \in \{0.1, 0.3, 1\}$.
-
-``` r
+```{r sim_run_amis, echo=TRUE, results=FALSE}
 lambda_W <- 1/3
 lambda_k_values <- c(0.1,0.3,1)
 num_lambda_k <- length(lambda_k_values)
@@ -196,8 +199,7 @@ for(lambda_k in lambda_k_values){
 
 We can look at the posterior distribution for $k$ at some particular location, e.g. the location with the largest mean number of worms:
 
-
-``` r
+```{r sim_plot_posterior_object, echo=TRUE, results=FALSE, fig.width=3.3, fig.height=3, fig.show="hide"}
 loc <- which.max(simData$W)
 xlimW <- c(0,10)
 Wvals <- seq(xlimW[1],xlimW[2],len=100)
@@ -227,29 +229,20 @@ for(lambda_k in lambda_k_values){
 ```
 
 
-
-``` r
+```{r sim_plot_posterior_t1, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
 plots_W[[1]]
 plots_k[[1]]
 ```
 
-![plot of chunk sim_plot_posterior_t1](figure/sim_plot_posterior_t1-1.png)![plot of chunk sim_plot_posterior_t1](figure/sim_plot_posterior_t1-2.png)
-
-
-``` r
+```{r sim_plot_posterior_t2, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
 plots_W[[2]]
 plots_k[[2]]
 ```
 
-![plot of chunk sim_plot_posterior_t2](figure/sim_plot_posterior_t2-1.png)![plot of chunk sim_plot_posterior_t2](figure/sim_plot_posterior_t2-2.png)
-
-
-``` r
+```{r sim_plot_posterior_t3, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
 plots_W[[3]]
 plots_k[[3]]
 ```
-
-![plot of chunk sim_plot_posterior_t3](figure/sim_plot_posterior_t3-1.png)![plot of chunk sim_plot_posterior_t3](figure/sim_plot_posterior_t3-2.png)
 
 We can clearly see that the posterior distribution of $k$ is largely determined by the prior, and that the existence of multiple time points did not help the recovery of the true parameter values.
 
@@ -258,8 +251,7 @@ We can clearly see that the posterior distribution of $k$ is largely determined 
 
 Now, we assume that an intervention (reduction of the mean number of worms by $70\%$) occurs at time $t=2$ and still has effect at $t=3$.
 
-
-``` r
+```{r sim_simulate_with_intervention, echo=TRUE, results=FALSE}
 for(t in 2:3){
   prevs_t <- matrix(NA,L,M)
   for (l in 1:L) {
@@ -276,8 +268,7 @@ for(t in 2:3){
 
 The intervention is known and is also taken into account in the transmission model:
 
-
-``` r
+```{r sim_model_with_intervention, echo=TRUE, results=FALSE}
 transmission_model <- function(seeds, params, n_tims){
   n_samples <- nrow(params)
   p <- matrix(NA, nrow=n_samples, ncol=n_tims)
@@ -297,8 +288,7 @@ transmission_model <- function(seeds, params, n_tims){
 ```
 
 We then fit AMIS using different priors for $k$ as before.
-
-``` r
+```{r sim_run_amis_model_with_intervention, echo=TRUE, results=FALSE}
 outList <- vector("list", num_lambda_k)
 i <- 1
 for(lambda_k in lambda_k_values){
@@ -309,8 +299,7 @@ for(lambda_k in lambda_k_values){
 
 Now, after introducing intervention, the posterior distribution for $k$ is no longer determined by the prior:
 
-
-``` r
+```{r sim_plot_posterior_object_interv, echo=TRUE, results=FALSE, fig.width=3.3, fig.height=3, fig.show="hide"}
 xlimk <- c(0,3)
 kvals <- seq(xlimk[1],xlimk[2],len=100)
 i <- 1
@@ -334,33 +323,23 @@ for(lambda_k in lambda_k_values){
 ```
 
 
-
-``` r
+```{r sim_plot_posterior_t1_interv, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
 plots_W[[1]]
 plots_k[[1]]
 ```
 
-![plot of chunk sim_plot_posterior_t1_interv](figure/sim_plot_posterior_t1_interv-1.png)![plot of chunk sim_plot_posterior_t1_interv](figure/sim_plot_posterior_t1_interv-2.png)
-
-
-``` r
+```{r sim_plot_posterior_t2_interv, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
 plots_W[[2]]
 plots_k[[2]]
 ```
 
-![plot of chunk sim_plot_posterior_t2_interv](figure/sim_plot_posterior_t2_interv-1.png)![plot of chunk sim_plot_posterior_t2_interv](figure/sim_plot_posterior_t2_interv-2.png)
-
-
-``` r
+```{r sim_plot_posterior_t3_interv, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
 plots_W[[3]]
 plots_k[[3]]
 ```
 
-![plot of chunk sim_plot_posterior_t3_interv](figure/sim_plot_posterior_t3_interv-1.png)![plot of chunk sim_plot_posterior_t3_interv](figure/sim_plot_posterior_t3_interv-2.png)
-
 In what follows, using the model with $\Exp(0.1)$ prior on $k$, we look at the posterior median for $W$ over space at time $t=1$.
-
-``` r
+```{r sim_plot_interv_vs_true, echo=TRUE, fig.width=7, fig.height=2.5}
 out <- outList[[3]]
 th <- theme(plot.title = element_text(size = 16, hjust = 0.5))
 limits <- c(0,5)
@@ -384,15 +363,10 @@ pWtrue <- ggplot(data=simData_sf) +
 wrap_plots(list(pWtrue, plot_W_post_median), guides = 'collect', ncol = 2)
 ```
 
-![plot of chunk sim_plot_interv_vs_true](figure/sim_plot_interv_vs_true-1.png)
-
 Note that we assumed a constant true parameter value $k=0.4$ for all locations, but obtained posterior samples for each location. To see how much the estimates for $k$ varied over space, we can look at the posterior median of each location:
-
-``` r
+```{r sim_k_post_medians, echo=TRUE, results=TRUE}
 k_post_medians <- sapply(1:L, function(l) calculate_summaries(out, what="k", locations=l)$median)
 summary(k_post_medians)
-#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#>   0.346   0.360   0.415   0.409   0.444   0.533
 ```
 
 

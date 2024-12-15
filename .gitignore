@@ -8,6 +8,7 @@ tests/.Rhistory
 files/
 output/
 inst/doc
+vignettes/figure
 doc/*.R
 doc/*.Rmd
 /Meta/

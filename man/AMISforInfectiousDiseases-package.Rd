@@ -13,10 +13,10 @@ Fits infectious disease models to prevalence maps using AMIS.
 
 Authors:
 \itemize{
+  \item Evandro Konzen (\href{https://orcid.org/0000-0002-6275-1681}{ORCID})
   \item Renata Retkute
-  \item Thilbault Lestang
   \item Raiha Browning
-  \item Evandro Konzen
+  \item Thilbault Lestang
 }
 
 }

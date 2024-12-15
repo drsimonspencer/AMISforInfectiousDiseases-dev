@@ -2,30 +2,31 @@ Package: AMISforInfectiousDiseases
 Title: Implement the Adaptive Importance Sampling Algorithm (AMIS) for infectious disease models
 Version: 0.1.0
 Authors@R:
-    c(person(given = "Simon",
-             family = "Spencer",
-             role = c("aut", "cre"),
-             email = "s.e.f.spencer@warwick.ac.uk",
-             comment = c(ORCID = "0000-0002-8375-5542")),
+    c(person(given = "Evandro",
+             family = "Konzen",
+             role = c("aut"),
+             comment = c(ORCID = "0000-0002-6275-1681")),
     person(given = "Renata",
            family = "Retkute",
            role = c("aut")),
-    person(given = "Thilbault",
-           family = "Lestang",
-           role=c("aut")), 
     person(given = "Raiha",
            family = "Browning",
            role = c("aut")),
-    person(given = "Evandro",
-           family = "Konzen",
-           role = c("aut")))
+    person(given = "Thilbault",
+           family = "Lestang",
+           role=c("aut")),
+    person(given = "Simon",
+           family = "Spencer",
+           role = c("aut", "cre"),
+           email = "s.e.f.spencer@warwick.ac.uk",
+           comment = c(ORCID = "0000-0002-8375-5542")))
 Description: Fits infectious disease models to prevalence maps using AMIS.
 Acknowledgements: This work was supported by the NTD Modelling Consortium grant INV-030046, funded by the Bill & Melinda Gates Foundation.
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Imports:
     Hmisc,
     mclust,
@@ -37,5 +38,7 @@ Depends:
     R (>= 4.1)
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    sf,
+    viridis
 VignetteBuilder: knitr

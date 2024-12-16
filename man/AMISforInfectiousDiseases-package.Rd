@@ -22,8 +22,8 @@ Useful links:
 Authors:
 \itemize{
   \item Evandro Konzen (\href{https://orcid.org/0000-0002-6275-1681}{ORCID})
-  \item Renata Retkute
-  \item Raiha Browning
+  \item Renata Retkute (\href{https://orcid.org/0000-0002-3877-6440}{ORCID})
+  \item Raiha Browning (\href{https://orcid.org/0000-0002-6175-2244}{ORCID})
   \item Thilbault Lestang
 }
 

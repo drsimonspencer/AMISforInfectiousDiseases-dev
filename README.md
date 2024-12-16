@@ -1,4 +1,4 @@
-# Description
+## Description
 
 This package provides an implementation of the Adaptive Multiple
 Importance Sampling algorithm, as described in 
@@ -9,16 +9,16 @@ _Annals of Applied Statistics_, 15 (4), 1980-1998. DOI https://doi.org/10.1214/2
 
 This repository contains the development version of the package. It started as a cloned version of the [AMISforInfectiousDiseases](https://github.com/drsimonspencer/AMISforInfectiousDiseases) repository, and [Raiha Browning](https://github.com/RaihaTuiTaura) has added substantial improvements to this since then.
 
-# Installation
+## Installation
 
 Make sure you have the package [devtools](https://devtools.r-lib.org/)
 installed. Then
 
 ```R
-devtools::install_github("evandrokonzen/AMISforInfectiousDiseases-dev")
+devtools::install_github("drsimonspencer/AMISforInfectiousDiseases-dev")
 ```
 
-# Usage
+## Usage
 
 `amis` is the main function of the package. It takes a
 geostatistical map, a transmission model and a prior distribution for parameters, 
@@ -52,7 +52,7 @@ amis_output <- AMISforInfectiousDiseases::amis(prevalence_map, transmission_mode
 - `initial_amis_vals`: Optional list of intermittent outputs from a previous run.
   
   
-## Defining a model function
+### Defining a model function
 
 The `amis` function expects its argument `model_func` to be a function with the 
 following interface

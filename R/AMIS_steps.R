@@ -10,7 +10,7 @@ NULL
 default_amis_params <- function() {
   amis_params <- list(n_samples=500, target_ess=500, max_iters=12,
                       boundaries=c(0,1), boundaries_param=NULL, 
-                      log=TRUE, use_induced_prior=TRUE, mixture_samples=1000, df=3, q=0,
+                      log=TRUE, delete_induced_prior=TRUE, mixture_samples=1000, df=3, q=0,
                       delta=0.01, sigma=NULL, breaks=NULL)
   return(amis_params)
 }
@@ -90,7 +90,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   df <- amis_params$df
   target_ess <- amis_params$target_ess
   max_iters <- amis_params$max_iters
-  use_induced_prior <- amis_params$use_induced_prior
+  delete_induced_prior <- amis_params$delete_induced_prior
   boundaries <- amis_params$boundaries
   boundaries_param <- amis_params$boundaries_param
   boundaries <- as.numeric(boundaries)
@@ -133,13 +133,13 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   if(is.null(prevalence_map[[1]]$likelihood) && is.null(c(delta, sigma, breaks))){
     stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL if a likelihood function is not provided.")
   }
-  if(use_induced_prior && is.null(c(delta, sigma, breaks))){
-    stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL if 'use_induced_prior' is set to TRUE.")
+  if(delete_induced_prior && is.null(c(delta, sigma, breaks))){
+    stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL if 'delete_induced_prior' is set to TRUE.")
   }
   
   mes <- NULL
   mes_ <- NULL
-  if(is.null(prevalence_map[[1]]$likelihood) && !use_induced_prior){
+  if(is.null(prevalence_map[[1]]$likelihood) && !delete_induced_prior){
     if(!is.null(breaks)){
       mes_ <- "- Histogram method will be used in the estimation of the likelihood as 'breaks' was provided. \n"
     }else{
@@ -151,7 +151,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     }
   }
   mes <- c(mes, mes_)
-  if(!use_induced_prior){
+  if(!delete_induced_prior){
     mes_ <- "- Induced prior will not be used in the update of the weights. \n"
   }else{
     if(is.null(prevalence_map[[1]]$likelihood)){
@@ -391,7 +391,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
     lik_mat <- t(array(likelihoods[t,,], dim=c(n_locs, n_sims)))
     
     # Update the weights by the latest likelihood (filtering)
-    if (amis_params[["use_induced_prior"]]){
+    if (amis_params[["delete_induced_prior"]]){
       
       # If this is the first timepoint where there is data for a location, then use induced prior
       # locs_with_g = which(locations_first_t == t)
@@ -784,7 +784,7 @@ compute_model_evidence <- function(likelihoods, simulated_prevalences,
     lik_mat <- t(array(likelihoods[t,,], dim=c(n_locs, n_sims)))
     
     # Update the weights by the latest likelihood (filtering)
-    if (amis_params[["use_induced_prior"]]){
+    if (amis_params[["delete_induced_prior"]]){
       
       # If this is the first timepoint where there is data for a location, then use induced prior
       # locs_with_g = which(locations_first_t == t)

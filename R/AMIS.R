@@ -77,7 +77,7 @@
 #' \item{\code{boundaries_param}}{If specified, it should be a \eqn{d \times 2} matrix 
 #' with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to NULL.}
 #' \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to TRUE.}
-#' \item{\code{use_induced_prior}}{Logical indicating whether the induced prior density is to be used in the update of weights. Default to TRUE.}
+#' \item{\code{delete_induced_prior}}{Logical indicating whether the induced prior density is to be used in the update of weights. Default to FALSE.}
 #' \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
 #' \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
 #' \item{\code{q}}{Parameter (between 0 and 1) controlling how the weights are calculated for active locations. 
@@ -297,7 +297,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
     param <- prior$rprior(n_samples)
     if(!is.matrix(param)) {stop("rprior function must produce a MATRIX of size #simulations by #parameters, even when #parameters is equal to 1. \n")}
     if(any(is.na(param))){warning("At least one sample from the prior was NA or NaN. \n")}
-    if(ncol(param)==1 && amis_params[["use_induced_prior"]]==T) {warning("Currently running with amis_params[['use_induced_prior']]=TRUE. For models with only one parameter it is recommended to set amis_params[['use_induced_prior']]=FALSE for prior to influence the weights calculation.\n")}
+    if(ncol(param)==1 && amis_params[["delete_induced_prior"]]==T) {warning("Currently running with amis_params[['delete_induced_prior']]=TRUE. For models with only one parameter it is recommended to set amis_params[['delete_induced_prior']]=FALSE for prior to influence the weights calculation.\n")}
     # To avoid duplication, evaluate prior density now.
     prior_density <- sapply(1:n_samples,function(b) {prior$dprior(param[b,],log=amis_params[["log"]])})
     if(length(prior_density)!=n_samples) {stop("Output from dprior function must have length 1. \n")}

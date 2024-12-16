@@ -79,7 +79,7 @@ set \code{boundaries = c(0,Inf)}.}
 \item{\code{boundaries_param}}{If specified, it should be a \eqn{d \times 2} matrix
 with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to NULL.}
 \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to TRUE.}
-\item{\code{use_induced_prior}}{Logical indicating whether the induced prior density is to be used in the update of weights. Default to TRUE.}
+\item{\code{delete_induced_prior}}{Logical indicating whether the induced prior density is to be used in the update of weights. Default to FALSE.}
 \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
 \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
 \item{\code{q}}{Parameter (between 0 and 1) controlling how the weights are calculated for active locations.

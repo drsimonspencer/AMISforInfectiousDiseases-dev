@@ -750,7 +750,13 @@ compute_prior_proposal_ratio <- function(components, param, prior_density, df, l
 #' @return A list containing an estimate of the log model evidence and corresponding log variance of this estimate for both the full likelihood model 
 #'     (product over all locations), and for each location individually.
 #' @noRd
-compute_model_evidence <- function(likelihoods, amis_params, first_weight){
+compute_model_evidence <- function(likelihoods, simulated_prevalences, 
+                                   amis_params, first_weight,
+                                   locs_with_g, locs_without_g,
+                                   bool_valid_sim_prev, which_valid_sim_prev, 
+                                   which_invalid_sim_prev, which_valid_locs_prev_map, 
+                                   locations_with_no_data){
+  
   n_tims <- dim(likelihoods)[1]
   n_locs <- dim(likelihoods)[2]
   n_sims <- dim(likelihoods)[3]
@@ -763,32 +769,98 @@ compute_model_evidence <- function(likelihoods, amis_params, first_weight){
   # } else {
   #   lik_matrix <- function(l) t(l)
   # }
+  
   for (t in 1:n_tims) {
-    # lik_mat <- lik_matrix(likelihoods[t,,])
+    
     lik_mat <- t(array(likelihoods[t,,], dim=c(n_locs, n_sims)))
     
     # Update the weights by the latest likelihood (filtering)
-    weight_matrix <- compute_weight_matrix_no_induced_prior(lik_mat,amis_params,weight_matrix)
-    weight_matrix_loc <- compute_weight_matrix_no_induced_prior(lik_mat,amis_params,weight_matrix_loc)
+    if (amis_params[["use_induced_prior"]]){
+      
+      # If this is the first timepoint where there is data for a location, then use induced prior
+      # locs_with_g = which(locations_first_t == t)
+      # locs_without_g = which(locations_first_t < t)
+      
+      if(!is.null(locs_without_g[[t]])){
+        weight_matrix <- compute_weight_matrix_without_g(lik_mat, amis_params, weight_matrix,
+                                                         which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]],
+                                                         locs_without_g[[t]])
+        weight_matrix_loc <- compute_weight_matrix_without_g(lik_mat, amis_params, weight_matrix_loc,
+                                                         which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]],
+                                                         locs_without_g[[t]])      }
+      
+      if (is.null(amis_params[["breaks"]])){
+        if(is.null(amis_params[["sigma"]])){
+          if(!is.null(locs_with_g[[t]])){
+            weight_matrix <- compute_weight_matrix_empirical_uniform(lik_mat,simulated_prevalences[,t],amis_params,weight_matrix,
+                                                                     bool_valid_sim_prev[,t], 
+                                                                     which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], 
+                                                                     locs_with_g[[t]])
+            weight_matrix_loc <- compute_weight_matrix_empirical_uniform(lik_mat,simulated_prevalences[,t],amis_params,weight_matrix_loc,
+                                                                     bool_valid_sim_prev[,t], 
+                                                                     which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], 
+                                                                     locs_with_g[[t]])
+          }
+        }else{
+          if(!is.null(locs_with_g[[t]])){
+            weight_matrix <- compute_weight_matrix_empirical_gauss(lik_mat,simulated_prevalences[,t],amis_params,weight_matrix, 
+                                                                   which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], 
+                                                                   locs_with_g[[t]])
+            weight_matrix_loc <- compute_weight_matrix_empirical_gauss(lik_mat,simulated_prevalences[,t],amis_params,weight_matrix_loc, 
+                                                                   which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], 
+                                                                   locs_with_g[[t]])
+          }
+        }
+      } else {
+        if(!is.null(locs_with_g[[t]])){
+          weight_matrix <- compute_weight_matrix_empirical_histogram(lik_mat,simulated_prevalences[,t],amis_params,weight_matrix,
+                                                                     bool_valid_sim_prev[,t], 
+                                                                     which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], 
+                                                                     locs_with_g[[t]])
+          weight_matrix_loc <- compute_weight_matrix_empirical_histogram(lik_mat,simulated_prevalences[,t],amis_params,weight_matrix_loc,
+                                                                     bool_valid_sim_prev[,t], 
+                                                                     which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], 
+                                                                     locs_with_g[[t]])
+        }
+      }
+    } else {
+      if(!is.null(which_valid_locs_prev_map[[t]])){
+        weight_matrix <- compute_weight_matrix_without_g(lik_mat, amis_params, weight_matrix,
+                                                         which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], 
+                                                         which_valid_locs_prev_map[[t]])
+        weight_matrix_loc <- compute_weight_matrix_without_g(lik_mat, amis_params, weight_matrix_loc,
+                                                         which_valid_sim_prev[[t]], which_invalid_sim_prev[[t]], 
+                                                         which_valid_locs_prev_map[[t]])
+      }
+    }
+    
+    if(length(locations_with_no_data)>0 && length(which_invalid_sim_prev[[t]])>0){
+      weight_inval_prev <- ifelse(amis_params[["log"]], -Inf, 0)
+      weight_matrix[which_invalid_sim_prev[[t]]+1L, locations_with_no_data] <- weight_inval_prev
+      weight_matrix_loc[which_invalid_sim_prev[[t]]+1L, locations_with_no_data] <- weight_inval_prev
+    }
   }
-
+  
   # Model evidence of full model
   joint_log_posterior = rowSums(weight_matrix) + first_weight
   M = max(joint_log_posterior)
   log_model_evidence =  - log(n_sims) + M + log(sum(exp(joint_log_posterior - M))) 
-  log_model_evidence_var = log(sum(exp(log((exp(joint_log_posterior) - exp(log_model_evidence))^2) - 2*log(n_sims))))
+  M_var = max((2*joint_log_posterior),(log(2)+joint_log_posterior),0)
+  log_model_evidence_var = -2*log(n_sims) + M_var + log(sum(exp(2*joint_log_posterior - M_var),(-2*exp(joint_log_posterior - M_var)), n_sims*exp(-M_var)))
   
-  # Model evidence for each location 
+  # Model evidence for each location subset
   joint_log_posterior_loc = weight_matrix_loc
   M_loc = apply(joint_log_posterior_loc,2,max)
   log_model_evidence_loc = sapply(1:n_locs, function(v) {
     - log(n_sims) + M_loc[v] + log(sum(exp(joint_log_posterior_loc[,v] - M_loc[v])))
   })
   log_model_evidence_var_loc = sapply(1:n_locs, function(v) {
-    log(sum(exp(log((exp(joint_log_posterior_loc[,v]) - exp(log_model_evidence_loc[v]))^2) - 2*log(n_sims))))
+    -2*log(n_sims) + 2*M_loc[v] + log(sum(exp(2*joint_log_posterior_loc[,v] - 2*M_loc[v]),(-2*exp(joint_log_posterior_loc[,v] - 2*M_loc[v])), n_sims*exp(-2*M_loc[v])))
   })
-
-  return(list(evidence_full_likelihood = cbind(log_model_evidence = log_model_evidence, log_variance = log_model_evidence_var), 
-              evidence_by_location = cbind(log_model_evidence = log_model_evidence_loc, log_variance = log_model_evidence_var_loc)))
+  
+  return(list(evidence = cbind(log_model_evidence = log_model_evidence, log_variance = log_model_evidence_var), 
+              joint_log_posterior = joint_log_posterior,
+              evidence_by_location = cbind(log_model_evidence = log_model_evidence_loc, log_variance = log_model_evidence_var_loc), 
+              joint_log_posterior_by_location = joint_log_posterior_loc))
 }
 

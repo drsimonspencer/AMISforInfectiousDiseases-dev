@@ -193,6 +193,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
     output <- list(seeds=allseeds,
                    param=param,
                    simulated_prevalences=simulated_prevalences, 
+                   first_weight=first_weight,
                    weight_matrix=weight_matrix, 
                    likelihoods=likelihoods, 
                    ess=ess, 
@@ -202,7 +203,14 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
                    components_per_iteration=components_per_iteration,
                    ess_per_iteration=ess_per_iteration,
                    prior_density=prior_density,
-                   amis_params=amis_params)
+                   amis_params=amis_params,
+                   locs_with_g=locs_with_g, 
+                   locs_without_g=locs_without_g,
+                   bool_valid_sim_prev=bool_valid_sim_prev,
+                   which_valid_sim_prev=which_valid_sim_prev, 
+                   which_invalid_sim_prev=which_invalid_sim_prev,
+                   which_valid_locs_prev_map=which_valid_locs_prev_map, 
+                   locations_with_no_data=locations_with_no_data)
     class(output) <- 'amis'
     return(output)
   }
@@ -317,10 +325,10 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
                                       which_valid_prev_map,log_norm_const_gaussian)
     if(any(is.nan(likelihoods))) {warning("Likelihood evaluation produced at least 1 NaN value. \n")}
     # Update weight matrix
+    first_weight = rep(1-amis_params[["log"]], n_samples)
     weight_matrix <- compute_weight_matrix(likelihoods, simulated_prevalences, amis_params,
-      first_weight = rep(1-amis_params[["log"]], n_samples), locs_with_g, locs_without_g,
-      bool_valid_sim_prev, which_valid_sim_prev, which_invalid_sim_prev, which_valid_locs_prev_map, 
-      locations_with_no_data)
+      first_weight, locs_with_g, locs_without_g,bool_valid_sim_prev, 
+      which_valid_sim_prev, which_invalid_sim_prev, which_valid_locs_prev_map, locations_with_no_data)
     if(any(is.na(weight_matrix))) {warning("Weight matrix contains at least one NA or NaN value. \n")}
 
     ess <- calculate_ess(weight_matrix,amis_params[["log"]])
@@ -363,27 +371,9 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
     components_per_iteration <- check_initial_vals("components_per_iteration")
     param <- check_initial_vals("param")
     prior_density <- check_initial_vals("prior_density")
-    
-    
-    # Terms needed to recalculated as they are not in the AMIS output
-    n_samples_previous_run <- n_samples*niter
-    bool_valid_sim_prev <- (simulated_prevalences>=boundaries[1]) & (simulated_prevalences<=boundaries[2]) & is.finite(simulated_prevalences)
-    if(!is.null(boundaries_param)){
-      bool_valid_sim_param <- rep(T, n_samples_previous_run)
-      for(i_samp in 1:n_samples_previous_run){
-        bool_valid_sim_param[i_samp] <- all((param[i_samp,]>=boundaries_param[,1])&(param[i_samp,]<=boundaries_param[,2]))
-      }
-      prior_density[!bool_valid_sim_param] <- ifelse(amis_params[["log"]], -Inf, 0)
-      bool_valid_sim_prev <- bool_valid_sim_prev & bool_valid_sim_param
-    }
-    which_valid_sim_prev <- lapply(1:n_tims, function(t) which(bool_valid_sim_prev[,t])-1L)
-    which_invalid_sim_prev <- lapply(1:n_tims, function(t) which(!bool_valid_sim_prev[,t])-1L)
-
   }
+
   
-  
-  # Define first_weight object in case target_ess reached in first iteration
-  first_weight <- rep(1-amis_params[["log"]], n_samples)
   # Continue if target_ess not yet reached
   if (min(ess) >= amis_params[["target_ess"]]){
     cat("----------------------- \n")
@@ -470,15 +460,15 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
   # Save output
   output <- save_output()
   
-  # Calculate model evidence only if use_induced_prior==FALSE
-  if (!amis_params[["use_induced_prior"]]){
-    model_evidence <- NULL
-    warning("model_evidence not calculated. Function compute_model_evidence() is under development.")
-    # model_evidence <- compute_model_evidence(likelihoods, amis_params, first_weight)
-    output$evidence <- model_evidence
-  } else {
-    output$evidence <- NULL
-  }
+  # Calculate model evidence
+  model_evidence <- compute_model_evidence(likelihoods, simulated_prevalences, 
+                                           amis_params, first_weight,
+                                           locs_with_g, locs_without_g,
+                                           bool_valid_sim_prev, which_valid_sim_prev, 
+                                           which_invalid_sim_prev, which_valid_locs_prev_map, 
+                                           locations_with_no_data)
+  output$evidence <- model_evidence
+
   
   return(output)
 }

@@ -8,6 +8,14 @@
 \description{
 Fits infectious disease models to prevalence maps using AMIS.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/drsimonspencer/AMISforInfectiousDiseases-dev}
+  \item Report bugs at \url{https://github.com/drsimonspencer/AMISforInfectiousDiseases-dev/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Simon Spencer \email{s.e.f.spencer@warwick.ac.uk} (\href{https://orcid.org/0000-0002-8375-5542}{ORCID})
 

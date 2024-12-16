@@ -10,7 +10,7 @@ NULL
 default_amis_params <- function() {
   amis_params <- list(n_samples=500, target_ess=500, max_iters=12,
                       boundaries=c(0,1), boundaries_param=NULL, 
-                      log=TRUE, delete_induced_prior=TRUE, mixture_samples=1000, df=3, q=0,
+                      log=TRUE, delete_induced_prior=FALSE, mixture_samples=1000, df=3, q=0,
                       delta=0.01, sigma=NULL, breaks=NULL)
   return(amis_params)
 }

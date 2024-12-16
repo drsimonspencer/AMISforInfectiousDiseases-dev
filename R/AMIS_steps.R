@@ -744,9 +744,18 @@ compute_prior_proposal_ratio <- function(components, param, prior_density, df, l
 #' for a given set of unnormalised parameter weights.
 #'
 #' @param likelihoods An array with dimension n_tims,n_locs,n_sims -- ie timepoints x locations x simulations.
+#' @param simulated_prevalence An n_sims x n_tims matrix containing the simulated prevalence values for each of the
+#'     parameter samples. (double)
 #' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
 #' @param first_weight A vector containing the values for the right hand side of
-#'     the weight expression. 
+#'     the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.
+#' @param locs_with_g List indicating, at each time, which locations are updated using induced prior.
+#' @param locs_without_g List indicating, at each time, which locations are updated without using induced prior.
+#' @param bool_valid_sim_prev Matrix of n_tims columns, where column is a logical vector indicating which simulated prevalences are valid.
+#' @param which_valid_sim_prev List indicating, at each time, which simulated prevalences are valid.
+#' @param which_invalid_sim_prev List indicating, at each time, which simulated prevalences are invalid
+#' @param which_valid_locs_prev_map List showing which locations have valid data at each time
+#' @param locations_with_no_data Vector indicating which locations have no data at any time point
 #' @return A list containing an estimate of the log model evidence and corresponding log variance of this estimate for both the full likelihood model 
 #'     (product over all locations), and for each location individually.
 #' @noRd

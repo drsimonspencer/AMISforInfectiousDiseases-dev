@@ -760,7 +760,7 @@ compute_model_evidence <- function(likelihoods, simulated_prevalences,
   n_tims <- dim(likelihoods)[1]
   n_locs <- dim(likelihoods)[2]
   n_sims <- dim(likelihoods)[3]
-  weight_matrix <- matrix(rep(rep(1-amis_params[["log"]], amis_params[["nsamples"]]),n_locs), nrow = n_sims, ncol = n_locs) 
+  weight_matrix <- matrix(rep(rep(1-amis_params[["log"]], amis_params[["n_samples"]]),n_locs), nrow = n_sims, ncol = n_locs) 
   weight_matrix_loc <- matrix(rep(first_weight,n_locs), nrow = n_sims, ncol = n_locs) 
   # ## If n_locs = 1, likelihood matrix for given timepoint is an atomic
   # ## vector and doesn't need to be transposed.

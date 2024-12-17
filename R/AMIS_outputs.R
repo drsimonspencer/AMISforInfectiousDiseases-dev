@@ -33,7 +33,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' It can be 'prev' (default) for plotting prevalences, or one of the parameter names. 
 #' @param type Type of plot. It can be 'hist' (default) for histogram, 
 #' or 'CI' for credible intervals
-#' @param locations Integer identifying the locations. Default to 1.
+#' @param locations Integer vector or location names identifying locations the plots are made for. Default to 1 (first location).
 #' @param time Integer index identifying the timepoint. Default to 1.
 #' @param measure_central Measure of central tendency for credible interval plots. 
 #' It can be 'mean' (default) or 'median'.
@@ -81,6 +81,14 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   
   if(!type%in%c("hist","CI")){stop("Argument 'type' must be either 'hist' or 'CI'.")}
   
+  if(length(locations)==1&&is.numeric(locations)&&(locations==as.integer(locations))){
+    locations <- as.integer(locations)
+  }
+  stopifnot("'locations' must be either integer or character." = is.integer(locations)||is.character(locations))
+  if(is.character(locations)){
+    stopifnot("No all 'locations' are location names in the AMIS output." = all(locations%in%colnames(x$weight_matrix)))
+  }
+  
   if(type=="hist"){
     if(length(what)!=1){
       stop("If type = 'hist', 'what' must have length one")
@@ -107,8 +115,17 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
     }
   }
   
-  n_locs <- length(locations)
-  location_names <- colnames(x$weight_matrix)[locations]
+  if(is.null(locations)){
+    n_locs <- nrow(x$prevalence_map[[1]]$data)
+    locations <- 1:n_locs
+    location_names <- colnames(x$weight_matrix)
+  }else{
+    if(is.integer(locations)){
+      location_names <- colnames(x$weight_matrix)[locations]
+    }else{
+      location_names <- locations  
+    }
+  }
   
   # Histograms
   if(type=="hist"){
@@ -355,9 +372,24 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
   out <- vector(mode='list', length=4)
   names(out) <- c("mean","median","quantiles","exceedance_probability")
   
+  if(length(locations)==1&&is.numeric(locations)&&(locations==as.integer(locations))){
+    locations <- as.integer(locations)
+  }
+  stopifnot("'locations' must be either integer or character." = is.integer(locations)||is.character(locations))
+  if(is.character(locations)){
+    stopifnot("No all 'locations' are location names in the AMIS output." = all(locations%in%colnames(x$weight_matrix)))
+  }
+  
   if(is.null(locations)){
     n_locs <- nrow(x$prevalence_map[[1]]$data)
     locations <- 1:n_locs
+    location_names <- colnames(x$weight_matrix)
+  }else{
+    if(is.integer(locations)){
+      location_names <- colnames(x$weight_matrix)[locations]
+    }else{
+      location_names <- locations  
+    }
   }
   
   if(alpha < 0 || alpha > 1){stop("'alpha' must be within 0 and 1.")}
@@ -373,10 +405,7 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 
   wtd <- x$weight_matrix[,locations,drop=F]
   if(x$amis_params$log){wtd <- exp(wtd)}
-  
-  # location_names <- colnames(x$weight_matrix)[locations]   # revise this 
-  location_names <- locations
-  
+
   # weighted mean
   out[[1]] <- sapply(1:length(locations), function(l) Hmisc::wtd.mean(statistic, weights=wtd[,l], normwt = T))
   names(out[[1]]) <- location_names

@@ -33,7 +33,7 @@ It can be 'prev' (default) for plotting prevalences, or one of the parameter nam
 \item{type}{Type of plot. It can be 'hist' (default) for histogram,
 or 'CI' for credible intervals}
 
-\item{locations}{Integer identifying the locations. Default to 1.}
+\item{locations}{Integer vector or location names identifying locations the plots are made for. Default to 1 (first location).}
 
 \item{time}{Integer index identifying the timepoint. Default to 1.}
 

@@ -2,20 +2,20 @@
 % Please edit documentation in R/AMIS_outputs.R
 \name{sample_parameters}
 \alias{sample_parameters}
-\title{Sample parameters from their weighted distributions given a model fitted by \code{\link{amis}}}
+\title{Sample parameters from their weighted distributions given a model fitted by \code{\link{amis}()}}
 \usage{
 sample_parameters(x, n_samples = 200, locations = 1)
 }
 \arguments{
-\item{x}{The output from the function \code{\link{amis}}.}
+\item{x}{The output from the function \code{\link{amis}()}.}
 
-\item{n_samples}{Number of samples to draw. Default to 200.}
+\item{n_samples}{Number of samples to draw. Default to \code{200}.}
 
-\item{locations}{Integer identifying the locations. Default to 1.}
+\item{locations}{Integer identifying the locations. Default to \code{1}.}
 }
 \value{
 Matrix with parameter values and corresponding prevalences for each location.
 }
 \description{
-Sample parameters from their weighted distributions given a model fitted by \code{\link{amis}}
+Sample parameters from their weighted distributions given a model fitted by \code{\link{amis}()}
 }

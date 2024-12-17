@@ -1,8 +1,8 @@
-#' Sample parameters from their weighted distributions given a model fitted by \code{\link{amis}}
+#' Sample parameters from their weighted distributions given a model fitted by \code{\link{amis}()}
 #'
-#' @param x The output from the function \code{\link{amis}}.
-#' @param n_samples Number of samples to draw. Default to 200.
-#' @param locations Integer identifying the locations. Default to 1.
+#' @param x The output from the function \code{\link{amis}()}.
+#' @param n_samples Number of samples to draw. Default to \code{200}.
+#' @param locations Integer identifying the locations. Default to \code{1}.
 #' @return Matrix with parameter values and corresponding prevalences for each location.
 #' @export
 sample_parameters <- function(x, n_samples=200, locations=1) {
@@ -26,39 +26,39 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
   return(sampled_pars)
 }
 
-#' Plot histogram or credible interval of weighted distributions given a model fitted by \code{\link{amis}}
+#' Plot histogram or credible interval of weighted distributions given a model fitted by \code{\link{amis}()}
 #'
-#' @param x The output from the function \code{\link{amis}}.
+#' @param x The output from the function \code{\link{amis}()}.
 #' @param what What posterior distribution should be plotted. 
-#' It can be 'prev' (default) for plotting prevalences, or one of the parameter names. 
-#' @param type Type of plot. It can be 'hist' (default) for histogram, 
-#' or 'CI' for credible intervals
-#' @param locations Integer vector or location names identifying locations the plots are made for. Default to 1 (first location).
-#' @param time Integer index identifying the timepoint. Default to 1.
+#' It can be \code{"prev"} (default) for plotting prevalences, or one of the parameter names. 
+#' @param type Type of plot. It can be \code{"hist"} (default) for histogram, 
+#' or \code{"CI"} for credible intervals
+#' @param locations Integer vector or location names identifying locations the plots are made for. Default to \code{1} (first location).
+#' @param time Integer index identifying the timepoint. Default to \code{1}.
 #' @param measure_central Measure of central tendency for credible interval plots. 
-#' It can be 'mean' (default) or 'median'.
+#' It can be \code{"mean"} (default) or \code{"median"}.
 #' @param order_locations_by How the credible intervals of multiple locations should be ordered. 
-#' If NULL (default), locations are displayed according to the argument 'locations'.
-#' Otherwise, it must be either 'prev' or one of the parameter names, and then the 
+#' If \code{NULL} (default), locations are displayed according to the argument \code{"locations"}.
+#' Otherwise, it must be either \code{"prev"} or one of the parameter names, and then the 
 #' locations are ranked by the corresponding measure of central tendency.
 #' @param display_location_names Logical indicating whether location names are to be shown or not 
-#' in credible interval plots. Default to FALSE.
+#' in credible interval plots. Default to \code{FALSE}.
 #' @param alpha Numeric value between 0 and 1 indicating the endpoints of the 
 #' credible intervals, which are evaluated at (alpha/2, 1-alpha/2)% quantiles. 
-#' Default (0.05) will create 95% credible intervals.
-#' @param breaks Argument passed to \code{\link{wtd.hist}} for histogram plots. 
-#' Default to 500.
+#' Default (\code{0.05}) will create 95% credible intervals.
+#' @param breaks Argument passed to \code{\link[weights]{wtd.hist}()} for histogram plots. 
+#' Default to \code{500}.
 #' @param cex Argument passed to plots of credible intervals.
-#' Default to 1
+#' Default to \code{1}.
 #' @param lwd Argument passed to plots of credible intervals.
-#' Default to 1.
+#' Default to \code{1}.
 #' @param xlim The x limits of the plots. For for credible intervals of multiple 
-#' statistics (i.e. length(what)>1), it must be either NULL or a list with 
-#' the x limits for each statistic. Default to NULL.
+#' statistics (i.e. \code{length(what)>1)}, it must be either \code{NULL} or a list with 
+#' the x limits for each statistic. Default to \code{NULL}.
 #' @param main Title for the plot.
 #' @param xlab Lable for the x axis.
 #' @param ylab Lable for the y axis.
-#' @param ... Other graphical parameters passed to \code{\link{wtd.hist}}.
+#' @param ... Other graphical parameters passed to \code{\link[weights]{wtd.hist}()}.
 #' @importFrom weights wtd.hist
 #' @importFrom graphics axis
 #' @importFrom graphics segments
@@ -257,9 +257,9 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
 
 #' Print method for object of class \code{amis}
 #'
-#' @param x The output from the function \code{\link{amis}}.
-#' @param ... Other arguments to match the generic \code{print} function
-#' @return Brief description of data and model specifications used to run \code{\link{amis}}.
+#' @param x The output from the function \code{\link{amis}()}.
+#' @param ... Other arguments to match the generic \code{print()} function
+#' @return Brief description of data and model specifications used to run \code{\link{amis}()}.
 #' @export
 print.amis <- function(x, ...) {
   
@@ -306,8 +306,8 @@ print.amis <- function(x, ...) {
 
 #' Summary method for object of class \code{amis}
 #'
-#' @param object The output from the function \code{\link{amis}}.
-#' @param ... Other arguments to match the generic \code{summary} function
+#' @param object The output from the function \code{\link{amis}()}.
+#' @param ... Other arguments to match the generic \code{summary()} function
 #' @return Summary statistics of the fitted model.
 #' @export
 summary.amis <- function(object, ...) {
@@ -353,17 +353,17 @@ summary.amis <- function(object, ...) {
 
 #' Calculate summaries of weighted statistics
 #'
-#' @param x The output from the function \code{\link{amis}}.
+#' @param x The output from the function \code{\link{amis}()}.
 #' @param what What statistic should be calculated the summaries from. 
-#' It must be either 'prev' or the name of one of the model parameters. Default to 'prev'.
-#' @param time Time point. Only used if 'what' is set to 'prev'.
+#' It must be either \code{"prev"} or the name of one of the model parameters. Default to \code{"prev"}.
+#' @param time Time point. Only used if \code{"what"} is set to \code{"prev"}.
 #' @param locations Integer vector or location names identifying locations where 
 #' summaries should be calculated for. If not specified, summary statistics of 
 #' all locations will be provided.
-#' @param alpha Numeric value between 0 and 1. Calculations are for the (alpha/2, 1-alpha/2)% quantiles.
-#' @param exceedance_prob_threshold Numeric value. Default to 0.35, i.e. the 
-#' probability that the statistic of interest (e.g. prevalence) is higher than 0.35.
-#' @return A list with mean, median, and quantiles of the weighted distribution
+#' @param alpha Numeric value between 0 and 1. Calculations are for the \code{(alpha/2, 1-alpha/2)}% quantiles.
+#' @param exceedance_prob_threshold Numeric value. Default to \code{0.35}, i.e. the 
+#' probability that the statistic of interest (e.g. prevalence) is higher than \code{0.35}.
+#' @return A list with mean, median, and quantiles of the weighted distribution.
 #' @importFrom  Hmisc wtd.mean
 #' @importFrom  Hmisc wtd.quantile
 #' @export
@@ -430,9 +430,9 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 
 
 
-#' Wrapper function for \code{\link{plot.Mclust}}
+#' Wrapper function for \code{\link[mclust]{plot.Mclust}()}
 #'
-#' @param x The output from the function \code{\link{amis}}.
+#' @param x The output from the function \code{\link{amis}()}.
 #' @param what A string specifying the type of plot requested:
 #' \describe{
 #' \item{\code{"uncertainty"}}{A plot of classification uncertainty (default)}
@@ -440,8 +440,8 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 #' \item{\code{"BIC"}}{A plot showing BIC values used to choose the number of components}
 #' }
 #' @param iteration Integer indicating which iteration the plot should be about. 
-#' If NULL (default), the plot will be for the final iteration.
-#' See more details in \code{\link{plot.Mclust}}.
+#' If \code{NULL} (default), the plot will be for the final iteration.
+#' See more details in \code{\link[mclust]{plot.Mclust}()}.
 #' @param datapoints A string specifying what the datapoints should represent in the 
 #' plot of classification uncertainty: 
 #' \describe{
@@ -451,10 +451,10 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 #'   i.e. weighted samples from the previous iteration. 
 #'   The colour of a datapoint indicates the most likely mixture component the sample belongs to.}
 #' }
-#' @param main Title of the plot. If NULL, the default title will be displayed. Set to NA for omitting title.
-#' @param xlim The x limits of the plots. Default to NULL.
-#' @param ylim The y limits of the plots. Default to NULL.
-#' @param ... Other arguments to match the \code{plot.Mclust} function
+#' @param main Title of the plot. If \code{NULL}, the default title will be displayed. Set to \code{NA} for omitting title.
+#' @param xlim The x limits of the plots. Default to \code{NULL}
+#' @param ylim The y limits of the plots. Default to \code{NULL}.
+#' @param ... Other arguments to match the \code{\link[mclust]{plot.Mclust}()} function.
 #' @importFrom graphics title
 #' @return A plot for model-based clustering results.
 #' @export

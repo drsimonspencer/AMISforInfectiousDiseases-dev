@@ -2,7 +2,7 @@
 % Please edit documentation in R/AMIS_outputs.R
 \name{plot_mixture_components}
 \alias{plot_mixture_components}
-\title{Wrapper function for \code{\link{plot.Mclust}}}
+\title{Wrapper function for \code{\link[mclust]{plot.Mclust}()}}
 \usage{
 plot_mixture_components(
   x,
@@ -16,7 +16,7 @@ plot_mixture_components(
 )
 }
 \arguments{
-\item{x}{The output from the function \code{\link{amis}}.}
+\item{x}{The output from the function \code{\link{amis}()}.}
 
 \item{what}{A string specifying the type of plot requested:
 \describe{
@@ -26,8 +26,8 @@ plot_mixture_components(
 }}
 
 \item{iteration}{Integer indicating which iteration the plot should be about.
-If NULL (default), the plot will be for the final iteration.
-See more details in \code{\link{plot.Mclust}}.}
+If \code{NULL} (default), the plot will be for the final iteration.
+See more details in \code{\link[mclust]{plot.Mclust}()}.}
 
 \item{datapoints}{A string specifying what the datapoints should represent in the
 plot of classification uncertainty:
@@ -39,17 +39,17 @@ i.e. weighted samples from the previous iteration.
 The colour of a datapoint indicates the most likely mixture component the sample belongs to.}
 }}
 
-\item{main}{Title of the plot. If NULL, the default title will be displayed. Set to NA for omitting title.}
+\item{main}{Title of the plot. If \code{NULL}, the default title will be displayed. Set to \code{NA} for omitting title.}
 
-\item{xlim}{The x limits of the plots. Default to NULL.}
+\item{xlim}{The x limits of the plots. Default to \code{NULL}}
 
-\item{ylim}{The y limits of the plots. Default to NULL.}
+\item{ylim}{The y limits of the plots. Default to \code{NULL}.}
 
-\item{...}{Other arguments to match the \code{plot.Mclust} function}
+\item{...}{Other arguments to match the \code{\link[mclust]{plot.Mclust}()} function.}
 }
 \value{
 A plot for model-based clustering results.
 }
 \description{
-Wrapper function for \code{\link{plot.Mclust}}
+Wrapper function for \code{\link[mclust]{plot.Mclust}()}
 }

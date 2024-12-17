@@ -4,7 +4,7 @@ NULL
 
 #' Produce list containing the default AMIS parameters
 #' 
-#' For description of AMIS parameters, see argument \code{amis_params} in \code{\link{amis}}.
+#' For description of AMIS parameters, see argument \code{amis_params} in \code{\link{amis}()}.
 #' @return List containing the default AMIS parameters.
 #' @export
 default_amis_params <- function() {
@@ -15,9 +15,9 @@ default_amis_params <- function() {
   return(amis_params)
 }
 
-#' Check inputs of \code{amis} function
+#' Check inputs of \code{\link{amis}()} function
 #' 
-#' Check whether all the inputs of \code{\link{amis}} function are as expected.
+#' Check whether all the inputs of \code{\link{amis}()} function are as expected.
 #' @inheritParams amis
 #' @noRd
 # #' @export
@@ -211,7 +211,7 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
 #' 
 #' @inheritParams amis
 #' @param likelihood_approach A string saying the likelihood approach: "parametric" or "nonparametric".
-#' @param nonparametric_method A string specifying which nonparametric method are used. Default to NULL.
+#' @param nonparametric_method A string specifying which nonparametric method are used. Default to \code{NULL}.
 #' @noRd
 # #' @export
 check_zero_weight_for_all_particles <- function(amis_params, mean_weights, likelihood_approach, nonparametric_method=NULL){
@@ -239,9 +239,9 @@ check_zero_weight_for_all_particles <- function(amis_params, mean_weights, likel
 #' Calls evaluate likelihood for each timepoint.
 #' @param prevalence_map A list with one entry for each timepoint.
 #' Each entry must be a list containing objects \code{data} (an L x M matrix of data);
-#' and optional function \code{likelihood} (see \code{\link{amis}})
+#' and optional function \code{likelihood} (see \code{\link{amis}()})
 #' @param simulated_prevalences An n x timepoints matrix of prevalences simulated from the transmission model.
-#' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
+#' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}()}.
 #' @param likelihoods An array with dimension n_tims,n_locs,n_sims -- ie timepoints x locations x simulations (optional).
 #' @param which_valid_sim_prev_iter List of T elements, where each one indicates which simulated prevalences are valid at the current iteration
 #' @param which_valid_prev_map List showing which prevalence map samples are valid
@@ -279,7 +279,7 @@ compute_likelihood <- function(prevalence_map,simulated_prevalences,amis_params,
 #' and \code{likelihood} a function taking arguments \code{data} (a matrix of data as above),
 #' \code{prevalence} (a matrix of output from the transmission model) and optional logical \code{log}, which returns the vector of (log)-likelihoods.    
 #' @param prev_sim A vector of simulated prevalences
-#' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
+#' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}()}.
 #' @param which_valid_sim_prev_iter Vector showing which simulated prevalences are valid at the current iteration at time t.
 #' @param which_valid_prev_map_t List showing which prevalence map samples are valid at time t.
 #' @param log_norm_const_gaussian_t Normalising constant (in log scale) for the Gaussian kernel at time t. It is only used if Gaussian kernel is used.
@@ -363,7 +363,7 @@ evaluate_likelihood <- function(prevalence_map,prev_sim,amis_params,
 #' @param likelihoods An array with dimension n_tims,n_locs,n_sims -- ie timepoints x locations x simulations.
 #' @param simulated_prevalence An n_sims x n_tims matrix containing the simulated prevalence values for each of the
 #'     parameter samples. (double)
-#' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
+#' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}()}.
 #' @param first_weight A vector containing the values for the right hand side of
 #'     the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.
 #' @param locs_with_g List indicating, at each time, which locations are updated using induced prior.
@@ -471,7 +471,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
 #' @param log logical indicating if the weights are on the log scale. 
 #' @return A vector containing the ESS value for each location.
 #'
-#' @seealso \code{\link{compute_weight_matrix}}
+#' @seealso \code{\link{compute_weight_matrix}()}.
 #' @noRd
 # #' @export
 calculate_ess <- function(weight_mat,log) {
@@ -495,9 +495,9 @@ calculate_ess <- function(weight_mat,log) {
 #' the effective sample size ESS is below a target size \code{target_size}.
 #'
 #' @param weight_matrix The weight_matrix as returned by
-#'     \link{compute_weight_matrix}
+#'     \code{\link{compute_weight_matrix}()}
 #' @param ess The effective sample size vector as returned by
-#'     \link{calculate_ess}
+#'     \code{\link{calculate_ess}()}
 #' @param target_size A number representing the target size for the sample.
 #' @param log A logical indicating if the weights are logged.
 #' @param q Parameter (between 0 and 1) controlling how the weights are calculated for active locations. 
@@ -569,12 +569,12 @@ systematic_sample <- function(n_samples,weights,log=F) {
 #' Fit mixture to weighted sample
 #' 
 #' Weights are implemented by using systematic resampling to obtain an unweighted set of parameters.
-#' An unweighted mixture is then fitted using \code{fit_mixture}.
+#' An unweighted mixture is then fitted using \code{\link{fit_mixture}()}.
 #' @param parameters An N x d matrix containing the sampled values for the d parameters.
 #' @param n_samples The number of parameter to resample as data to fit the mixture to.
 #' @param weights A vector of weights with length N.
 #' @param log logical indicating if weights are logged.
-#' @return A list of the mixture components (see function \code{\link{fit_mixture}})
+#' @return A list of the mixture components (see function \code{\link{fit_mixture}()})
 #'     \describe{
 #'       \item{\code{probs}}{The mixture weights}
 #'       \item{\code{Mean}}{The means of the components}
@@ -584,7 +584,7 @@ systematic_sample <- function(n_samples,weights,log=F) {
 #'       \item{\code{ModelName}}{Model name from package mclust}
 #'     }
 #'
-#' @seealso \code{\link{fit_mixture}}
+#' @seealso \code{\link{fit_mixture}()}
 #' @noRd
 # #' @export
 weighted_mixture <- function(parameters, n_samples, weights, log=F) {
@@ -594,11 +594,11 @@ weighted_mixture <- function(parameters, n_samples, weights, log=F) {
 }
 #' Sample new parameters
 #'
-#' This function generates \code{n_samples} new model parameter values according the
-#' t-distribution with \code{df} degrees of freedom and the mixture components \code{mixture}.
+#' This function generates \code{"n_samples"} new model parameter values according the
+#' t-distribution with \code{"df"} degrees of freedom and the mixture components \code{"mixture"}.
 #'
 #' @param mixture A list of mixture components as returned by
-#'     \code{\link{weighted_mixture}}
+#'     \code{\link{weighted_mixture}()}
 #' @param n_samples A number of new parameters to sample (integer)
 #' @param df The degrees of freedom for the t-distributed proposal distribution.
 #' @param prior list containing the functions \code{rprior} and \code{dprior}
@@ -611,7 +611,7 @@ weighted_mixture <- function(parameters, n_samples, weights, log=F) {
 #'   \item{\code{compon_proposal}}{A vector indicating the mixture component each parameter value was simulated from}
 #' }
 #'
-#' @seealso \code{\link{fit_mixture}}
+#' @seealso \code{\link{fit_mixture}()}
 #' @noRd
 # #' @export
 sample_new_parameters <- function(mixture, n_samples, df, prior, log) {
@@ -635,11 +635,11 @@ sample_new_parameters <- function(mixture, n_samples, df, prior, log) {
 
 #' Update the components of the mixture
 #'
-#' This function updates the mixture \code{components} according to
-#' the current mixture \code{mixture} generated at iteration \code{iter}.
+#' This function updates the mixture \code{"components"} according to
+#' the current mixture \code{"mixture"} generated at iteration \code{"iter"}.
 #'
 #' @param mixture A list of mixture components as returned by
-#'     \code{\link{fit_mixture}}
+#'     \code{\link{fit_mixture}()}
 #' @param components A list of mixture components made of
 #'     \describe{
 #'       \item{\code{G}}{A numeric vector containing the number of components from each AMIS iteration}
@@ -650,7 +650,7 @@ sample_new_parameters <- function(mixture, n_samples, df, prior, log) {
 #' @param iter The current iteration index (integer)
 #' @return The updated \code{components} list
 #'
-#' @seealso \code{\link{weighted_mixture}}, \code{\link{fit_mixture}}
+#' @seealso \code{\link{weighted_mixture}()}, \code{\link{fit_mixture}()}
 #' @noRd
 # #' @export
 update_mixture_components <- function(mixture, components, iter) {
@@ -666,10 +666,10 @@ update_mixture_components <- function(mixture, components, iter) {
 
 #' Update the \code{Mclust} object used for plotting mixture components
 #' 
-#' The object is used in \code{\link{plot_mixture_components}}.
+#' The object is used in \code{\link{plot_mixture_components}()}.
 #' 
-#' @param mixture A list of the mixture components returned by \code{\link{weighted_mixture}}
-#' @param sampled_params List of parameter values sampled from the mixture. It is returned by \code{\link{sample_new_parameters}}
+#' @param mixture A list of the mixture components returned by \code{\link{weighted_mixture}()}
+#' @param sampled_params List of parameter values sampled from the mixture. It is returned by \code{\link{sample_new_parameters}()}
 #' @return An updated list of class \code{Mclust}
 #' @noRd
 # #' @export
@@ -746,9 +746,9 @@ compute_prior_proposal_ratio <- function(components, param, prior_density, df, l
 #' @param likelihoods An array with dimension n_tims,n_locs,n_sims -- ie timepoints x locations x simulations.
 #' @param simulated_prevalence An n_sims x n_tims matrix containing the simulated prevalence values for each of the
 #'     parameter samples. (double)
-#' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}}.
+#' @param amis_params A list of parameters, e.g. from \code{\link{default_amis_params}()}.
 #' @param first_weight A vector containing the values for the right hand side of
-#'     the weight expression. Should be of the same length as the rows in \code{simulated_prevalence}.
+#'     the weight expression. Should be of the same length as the rows in \code{simulated_prevalences}.
 #' @param locs_with_g List indicating, at each time, which locations are updated using induced prior.
 #' @param locs_without_g List indicating, at each time, which locations are updated without using induced prior.
 #' @param bool_valid_sim_prev Matrix of n_tims columns, where column is a logical vector indicating which simulated prevalences are valid.

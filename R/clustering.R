@@ -4,8 +4,8 @@
 #'  dimensions, even if the number of dimensions is 1.
 #' Uses BIC to determine the best number of components, up to max.components.
 #'
-#' @param dat a MATRIX or dataframe containing the observations to cluster.
-#' @param max.components A postive integer specifying the maximum number of components to fit in the mixture.
+#' @param dat A MATRIX or dataframe containing the observations to cluster.
+#' @param max.components A positive integer specifying the maximum number of components to fit in the mixture.
 #' @return list containing selected output from \code{mclust}:
 #' \describe{
 #' \item{\code{G}}{the best number of components G.}

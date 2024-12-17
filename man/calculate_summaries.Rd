@@ -14,24 +14,24 @@ calculate_summaries(
 )
 }
 \arguments{
-\item{x}{The output from the function \code{\link{amis}}.}
+\item{x}{The output from the function \code{\link{amis}()}.}
 
 \item{what}{What statistic should be calculated the summaries from.
-It must be either 'prev' or the name of one of the model parameters. Default to 'prev'.}
+It must be either \code{"prev"} or the name of one of the model parameters. Default to \code{"prev"}.}
 
-\item{time}{Time point. Only used if 'what' is set to 'prev'.}
+\item{time}{Time point. Only used if \code{"what"} is set to \code{"prev"}.}
 
 \item{locations}{Integer vector or location names identifying locations where
 summaries should be calculated for. If not specified, summary statistics of
 all locations will be provided.}
 
-\item{alpha}{Numeric value between 0 and 1. Calculations are for the (alpha/2, 1-alpha/2)\% quantiles.}
+\item{alpha}{Numeric value between 0 and 1. Calculations are for the \code{(alpha/2, 1-alpha/2)}\% quantiles.}
 
-\item{exceedance_prob_threshold}{Numeric value. Default to 0.35, i.e. the
-probability that the statistic of interest (e.g. prevalence) is higher than 0.35.}
+\item{exceedance_prob_threshold}{Numeric value. Default to \code{0.35}, i.e. the
+probability that the statistic of interest (e.g. prevalence) is higher than \code{0.35}.}
 }
 \value{
-A list with mean, median, and quantiles of the weighted distribution
+A list with mean, median, and quantiles of the weighted distribution.
 }
 \description{
 Calculate summaries of weighted statistics

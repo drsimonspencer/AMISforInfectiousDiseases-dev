@@ -10,5 +10,5 @@ default_amis_params()
 List containing the default AMIS parameters.
 }
 \description{
-For description of AMIS parameters, see argument \code{amis_params} in \code{\link{amis}}.
+For description of AMIS parameters, see argument \code{amis_params} in \code{\link{amis}()}.
 }

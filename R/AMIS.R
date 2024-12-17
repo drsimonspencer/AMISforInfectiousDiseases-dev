@@ -16,9 +16,9 @@
 #' transmission models using adaptive multiple importance sampling.} 
 #' The Annals of Applied Statistics, 15(4), 1980-1998. 
 #' DOI: \url{https://doi.org/10.1214/21-AOAS1486}.
-#' @param prevalence_map For a single timepoint, \code{prevalence_map} can be an \eqn{L \times M} matrix or data frame containing samples from a geostatistical model, 
+#' @param prevalence_map For a single timepoint, \code{"prevalence_map"} can be an \eqn{L \times M} matrix or data frame containing samples from a geostatistical model, 
 #' where \eqn{L} is the number of locations and \eqn{M} the number of samples per location.
-#' \cr \cr If there are multiple timepoints and/or a parametric \code{likelihood} function is to be used, \code{prevalence_map} must be a list with \eqn{T} elements, one for each timepoint \eqn{t=1,\dots,T}.
+#' \cr \cr If there are multiple timepoints and/or a parametric \code{likelihood} function is to be used, \code{"prevalence_map"} must be a list with \eqn{T} elements, one for each timepoint \eqn{t=1,\dots,T}.
 #' Each element must itself be a list with the following objects: 
 #' \describe{
 #' \item{\code{data}}{An \eqn{L \times M} matrix as above}
@@ -29,19 +29,19 @@
 #' the number of likelihood parameters;
 #'    \item \code{sim_prev}: A numeric value for a prevalence simulated from the transmission model;
 #'    \item \code{log}: Logical indicating if calculations are to be performed on log scale 
-#'    (specified in \code{amis_params}, see below).
+#'    (specified in \code{"amis_params"}, see below).
 #' }
 #' The function \code{likelihood} must return a numeric value representing the (log-)likelihood of 
 #' observing a simulated prevalence given the data from a particular location.
 #' }
 #' }
 #' The location names are inherited from \code{rownames(prevalence_map)} 
-#' if \code{prevalence_map} is a matrix, and 
-#' from \code{rownames(prevalence_map[[1]]$data)} if \code{prevalence_map} is a list.
+#' if \code{"prevalence_map"} is a matrix, and 
+#' from \code{rownames(prevalence_map[[1]]$data)} if \code{"prevalence_map"} is a list.
 #' \cr \cr If \code{likelihood} is not specified, then it is assumed that the data consist of 
 #' samples from a geostatistical model and a nonparametric method is used. The nonparametric 
-#' method to be used is specified in \code{amis_params} using the options 
-#' \code{breaks}, \code{delta}, or \code{sigma} (see \code{amis_params}).
+#' method to be used is specified in \code{"amis_params"} using the options 
+#' \code{breaks}, \code{delta}, or \code{sigma} (see \code{"amis_params"}).
 #' \cr \cr
 #' @param transmission_model A function taking arguments:
 #' \itemize{
@@ -68,23 +68,23 @@
 #' @param amis_params A list containing control parameters for the AMIS algorithm 
 #' (\code{default_amis_params()} returns the default values):
 #' \describe{
-#' \item{\code{n_samples}}{Number of new samples drawn within each AMIS iteration. Default to 500.}
-#' \item{\code{target_ess}}{Target effective sample size. Default to 500.}
-#' \item{\code{max_iters}}{Maximum number of AMIS iterations. Default to 12.}
+#' \item{\code{n_samples}}{Number of new samples drawn within each AMIS iteration. Default to \code{500}.}
+#' \item{\code{target_ess}}{Target effective sample size. Default to \code{500}.}
+#' \item{\code{max_iters}}{Maximum number of AMIS iterations. Default to \code{12}.}
 #' \item{\code{boundaries}}{A vector of length two with the left and right boundaries for prevalences. 
 #' Default to \code{c(0,1)}. If, for instance, left boundary is zero and there is no right boundary, 
 #' set \code{boundaries = c(0,Inf)}.}
 #' \item{\code{boundaries_param}}{If specified, it should be a \eqn{d \times 2} matrix 
-#' with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to NULL.}
-#' \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to TRUE.}
-#' \item{\code{delete_induced_prior}}{Logical indicating whether the induced prior density is to be deleted in the update of weights. Default to FALSE.}
+#' with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to \code{NULL}.}
+#' \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to \code{TRUE}.}
+#' \item{\code{delete_induced_prior}}{Logical indicating whether the induced prior density is to be deleted in the update of weights. Default to \code{FALSE}.}
 #' \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
-#' \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
+#' \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to \code{3}.}
 #' \item{\code{q}}{Parameter (between 0 and 1) controlling how the weights are calculated for active locations. 
-#' Default to 0. See Details below.}
-#' \item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to 0.01.}
-#' \item{\code{sigma}}{Optional smoothing parameter if Gaussian kernel is used. Default to NULL.}
-#' \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to NULL.
+#' Default to \code{0}. See Details below.}
+#' \item{\code{delta}}{Optional smoothing parameter if uniform kernel (default) is used. Default to \code{0.01}.}
+#' \item{\code{sigma}}{Optional smoothing parameter if Gaussian kernel is used. Default to \code{NULL}.}
+#' \item{\code{breaks}}{Optional vector specifying the breaks for the histogram. Default to \code{NULL}.
 #' For finite \code{boundaries}, the first and last entries of \code{breaks} must be 
 #' equal to the left and right boundaries, respectively.
 #' For non-finite \code{boundaries}, ensure that the range of \code{breaks} includes any possible prevalence value.}
@@ -95,16 +95,16 @@
 #' Note that if \code{likelihood} is provided in \code{prevalence_map}, then a parametric method will be implemented.
 #' @param seed Optional single value interpreted as an integer. 
 #' It is the seed for the random number generator for the AMIS algorithm. This is not the same as
-#' the \code{seeds} argument passed to \code{transmission_model}.
+#' the \code{seeds} argument passed to \code{"transmission_model"}.
 #' @param output_dir A string specifying the local directory where to save outputs 
 #' after each iteration of the algorithm. At the end of the string, 
 #' use the correct path separator for your machine's operating system. 
 #' If the directory is specified, the outputs will be saved in a file called `amis_output.rds'. 
-#' Default to NULL (i.e. outputs are not saved in a local directory).
+#' Default to \code{NULL} (i.e. outputs are not saved in a local directory).
 #' @param initial_amis_vals Optional list of intermittent outputs from a 
 #' previous run (where at least one iteration was successful). These outputs can 
-#' be saved by specifying the directory `\code{output_dir}'. 
-#' @return A list of class `\code{amis}'. If the algorithm completed \eqn{I} iterations, 
+#' be saved by specifying the directory \code{"output_dir"}. 
+#' @return A list of class \code{amis}. If the algorithm completed \eqn{I} iterations, 
 #' it simulated a total of \eqn{N = I \times} \code{n_samples}, and therefore the list returned by \code{amis()} will contain:
 #' \describe{
 #' \item{\code{seeds}}{An \eqn{N}-length vector with the simulation seeds that were used.}
@@ -124,7 +124,7 @@
 #'  }
 #' }
 #' \item{\code{components_per_iteration}}{A list with the mixture components at each iteration. 
-#' This object is used in \code{\link{plot_mixture_components}}.}
+#' This object is used in \code{\link{plot_mixture_components}()}.}
 #' \item{\code{ess_per_iteration}}{An \eqn{L \times I} matrix with with the ESS for each location after each iteration.}
 #' \item{\code{prior_density}}{An \eqn{N}-length vector with the density function evaluated at the simulated parameter values.}
 #' \item{\code{amis_params}}{List supplied by the user.}

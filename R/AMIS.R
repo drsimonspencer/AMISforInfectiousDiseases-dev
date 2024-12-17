@@ -77,7 +77,7 @@
 #' \item{\code{boundaries_param}}{If specified, it should be a \eqn{d \times 2} matrix 
 #' with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to NULL.}
 #' \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to TRUE.}
-#' \item{\code{delete_induced_prior}}{Logical indicating whether the induced prior density is to be used in the update of weights. Default to FALSE.}
+#' \item{\code{delete_induced_prior}}{Logical indicating whether the induced prior density is to be deleted in the update of weights. Default to FALSE.}
 #' \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
 #' \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
 #' \item{\code{q}}{Parameter (between 0 and 1) controlling how the weights are calculated for active locations. 
@@ -128,6 +128,8 @@
 #' \item{\code{ess_per_iteration}}{An \eqn{L \times I} matrix with with the ESS for each location after each iteration.}
 #' \item{\code{prior_density}}{An \eqn{N}-length vector with the density function evaluated at the simulated parameter values.}
 #' \item{\code{amis_params}}{List supplied by the user.}
+#' \item{\code{evidence}}{A list containing an estimate of the log model evidence and corresponding log variance of this estimate for both the full likelihood model 
+#'     (product over all locations), and for each location individually.}
 #' }
 #' @details The average weight of parameter vectors for the set of active locations at iteration \eqn{i} \eqn{\left(A_i\right)}
 #' has weights determined by how far the effective sample size for location \eqn{l} \eqn{\left(\text{ESS}_l^i\right)} 
@@ -198,7 +200,6 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
                    likelihoods=likelihoods, 
                    ess=ess, 
                    prevalence_map=prevalence_map,
-                   locations_with_no_data=locations_with_no_data,
                    components=components, 
                    components_per_iteration=components_per_iteration,
                    ess_per_iteration=ess_per_iteration,
@@ -297,7 +298,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
     param <- prior$rprior(n_samples)
     if(!is.matrix(param)) {stop("rprior function must produce a MATRIX of size #simulations by #parameters, even when #parameters is equal to 1. \n")}
     if(any(is.na(param))){warning("At least one sample from the prior was NA or NaN. \n")}
-    if(ncol(param)==1 && amis_params[["delete_induced_prior"]]==T) {warning("Currently running with amis_params[['delete_induced_prior']]=TRUE. For models with only one parameter it is recommended to set amis_params[['delete_induced_prior']]=FALSE for prior to influence the weights calculation.\n")}
+    if(ncol(param)==1 && amis_params[["delete_induced_prior"]]==FALSE) {warning("Currently running with amis_params[['delete_induced_prior']]=FALSE For models with only one parameter it is recommended to set amis_params[['delete_induced_prior']]=TRUE for prior to influence the weights calculation.\n")}
     # To avoid duplication, evaluate prior density now.
     prior_density <- sapply(1:n_samples,function(b) {prior$dprior(param[b,],log=amis_params[["log"]])})
     if(length(prior_density)!=n_samples) {stop("Output from dprior function must have length 1. \n")}

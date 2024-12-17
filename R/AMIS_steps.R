@@ -133,13 +133,13 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   if(is.null(prevalence_map[[1]]$likelihood) && is.null(c(delta, sigma, breaks))){
     stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL if a likelihood function is not provided.")
   }
-  if(delete_induced_prior && is.null(c(delta, sigma, breaks))){
-    stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL if 'delete_induced_prior' is set to TRUE.")
+  if(!delete_induced_prior && is.null(c(delta, sigma, breaks))){
+    stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL if 'delete_induced_prior' is set to FALSE.")
   }
   
   mes <- NULL
   mes_ <- NULL
-  if(is.null(prevalence_map[[1]]$likelihood) && !delete_induced_prior){
+  if(is.null(prevalence_map[[1]]$likelihood) && delete_induced_prior){
     if(!is.null(breaks)){
       mes_ <- "- Histogram method will be used in the estimation of the likelihood as 'breaks' was provided. \n"
     }else{
@@ -151,8 +151,8 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     }
   }
   mes <- c(mes, mes_)
-  if(!delete_induced_prior){
-    mes_ <- "- Induced prior will not be used in the update of the weights. \n"
+  if(delete_induced_prior){
+    mes_ <- "- Induced prior will not be calculated in the update of the weights. \n"
   }else{
     if(is.null(prevalence_map[[1]]$likelihood)){
       if(!is.null(breaks)){
@@ -391,7 +391,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
     lik_mat <- t(array(likelihoods[t,,], dim=c(n_locs, n_sims)))
     
     # Update the weights by the latest likelihood (filtering)
-    if (amis_params[["delete_induced_prior"]]){
+    if (!amis_params[["delete_induced_prior"]]){
       
       # If this is the first timepoint where there is data for a location, then use induced prior
       # locs_with_g = which(locations_first_t == t)
@@ -759,6 +759,7 @@ compute_prior_proposal_ratio <- function(components, param, prior_density, df, l
 #' @return A list containing an estimate of the log model evidence and corresponding log variance of this estimate for both the full likelihood model 
 #'     (product over all locations), and for each location individually.
 #' @noRd
+# #' @export
 compute_model_evidence <- function(likelihoods, simulated_prevalences, 
                                    amis_params, first_weight,
                                    locs_with_g, locs_without_g,
@@ -784,7 +785,7 @@ compute_model_evidence <- function(likelihoods, simulated_prevalences,
     lik_mat <- t(array(likelihoods[t,,], dim=c(n_locs, n_sims)))
     
     # Update the weights by the latest likelihood (filtering)
-    if (amis_params[["delete_induced_prior"]]){
+    if (!amis_params[["delete_induced_prior"]]){
       
       # If this is the first timepoint where there is data for a location, then use induced prior
       # locs_with_g = which(locations_first_t == t)
@@ -851,19 +852,19 @@ compute_model_evidence <- function(likelihoods, simulated_prevalences,
   }
   
   # Model evidence of full model
-  joint_log_posterior = rowSums(weight_matrix) + first_weight
-  M = max(joint_log_posterior)
-  log_model_evidence =  - log(n_sims) + M + log(sum(exp(joint_log_posterior - M))) 
-  M_var = max((2*joint_log_posterior),(log(2)+joint_log_posterior),0)
-  log_model_evidence_var = -2*log(n_sims) + M_var + log(sum(exp(2*joint_log_posterior - M_var),(-2*exp(joint_log_posterior - M_var)), n_sims*exp(-M_var)))
+  joint_log_posterior <- rowSums(weight_matrix) + first_weight
+  M <- max(joint_log_posterior)
+  log_model_evidence <-  -log(n_sims) + M + log(sum(exp(joint_log_posterior - M))) 
+  M_var <- max((2*joint_log_posterior),(log(2)+joint_log_posterior),0)
+  log_model_evidence_var <- -2*log(n_sims) + M_var + log(sum(exp(2*joint_log_posterior - M_var),(-2*exp(joint_log_posterior - M_var)), n_sims*exp(-M_var)))
   
   # Model evidence for each location subset
-  joint_log_posterior_loc = weight_matrix_loc
-  M_loc = apply(joint_log_posterior_loc,2,max)
-  log_model_evidence_loc = sapply(1:n_locs, function(v) {
-    - log(n_sims) + M_loc[v] + log(sum(exp(joint_log_posterior_loc[,v] - M_loc[v])))
+  joint_log_posterior_loc <- weight_matrix_loc
+  M_loc <- apply(joint_log_posterior_loc,2,max)
+  log_model_evidence_loc <- sapply(1:n_locs, function(v) {
+    -log(n_sims) + M_loc[v] + log(sum(exp(joint_log_posterior_loc[,v] - M_loc[v])))
   })
-  log_model_evidence_var_loc = sapply(1:n_locs, function(v) {
+  log_model_evidence_var_loc <- sapply(1:n_locs, function(v) {
     -2*log(n_sims) + 2*M_loc[v] + log(sum(exp(2*joint_log_posterior_loc[,v] - 2*M_loc[v]),(-2*exp(joint_log_posterior_loc[,v] - 2*M_loc[v])), n_sims*exp(-2*M_loc[v])))
   })
   

@@ -79,7 +79,7 @@ set \code{boundaries = c(0,Inf)}.}
 \item{\code{boundaries_param}}{If specified, it should be a \eqn{d \times 2} matrix
 with the lower and upper boundaries for the \eqn{d} transmission model parameters. Default to NULL.}
 \item{\code{log}}{Logical indicating if calculations are to be performed on log scale. Default to TRUE.}
-\item{\code{delete_induced_prior}}{Logical indicating whether the induced prior density is to be used in the update of weights. Default to FALSE.}
+\item{\code{delete_induced_prior}}{Logical indicating whether the induced prior density is to be deleted in the update of weights. Default to FALSE.}
 \item{\code{mixture_samples}}{Number of samples used to represent the weighted parameters in the mixture fitting.}
 \item{\code{df}}{Degrees of freedom in the \eqn{t}-distributions, used to yield a heavy tailed proposal. Default to 3.}
 \item{\code{q}}{Parameter (between 0 and 1) controlling how the weights are calculated for active locations.
@@ -135,6 +135,8 @@ This object is used in \code{\link{plot_mixture_components}}.}
 \item{\code{ess_per_iteration}}{An \eqn{L \times I} matrix with with the ESS for each location after each iteration.}
 \item{\code{prior_density}}{An \eqn{N}-length vector with the density function evaluated at the simulated parameter values.}
 \item{\code{amis_params}}{List supplied by the user.}
+\item{\code{evidence}}{A list containing an estimate of the log model evidence and corresponding log variance of this estimate for both the full likelihood model
+(product over all locations), and for each location individually.}
 }
 }
 \description{

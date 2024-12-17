@@ -47,7 +47,7 @@ amis_output <- AMISforInfectiousDiseases::amis(prevalence_map, transmission_mode
   - `boundaries`: Lower and upper boundaries for prevalences.
   - `boundaries_param`: Lower and upper boundaries for parameters.
   - `log`: logical indicating whether to work with log weights.
-  - `delete_induced_prior`: logical indicating whether the induced prior density is used in the update of weights.
+  - `delete_induced_prior`: logical indicating whether the induced prior density is deleted in the update of weights.
   - `mixture_samples`: The number of samples drawn from the weighted distribution to fit a new mixture to.
   - `df`: degrees of freedom in the t-distributions, used yield a heavy tailed proposal.
   - `delta`, `sigma`, `breaks`: Options for density estimation used in the pseudo-likelihood and induced prior density.

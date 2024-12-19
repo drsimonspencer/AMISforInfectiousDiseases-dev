@@ -133,13 +133,13 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   if(is.null(prevalence_map[[1]]$likelihood) && is.null(c(delta, sigma, breaks))){
     stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL if a likelihood function is not provided.")
   }
-  if(!delete_induced_prior && is.null(c(delta, sigma, breaks))){
+  if(delete_induced_prior && is.null(c(delta, sigma, breaks))){
     stop("At least one of the inputs ('delta','sigma','breaks') must not be NULL if 'delete_induced_prior' is set to FALSE.")
   }
   
   mes <- NULL
   mes_ <- NULL
-  if(is.null(prevalence_map[[1]]$likelihood) && delete_induced_prior){
+  if(is.null(prevalence_map[[1]]$likelihood) && !delete_induced_prior){
     if(!is.null(breaks)){
       mes_ <- "- Histogram method will be used in the estimation of the likelihood as 'breaks' was provided. \n"
     }else{
@@ -151,8 +151,8 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
     }
   }
   mes <- c(mes, mes_)
-  if(delete_induced_prior){
-    mes_ <- "- Induced prior will not be calculated in the update of the weights. \n"
+  if(!delete_induced_prior){
+    mes_ <- "- Induced prior will not be deleted in the update of the weights. \n"
   }else{
     if(is.null(prevalence_map[[1]]$likelihood)){
       if(!is.null(breaks)){
@@ -391,7 +391,7 @@ compute_weight_matrix <- function(likelihoods, simulated_prevalence, amis_params
     lik_mat <- t(array(likelihoods[t,,], dim=c(n_locs, n_sims)))
     
     # Update the weights by the latest likelihood (filtering)
-    if (!amis_params[["delete_induced_prior"]]){
+    if (amis_params[["delete_induced_prior"]]){
       
       # If this is the first timepoint where there is data for a location, then use induced prior
       # locs_with_g = which(locations_first_t == t)
@@ -785,7 +785,7 @@ compute_model_evidence <- function(likelihoods, simulated_prevalences,
     lik_mat <- t(array(likelihoods[t,,], dim=c(n_locs, n_sims)))
     
     # Update the weights by the latest likelihood (filtering)
-    if (!amis_params[["delete_induced_prior"]]){
+    if (amis_params[["delete_induced_prior"]]){
       
       # If this is the first timepoint where there is data for a location, then use induced prior
       # locs_with_g = which(locations_first_t == t)

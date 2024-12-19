@@ -46,10 +46,10 @@ amis_output <- AMISforInfectiousDiseases::amis(prevalence_map, transmission_mode
   - `max_iters`: The maximum number of iterations.
   - `boundaries`: Lower and upper boundaries for prevalences.
   - `boundaries_param`: Lower and upper boundaries for parameters.
-  - `log`: logical indicating whether to work with log weights.
-  - `delete_induced_prior`: logical indicating whether the induced prior density is deleted in the update of weights.
+  - `log`: Logical indicating whether to work with log weights.
+  - `delete_induced_prior`: Logical indicating whether the induced prior density is to be deleted in the update of weights.
   - `mixture_samples`: The number of samples drawn from the weighted distribution to fit a new mixture to.
-  - `df`: degrees of freedom in the t-distributions, used yield a heavy tailed proposal.
+  - `df`: Degrees of freedom in the t-distributions, used yield a heavy tailed proposal.
   - `delta`, `sigma`, `breaks`: Options for density estimation used in the pseudo-likelihood and induced prior density.
 - `seed`: Optional seed for the random number generator.
 - `output_dir`: An optional string specifying the local directory where to save outputs after each iteration of the algorithm.

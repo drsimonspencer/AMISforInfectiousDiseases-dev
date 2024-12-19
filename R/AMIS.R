@@ -298,7 +298,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
     param <- prior$rprior(n_samples)
     if(!is.matrix(param)) {stop("rprior function must produce a MATRIX of size #simulations by #parameters, even when #parameters is equal to 1. \n")}
     if(any(is.na(param))){warning("At least one sample from the prior was NA or NaN. \n")}
-    if(ncol(param)==1 && amis_params[["delete_induced_prior"]]==FALSE) {warning("Currently running with amis_params[['delete_induced_prior']]=FALSE For models with only one parameter it is recommended to set amis_params[['delete_induced_prior']]=TRUE for prior to influence the weights calculation.\n")}
+    if(ncol(param)==1 && amis_params[["delete_induced_prior"]]==TRUE) {warning("Currently running with amis_params[['delete_induced_prior']]=TRUE For models with only one parameter it is recommended to set amis_params[['delete_induced_prior']]=FALSE for prior to influence the weights calculation.\n")}
     # To avoid duplication, evaluate prior density now.
     prior_density <- sapply(1:n_samples,function(b) {prior$dprior(param[b,],log=amis_params[["log"]])})
     if(length(prior_density)!=n_samples) {stop("Output from dprior function must have length 1. \n")}

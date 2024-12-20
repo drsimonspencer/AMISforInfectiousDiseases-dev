@@ -24,7 +24,6 @@ Authors@R:
            comment = c(ORCID = "0000-0002-8375-5542")))
 Description: Fits infectious disease models to prevalence maps using AMIS.
 Acknowledgements: This work was supported by the NTD Modelling Consortium grant INV-030046, funded by the Bill & Melinda Gates Foundation.
-License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)
@@ -48,3 +47,4 @@ Suggests:
 VignetteBuilder: knitr
 URL: https://github.com/drsimonspencer/AMISforInfectiousDiseases-dev
 BugReports: https://github.com/drsimonspencer/AMISforInfectiousDiseases-dev/issues
+License: MIT + file LICENSE

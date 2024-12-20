@@ -32,14 +32,11 @@ study considering Ascariasis in Ethiopia in a single time point.
 library("AMISforInfectiousDiseases")
 ```
 
-<!-- \subsection*{Prevalence map} -->
 ### Prevalence map
 
 Ascariasis is one of the most common helminth infections in people worldwide. This disease is caused by Ascaris lumbricoides, also known as roundworms, which are an intestinal nematode. Ascaris surveys for Ethiopia are available upon request from the Global Atlas of Helminth Infection developed by the London Applied \& Spatial Epidemiology Research Group (LASER) [@pullan2014ascaris]. @retkute2021integrating used these surveys to obtain national level prevalence maps and made them available as a supplementary material. We will use these maps, which consist of $M=100$ samples of a prevalence map for Ascaris in Ethiopia with 11,369 locations at 10km $\times$ 10km resolution.
 
-<!-- The data are available in the package by calling \code{data(ascaris)}. -->
-
-In this example, we will use a subset of 1,000 locations and convert the percentage prevalence values to their decimals.
+In this example, we will use a subset of 1,000 locations and convert the percentage prevalence values to their decimals:
 ```{r asc_get_data}
 ascariasis_url <- "https://projecteuclid.org/journals/supplementalcontent/10.1214/21-AOAS1486/aoas1486suppb.zip"
 tempFile <- tempfile()
@@ -53,8 +50,6 @@ wh <- sample(1:nrow(prev), L)
 ascaris_map <- prev[wh, ]/100
 ```
 
-
-<!-- \subsection*{Model} -->
 ### Model
 
 Following @anderson1991infectious, we assume that the number of worms per host, $X$, has negative binomial distribution NB($W$,$k$), where $W$ is the mean number of worms and $k$ the dispersion parameter describing the degree of clumping of parasites. The probability mass function is given by
@@ -81,7 +76,6 @@ ascaris_model <- function(seeds, params, n_tims=1){
   return(p)
 }
 ```
-
 
 ### Priors
 
@@ -130,7 +124,6 @@ dprior <- function(x, log=FALSE) {
 ascaris_prior <- list(rprior=rprior, dprior=dprior)
 ```
 
-<!-- \subsection*{Running \fct{amis}} -->
 ### Running AMIS
 
 The list of default control parameters can be seen in `default_amis_params()`. 
@@ -152,7 +145,6 @@ set.seed(123)
 out <- amis(ascaris_map, ascaris_model, ascaris_prior, amis_params)
 ```
 
-<!-- \subsection*{Analysing \fct{amis} outputs} -->
 ### Analysing AMIS outputs
 
 Given the output returned by `amis()`, we can use the function `print()` to see the data dimensions, model choices, and control parameters used to run the AMIS algorithm. The function `summary()` provides some brief information about the number of samples and effective sample sizes achieved by the algorithm.

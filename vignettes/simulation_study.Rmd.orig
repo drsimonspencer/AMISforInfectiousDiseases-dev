@@ -246,7 +246,6 @@ plots_k[[3]]
 
 We can clearly see that the posterior distribution of $k$ is largely determined by the prior, and that the existence of multiple time points did not help the recovery of the true parameter values.
 
-
 ### Introducing intervention
 
 Now, we assume that an intervention (reduction of the mean number of worms by $70\%$) occurs at time $t=2$ and still has effect at $t=3$.
@@ -322,7 +321,6 @@ for(lambda_k in lambda_k_values){
 }
 ```
 
-
 ```{r sim_plot_posterior_t1_interv, cache=FALSE, echo=TRUE, results=FALSE, fig.width=3, fig.height=3, fig.show="hold"}
 plots_W[[1]]
 plots_k[[1]]
@@ -368,7 +366,3 @@ Note that we assumed a constant true parameter value $k=0.4$ for all locations, 
 k_post_medians <- sapply(1:L, function(l) calculate_summaries(out, what="k", locations=l)$median)
 summary(k_post_medians)
 ```
-
-
-
-

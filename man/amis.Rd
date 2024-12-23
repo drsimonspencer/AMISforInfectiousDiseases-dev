@@ -167,6 +167,5 @@ If \eqn{q>0}, more weight will be assigned to locations with low ESS.
 Retkute, R., Touloupou, P., Basanez, M. G., Hollingsworth, T. D.,
 Spencer, S. E. (2021). \emph{Integrating geostatistical maps and infectious disease
 transmission models using adaptive multiple importance sampling.}
-The Annals of Applied Statistics, 15(4), 1980-1998.
-DOI: \url{https://doi.org/10.1214/21-AOAS1486}.
+The Annals of Applied Statistics, 15(4), 1980-1998. \doi{10.1214/21-AOAS1486}.
 }

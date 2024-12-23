@@ -555,7 +555,7 @@ update_according_to_ess_value <- function(weight_matrix, ess, target_size, log, 
 #' @return vector of indices of the sampled particles 
 #' @noRd
 # #' @export
-systematic_sample <- function(n_samples,weights,log=F) {
+systematic_sample <- function(n_samples,weights,log=FALSE) {
   if (log) {
     M<-max(weights)
     log_sum_weights<-M+log(sum(exp(weights-M)))
@@ -587,7 +587,7 @@ systematic_sample <- function(n_samples,weights,log=F) {
 #' @seealso \code{\link{fit_mixture}()}
 #' @noRd
 # #' @export
-weighted_mixture <- function(parameters, n_samples, weights, log=F) {
+weighted_mixture <- function(parameters, n_samples, weights, log=FALSE) {
   sampled_idx <- systematic_sample(n_samples,weights,log)
   if (length(unique(sampled_idx))==1) {warning("Only one particle with sufficient weight. Will result in a non-invertible covariance matrix for the mixture. \n")}
   return(fit_mixture(parameters[sampled_idx,,drop=FALSE]))
@@ -725,9 +725,9 @@ compute_prior_proposal_ratio <- function(components, param, prior_density, df, l
   q_terms<-matrix(NA,nrow(param),G)
   for (g in 1:G) {
     if (log) {
-      q_terms[,g]<-log(probs[[g]])+mnormt::dmt(param,mean=Mean[[g]],S=Sigma[[g]],df=df,log=T)
+      q_terms[,g]<-log(probs[[g]])+mnormt::dmt(param,mean=Mean[[g]],S=Sigma[[g]],df=df,log=TRUE)
     } else {
-      q_terms[,g]<-probs[[g]]*mnormt::dmt(param,mean=Mean[[g]],S=Sigma[[g]],df=df,log=F)
+      q_terms[,g]<-probs[[g]]*mnormt::dmt(param,mean=Mean[[g]],S=Sigma[[g]],df=df,log=FALSE)
     }
   }
   if (log) {

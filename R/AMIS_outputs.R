@@ -15,7 +15,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
   simulated_prevalences <- x$simulated_prevalences
   for (l in locations) {
     idx <- systematic_sample(n_samples, weight_matrix[,l], log)
-    sampled_pars_p <- cbind(l, idx, param[idx, , drop=F], simulated_prevalences[idx, , drop=F])
+    sampled_pars_p <- cbind(l, idx, param[idx, , drop=FALSE], simulated_prevalences[idx, , drop=FALSE])
     sampled_pars <- rbind(sampled_pars, sampled_pars_p)
   }
   colnames(sampled_pars) <- c("location","seed",colnames(x$param),paste0("prev_t",1:n_tims))
@@ -66,7 +66,7 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' @return A plot.
 #' @export
 plot.amis <- function(x, what="prev", type="hist", locations=1, time=1, 
-                      measure_central="mean", order_locations_by=NULL, display_location_names=F, alpha=0.05, 
+                      measure_central="mean", order_locations_by=NULL, display_location_names=FALSE, alpha=0.05, 
                       breaks=500, cex=1, lwd=1, xlim=NULL, main=NULL, xlab=NULL, ylab=NULL, ...){
   if(!inherits(x, "amis")){
     stop("'x' must be of type 'amis'")
@@ -179,7 +179,7 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       }
       weights::wtd.hist(x=statistic, breaks=breaks, 
                         weight=weights,
-                        probability=T, xlim=xlim,
+                        probability=TRUE, xlim=xlim,
                         xlab=xlab,
                         ylab=ylab,
                         main=main_, ...)
@@ -403,22 +403,22 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
     statistic <- x$param[,what]
   }
 
-  wtd <- x$weight_matrix[,locations,drop=F]
+  wtd <- x$weight_matrix[,locations,drop=FALSE]
   if(x$amis_params$log){wtd <- exp(wtd)}
 
   # weighted mean
-  out[[1]] <- sapply(1:length(locations), function(l) Hmisc::wtd.mean(statistic, weights=wtd[,l], normwt = T))
+  out[[1]] <- sapply(1:length(locations), function(l) Hmisc::wtd.mean(statistic, weights=wtd[,l], normwt = TRUE))
   names(out[[1]]) <- location_names
   # weighted median
-  out[[2]] <- sapply(1:length(locations), function(l) Hmisc::wtd.quantile(statistic, weights=wtd[,l], probs=0.5, normwt = T))
+  out[[2]] <- sapply(1:length(locations), function(l) Hmisc::wtd.quantile(statistic, weights=wtd[,l], probs=0.5, normwt = TRUE))
   names(out[[2]]) <- location_names
   # weighted quantiles
-  out[[3]] <- sapply(1:length(locations), function(l) Hmisc::wtd.quantile(statistic, weights=wtd[,l], probs=c(alpha/2, 1-alpha/2), normwt = T))
+  out[[3]] <- sapply(1:length(locations), function(l) Hmisc::wtd.quantile(statistic, weights=wtd[,l], probs=c(alpha/2, 1-alpha/2), normwt = TRUE))
   colnames(out[[3]]) <- location_names
   # weighted exceedance probability
   exceedance_prob <- rep(NA, length(locations))
   for(l in 1:length(locations)){
-    ecdf_obj <- Hmisc::wtd.Ecdf(statistic, weights=wtd[,l], normwt = T)
+    ecdf_obj <- Hmisc::wtd.Ecdf(statistic, weights=wtd[,l], normwt = TRUE)
     wh <- which.min(abs(ecdf_obj$x - exceedance_prob_threshold))
     exceedance_prob[l] <- 1 - ecdf_obj$ecdf[wh]
   }

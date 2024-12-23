@@ -12,7 +12,7 @@
   time = 1,
   measure_central = "mean",
   order_locations_by = NULL,
-  display_location_names = F,
+  display_location_names = FALSE,
   alpha = 0.05,
   breaks = 500,
   cex = 1,

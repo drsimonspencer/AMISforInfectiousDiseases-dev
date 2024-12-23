@@ -14,8 +14,7 @@
 #' @references Retkute, R., Touloupou, P., Basanez, M. G., Hollingsworth, T. D., 
 #' Spencer, S. E. (2021). \emph{Integrating geostatistical maps and infectious disease 
 #' transmission models using adaptive multiple importance sampling.} 
-#' The Annals of Applied Statistics, 15(4), 1980-1998. 
-#' DOI: \url{https://doi.org/10.1214/21-AOAS1486}.
+#' The Annals of Applied Statistics, 15(4), 1980-1998. \doi{10.1214/21-AOAS1486}.
 #' @param prevalence_map For a single timepoint, \code{"prevalence_map"} can be an \eqn{L \times M} matrix or data frame containing samples from a geostatistical model, 
 #' where \eqn{L} is the number of locations and \eqn{M} the number of samples per location.
 #' \cr \cr If there are multiple timepoints and/or a parametric \code{likelihood} function is to be used, \code{"prevalence_map"} must be a list with \eqn{T} elements, one for each timepoint \eqn{t=1,\dots,T}.
@@ -311,7 +310,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
     # Check validity of simulated prevalences
     bool_valid_sim_prev <- (simulated_prevalences>=boundaries[1]) & (simulated_prevalences<=boundaries[2]) & is.finite(simulated_prevalences)
     if(!is.null(boundaries_param)){
-      bool_valid_sim_param <- rep(T, n_samples)
+      bool_valid_sim_param <- rep(TRUE, n_samples)
       for(i_samp in 1:n_samples){
         bool_valid_sim_param[i_samp] <- all((param[i_samp,]>=boundaries_param[,1])&(param[i_samp,]<=boundaries_param[,2]))
       }
@@ -402,7 +401,7 @@ amis <- function(prevalence_map, transmission_model, prior, amis_params = defaul
       if(any(is.na(new_params$params))){warning("At least one sample from the proposal after the first iteration of AMIS was NA or NaN. \n")}
       param <- rbind(param, new_params$params)
       if(!is.null(boundaries_param)){
-        bool_valid_sim_param_iter <- rep(T, n_samples)
+        bool_valid_sim_param_iter <- rep(TRUE, n_samples)
         for(i_samp in 1:n_samples){
           bool_valid_sim_param_iter[i_samp] <- all((new_params$params[i_samp,]>=boundaries_param[,1])&(new_params$params[i_samp,]<=boundaries_param[,2]))
         }

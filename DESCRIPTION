@@ -1,5 +1,5 @@
 Package: AMISforInfectiousDiseases
-Title: Implement the Adaptive Importance Sampling Algorithm (AMIS) for infectious disease models
+Title: Implement the AMIS algorithm for Infectious Disease Models
 Version: 0.1.0
 Authors@R:
     c(person(given = "Evandro",
@@ -22,7 +22,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "s.e.f.spencer@warwick.ac.uk",
            comment = c(ORCID = "0000-0002-8375-5542")))
-Description: Fits infectious disease models to prevalence maps using AMIS.
+Description: The 'AMISforInfectiousDiseases' package implements the Adaptive Multiple Importance Sampling (AMIS) algorithm, as described by Retkute et al. (2021, <doi:10.1214/21-AOAS1486>), to estimate key epidemiological parameters by combining outputs from a geostatistical model of infectious diseases (such as prevalence, incidence, or relative risk) with a disease transmission model. Utilising the resulting posterior distributions, the package enables forward projections at the local level.
 Acknowledgements: This work was supported by the NTD Modelling Consortium grant INV-030046, funded by the Bill & Melinda Gates Foundation.
 Encoding: UTF-8
 LazyData: false

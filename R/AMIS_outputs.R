@@ -235,20 +235,21 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       if(is.null(xlab)){
         xlab <- paste0(name, " and ", 100-alpha*100,"% credible interval")
       }
-      yaxt <- ifelse(display_location_names, "n", "s")
       plot(mu, 1:n_locs, pch=20, cex=cex,
            xlim = xlim_,
            ylim = c(0.5,n_locs+0.5),
            xlab = xlab,
            ylab = ylab,
            main = CItitle, 
-           yaxt = yaxt, ...
+           yaxt = "n", ...
       )
       for(l in 1:n_locs){
         graphics::segments(lo[l], l, up[l], l, lwd = lwd)
       }
       if(display_location_names){
         axis(2, at=1:length(location_names), labels=location_names, las=2)
+      }else{
+        axis(2, at=1:length(location_names), labels=1:length(location_names), las=2)
       }
       i <- i + 1
     }

@@ -123,8 +123,9 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
     if(is.integer(locations)){
       location_names <- colnames(x$weight_matrix)[locations]
     }else{
-      location_names <- locations  
+      location_names <- locations
     }
+    n_locs <- length(locations)
   }
   
   # Histograms

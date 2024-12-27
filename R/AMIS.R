@@ -181,7 +181,7 @@
 #' print(output)
 #' summary(output)
 #' 
-#' original_par <- par(no.readonly = T)
+#' original_par <- par(no.readonly = TRUE)
 #' par(cex.lab=1.5, cex.main=1.5, mar=c(5,4.5,4,2)+0.1)
 #' 
 #' par(mfrow=c(1,2))

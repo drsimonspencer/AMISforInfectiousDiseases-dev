@@ -130,7 +130,9 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
   
   # Histograms
   if(type=="hist"){
-    for(location in locations){
+    for(l in 1:n_locs){
+      location <- locations[l]
+      location_name <- location_names[l]
       amis_params <- x$amis_params
       weights <- x$weight_matrix[,location]
       if(amis_params$log){weights <- exp(weights)}
@@ -161,12 +163,12 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       if(is.null(main)){
         if(what=="prev"){
           if(n_tims==1){
-            main_ <- paste0("Location '", location)
+            main_ <- location_name
           }else{
-            main_ <- paste0("Location '", location, "' at time ", time_name)  
+            main_ <- paste0(location_name, "' at time ", time_name)  
           }
         }else{
-          main_ <- paste0("Location '", location, "'")
+          main_ <- location_name
         }
       }else{
         main_ <- main
@@ -219,9 +221,9 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
       up <- summaries[["quantiles"]][2, ]
       if(is.null(main)){
         if(n_tims==1){
-          CItitle <- ifelse(what_=="prev", "Prevalences", what_)
+          CItitle <- ifelse(what_=="prev", "Prevalence", what_)
         }else{
-          CItitle <- ifelse(what_=="prev", paste0("Prevalences at time ", time_name), what_)
+          CItitle <- ifelse(what_=="prev", paste0("Prevalence at time ", time_name), what_)
         }
       }else{
         CItitle <- main

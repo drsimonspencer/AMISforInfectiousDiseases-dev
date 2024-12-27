@@ -53,3 +53,6 @@ A plot for model-based clustering results.
 \description{
 Wrapper function for \code{\link[mclust]{plot.Mclust}()}
 }
+\details{
+For illustrative examples, see \code{\link{amis}()}.
+}

@@ -79,3 +79,6 @@ A plot.
 \description{
 Plot histogram or credible interval of weighted distributions given a model fitted by \code{\link{amis}()}
 }
+\details{
+For illustrative examples, see \code{\link{amis}()}.
+}

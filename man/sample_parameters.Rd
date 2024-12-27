@@ -19,3 +19,6 @@ Matrix with parameter values and corresponding prevalences for each location.
 \description{
 Sample parameters from their weighted distributions given a model fitted by \code{\link{amis}()}
 }
+\details{
+For illustrative examples, see \code{\link{amis}()}.
+}

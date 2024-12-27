@@ -17,3 +17,6 @@ Brief description of data and model specifications used to run \code{\link{amis}
 \description{
 Print method for object of class \code{amis}
 }
+\details{
+For illustrative examples, see \code{\link{amis}()}.
+}

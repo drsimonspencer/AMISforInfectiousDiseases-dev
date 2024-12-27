@@ -4,6 +4,8 @@
 #' @param n_samples Number of samples to draw. Default to \code{200}.
 #' @param locations Integer identifying the locations. Default to \code{1}.
 #' @return Matrix with parameter values and corresponding prevalences for each location.
+#' @details
+#' For illustrative examples, see \code{\link{amis}()}.
 #' @export
 sample_parameters <- function(x, n_samples=200, locations=1) {
   log <- x$amis_params[["log"]]
@@ -18,7 +20,8 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
     sampled_pars_p <- cbind(l, idx, param[idx, , drop=FALSE], simulated_prevalences[idx, , drop=FALSE])
     sampled_pars <- rbind(sampled_pars, sampled_pars_p)
   }
-  colnames(sampled_pars) <- c("location","seed",colnames(x$param),paste0("prev_t",1:n_tims))
+  prev_title <- ifelse(n_tims==1, "prevalence", paste0("prevalence at t=", 1:n_tims))
+  colnames(sampled_pars) <- c("location", "seed", colnames(x$param), prev_title)
   sampled_pars$seed <- as.integer(sampled_pars$seed)
   for(j in 3:n_cols){
     sampled_pars[,j] <- as.numeric(sampled_pars[,j])
@@ -64,6 +67,8 @@ sample_parameters <- function(x, n_samples=200, locations=1) {
 #' @importFrom graphics segments
 #' @importFrom graphics par
 #' @return A plot.
+#' @details
+#' For illustrative examples, see \code{\link{amis}()}.
 #' @export
 plot.amis <- function(x, what="prev", type="hist", locations=1, time=1, 
                       measure_central="mean", order_locations_by=NULL, display_location_names=FALSE, alpha=0.05, 
@@ -264,6 +269,8 @@ plot.amis <- function(x, what="prev", type="hist", locations=1, time=1,
 #' @param x The output from the function \code{\link{amis}()}.
 #' @param ... Other arguments to match the generic \code{print()} function
 #' @return Brief description of data and model specifications used to run \code{\link{amis}()}.
+#' @details
+#' For illustrative examples, see \code{\link{amis}()}.
 #' @export
 print.amis <- function(x, ...) {
   
@@ -313,6 +320,8 @@ print.amis <- function(x, ...) {
 #' @param object The output from the function \code{\link{amis}()}.
 #' @param ... Other arguments to match the generic \code{summary()} function
 #' @return Summary statistics of the fitted model.
+#' @details
+#' For illustrative examples, see \code{\link{amis}()}.
 #' @export
 summary.amis <- function(object, ...) {
   
@@ -370,6 +379,8 @@ summary.amis <- function(object, ...) {
 #' @return A list with mean, median, and quantiles of the weighted distribution.
 #' @importFrom  Hmisc wtd.mean
 #' @importFrom  Hmisc wtd.quantile
+#' @details
+#' For illustrative examples, see \code{\link{amis}()}.
 #' @export
 calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.05, exceedance_prob_threshold=0.35) {
 
@@ -461,6 +472,8 @@ calculate_summaries <- function(x, what="prev", time=1, locations=NULL, alpha=0.
 #' @param ... Other arguments to match the \code{\link[mclust]{plot.Mclust}()} function.
 #' @importFrom graphics title
 #' @return A plot for model-based clustering results.
+#' @details
+#' For illustrative examples, see \code{\link{amis}()}.
 #' @export
 plot_mixture_components <- function(x, what="uncertainty", iteration=NULL, 
                                     datapoints="proposed", main=NULL, xlim=NULL, ylim=NULL, ...) {

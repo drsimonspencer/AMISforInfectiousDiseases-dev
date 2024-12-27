@@ -17,3 +17,6 @@ Summary statistics of the fitted model.
 \description{
 Summary method for object of class \code{amis}
 }
+\details{
+For illustrative examples, see \code{\link{amis}()}.
+}

@@ -36,3 +36,6 @@ A list with mean, median, and quantiles of the weighted distribution.
 \description{
 Calculate summaries of weighted statistics
 }
+\details{
+For illustrative examples, see \code{\link{amis}()}.
+}

@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   cache = FALSE,
-  echo = TRUE, results = 'hold', warning=F, message=F, 
+  echo = TRUE, results = 'hold', warning=FALSE, message=FALSE, 
   #dev = 'pdf', 
   fig.width=8, fig.height=5,
   tidy.opts=list(width.cutoff=75), tidy=FALSE
@@ -110,9 +110,9 @@ rprior <- function(n) {
 
 dprior <- function(x, log=FALSE) {
   if (log) {
-    dlogW <- dunif(x[1],log(0.01),log(60),log=T)
+    dlogW <- dunif(x[1],log(0.01),log(60),log=TRUE)
     dk <- dnorm(x[2], mean = fit.v[1] + fit.v[2]*exp(x[1]), 
-               sd = fit.inflation.factor*sqrt(c(1,exp(x[1]))%*%solve(fit.hess,c(1,exp(x[1])))),log=T) 
+               sd = fit.inflation.factor*sqrt(c(1,exp(x[1]))%*%solve(fit.hess,c(1,exp(x[1])))),log=TRUE) 
     return(sum(dlogW,dk))
   } else {
     dlogW <- dunif(x[1],log(0.01),log(60))
@@ -134,7 +134,7 @@ In addition, we will will set model parameter boundaries to ensure
 that $-\infty < \log(W) < \infty$ and $k>0$. 
 ```{r asc_amis_params}
 amis_params <- default_amis_params()
-amis_params$boundaries_param <- matrix(c(-Inf, Inf, 0, Inf), 2, 2, byrow=T)
+amis_params$boundaries_param <- matrix(c(-Inf, Inf, 0, Inf), 2, 2, byrow=TRUE)
 amis_params$sigma <- 0.0025
 ```
 Note that instead of defining boundaries through the object `amis_params`, the user could alternatively set the prevalence to `NA` directly in the model when $k$ is negative and thus out of bounds. The boundaries for prevalence values, which are in $[0,1]$, are taken into account by default (through `amis_params$boundaries`).
@@ -148,11 +148,11 @@ out <- amis(ascaris_map, ascaris_model, ascaris_prior, amis_params)
 ### Analysing AMIS outputs
 
 Given the output returned by `amis()`, we can use the function `print()` to see the data dimensions, model choices, and control parameters used to run the AMIS algorithm. The function `summary()` provides some brief information about the number of samples and effective sample sizes achieved by the algorithm.
-```{r asc_print}
+```{r asc_print, message=TRUE}
 print(out)
 ```
 
-```{r asc_summary}
+```{r asc_summary, message=TRUE}
 summary(out)
 ```
 

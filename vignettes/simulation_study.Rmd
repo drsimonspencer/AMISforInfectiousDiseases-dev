@@ -162,7 +162,7 @@ rprior <- function(n) {
 }
 dprior <- function(x, log=FALSE) {
   if (log) {
-    return(dexp(x=x[1], rate=lambda_W, log=T) + dexp(x=x[2], rate=lambda_k, log=T))
+    return(dexp(x=x[1], rate=lambda_W, log=TRUE) + dexp(x=x[2], rate=lambda_k, log=TRUE))
   } else {
     return(dexp(x=x[1], rate=lambda_W) * dexp(x=x[2], rate=lambda_k))
   }

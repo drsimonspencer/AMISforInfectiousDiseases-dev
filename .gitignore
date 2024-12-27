@@ -2,6 +2,7 @@
 *.Rproj
 .Rhistory
 .log
+AMISforInfectiousDiseases.Rcheck
 inst/doc
 vignettes/figure
 

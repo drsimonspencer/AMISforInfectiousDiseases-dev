@@ -25,10 +25,10 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
 
   if (!is.null(output_dir)){
     if(!is.character(output_dir)){
-      stop("'output_dir' must be either NULL or a character string.\n")
+      stop("'output_dir' must be either NULL or a character string.")
     }  
     if(!dir.exists(output_dir)){dir.create(output_dir)}
-    message("Outputs will be saved in the user-specified directory after each iteration (this will use data storage space).\n")
+    message("Outputs will be saved in the user-specified directory after each iteration (this will use data storage space).")
   }
   
   if (!is.null(initial_amis_vals)){
@@ -54,12 +54,12 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
        !all(sapply(prevalence_map, function(i) "data"%in%names(i))) ||
        !all(sapply(prevalence_map, function(i) all(names(i)%in%c("data","likelihood"))))
        ) {
-      stop("Since prevalence_map was provided as a list, each of its elements must itself be a list with an object called 'data' (and optionally an object called 'likelihood').\n")
+      stop("Since prevalence_map was provided as a list, each of its elements must itself be a list with an object called 'data' (and optionally an object called 'likelihood').")
     }
 
     if(any( sapply(prevalence_map, function(i) "likelihood"%in%names(i)) )){
       if(!all( sapply(prevalence_map, function(i) "likelihood"%in%names(i)) )){
-        stop("If 'likelihood' is to be used, it must be supplied for each time point in 'prevalence_map'.\n")  
+        stop("If 'likelihood' is to be used, it must be supplied for each time point in 'prevalence_map'.")  
       }
       for(i in 1:n_tims){
         stopifnot("'likelihood' must be a function." = is.function(prevalence_map[[i]]$likelihood))
@@ -141,38 +141,38 @@ check_inputs <- function(prevalence_map, transmission_model, prior, amis_params,
   mes_ <- NULL
   if(is.null(prevalence_map[[1]]$likelihood) && !delete_induced_prior){
     if(!is.null(breaks)){
-      mes_ <- "- Histogram method will be used in the estimation of the likelihood as 'breaks' was provided. \n"
+      mes_ <- "- Histogram method will be used in the estimation of the likelihood as 'breaks' was provided."
     }else{
       if(!is.null(sigma)){
-        mes_ <- "- Gaussian kernel will be used in the estimation of the likelihood as 'sigma' was provided. \n"
+        mes_ <- "- Gaussian kernel will be used in the estimation of the likelihood as 'sigma' was provided."
       }else{
-        mes_ <- "- Uniform kernel will be used in the estimation of the likelihood. \n"
+        mes_ <- "- Uniform kernel will be used in the estimation of the likelihood."
       }
     }
   }
   mes <- c(mes, mes_)
   if(!delete_induced_prior){
-    mes_ <- "- Induced prior will not be deleted in the update of the weights. \n"
+    mes_ <- "- Induced prior will not be deleted in the update of the weights."
   }else{
     if(is.null(prevalence_map[[1]]$likelihood)){
       if(!is.null(breaks)){
-        mes_ <- "- Histogram method will be used to estimate the likelihood and induced prior densities as 'breaks' was provided. \n"
+        mes_ <- "- Histogram method will be used to estimate the likelihood and induced prior densities as 'breaks' was provided."
       }else{
         if(!is.null(sigma)){
-          mes_ <- "- Gaussian kernel will be used to estimate the likelihood and induced prior densities as 'sigma' was provided. \n"
+          mes_ <- "- Gaussian kernel will be used to estimate the likelihood and induced prior densities as 'sigma' was provided."
         }else{
-          mes_ <- "- Uniform kernel will be used to estimate the likelihood and induced prior densities. \n"
+          mes_ <- "- Uniform kernel will be used to estimate the likelihood and induced prior densities."
         }
       }
     }else{
-      mes_0 <- "- A likelihood function was provided and will be used to calculate likelihood terms. \n"
+      mes_0 <- "- A likelihood function was provided and will be used to calculate likelihood terms."
       if(!is.null(breaks)){
-        mes_ <- "- Histogram method will be used to estimate the induced prior density as 'breaks' was provided. \n"
+        mes_ <- "- Histogram method will be used to estimate the induced prior density as 'breaks' was provided."
       }else{
         if(!is.null(sigma)){
-          mes_ <- "- Gaussian kernel will be used to estimate the induced prior density as 'sigma' was provided. \n"
+          mes_ <- "- Gaussian kernel will be used to estimate the induced prior density as 'sigma' was provided."
         }else{
-          mes_ <- "- Uniform kernel will be used to estimate the induced prior density. \n"
+          mes_ <- "- Uniform kernel will be used to estimate the induced prior density."
         }
       }
       mes_ <- c(mes_0, mes_)
@@ -219,17 +219,17 @@ check_zero_weight_for_all_particles <- function(amis_params, mean_weights, likel
     if(likelihood_approach=="nonparametric"){
       prefix <- "No weight on any particles for locations in the active set. "
       if(nonparametric_method=="histogram"){
-        errorMessage <- paste0(prefix, "Try to use breakpoints more distant to each other.\n")
+        errorMessage <- paste0(prefix, "Try to use breakpoints more distant to each other.")
       }
       if(nonparametric_method=="gaussian"){
-        errorMessage <- paste0(prefix, "Try to use larger sigma.\n")
+        errorMessage <- paste0(prefix, "Try to use larger sigma.")
       }
       if(nonparametric_method=="uniform"){
-        errorMessage <- paste0(prefix, "Try to use larger delta.\n")
+        errorMessage <- paste0(prefix, "Try to use larger delta.")
       }
       stop(errorMessage)
     }else{
-      stop("No weight on any particles for locations in the active set. Check whether the prevalence map data are correct for all locations.\n")
+      stop("No weight on any particles for locations in the active set. Check whether the prevalence map data are correct for all locations.")
     }
   }
 }
@@ -589,7 +589,7 @@ systematic_sample <- function(n_samples,weights,log=FALSE) {
 # #' @export
 weighted_mixture <- function(parameters, n_samples, weights, log=FALSE) {
   sampled_idx <- systematic_sample(n_samples,weights,log)
-  if (length(unique(sampled_idx))==1) {warning("Only one particle with sufficient weight. Will result in a non-invertible covariance matrix for the mixture. \n")}
+  if (length(unique(sampled_idx))==1) {warning("Only one particle with sufficient weight. Will result in a non-invertible covariance matrix for the mixture.")}
   return(fit_mixture(parameters[sampled_idx,,drop=FALSE]))
 }
 #' Sample new parameters

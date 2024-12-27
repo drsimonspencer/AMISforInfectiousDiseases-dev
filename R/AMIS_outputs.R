@@ -280,11 +280,11 @@ print.amis <- function(x, ...) {
   amis_params <- x$amis_params
   likelihood_approach <- ifelse(is.null(x$prevalence_map[[1]]$likelihood), "nonparametric", "parametric")
   
-  cat(paste0("Data dimensions: \n"))
-  cat(paste0("- Number of time points:  ",  length(x$prevalence_map),"\n"))
-  cat(paste0("- Number of locations:  ", nrow(x$prevalence_map[[1]]$data),"\n"))
+  message(paste0("Data dimensions:"))
+  message(paste0("- Number of time points:  ",  length(x$prevalence_map)))
+  message(paste0("- Number of locations:  ", nrow(x$prevalence_map[[1]]$data)))
   if(likelihood_approach=="nonparametric"){
-    cat(paste0("- Number of map samples in each location:  ",  ncol(x$prevalence_map[[1]]$data),"\n"))
+    message(paste0("- Number of map samples in each location:  ",  ncol(x$prevalence_map[[1]]$data)))
   }
   locs_no_data <- x$locations_with_no_data
   if(!is.null(locs_no_data)){
@@ -295,23 +295,23 @@ print.amis <- function(x, ...) {
     }
   }
 
-  cat(paste0("-------------------------------------------------------------", "\n"))
-  cat(paste0("Model and algorithm specifications: \n"))
-  cat(paste0("- For the nonparametric estimation of the density of the likelihood: \n"))
+  message("-------------------------------------------------------------")
+  message("Model and algorithm specifications:")
+  message("- For the nonparametric estimation of the density of the likelihood:")
   if(!is.null(amis_params[["breaks"]])){
-    cat("     Histogram method was used with breaks supplied by the user. \n")
+    message("     Histogram method was used with breaks supplied by the user.")
   }else{
     if(!is.null(amis_params[["sigma"]])){
-      cat(paste0("     Gaussian kernel was used with smoothing parameter sigma = ",as.character(round(amis_params$sigma, digits = getOption("digits"))), "\n"))
+      message(paste0("     Gaussian kernel was used with smoothing parameter sigma = ",as.character(round(amis_params$sigma, digits = getOption("digits")))))
     }else{
-      cat(paste0("     Uniform kernel was used with smoothing parameter delta = ",as.character(round(amis_params$delta, digits = getOption("digits"))), "\n"))
+      message(paste0("     Uniform kernel was used with smoothing parameter delta = ",as.character(round(amis_params$delta, digits = getOption("digits")))))
     }
   }
-  cat(paste0("- Lower and upper boundaries for prevalences:  ", 
-             paste0(amis_params$boundaries, collapse=", "),"\n"))
-  cat(paste0("- Number of new samples drawn within each AMIS iteration:  ",  amis_params$n_samples,"\n"))
-  cat(paste0("- Maximum number of iterations:  ",  amis_params$max_iters,"\n"))
-  cat(paste0("- Target effective sample size:  ",  amis_params$target_ess,"\n"))
+  message(paste0("- Lower and upper boundaries for prevalences:  ", 
+             paste0(amis_params$boundaries, collapse=", ")))
+  message(paste0("- Number of new samples drawn within each AMIS iteration:  ",  amis_params$n_samples))
+  message(paste0("- Maximum number of iterations:  ",  amis_params$max_iters))
+  message(paste0("- Target effective sample size:  ",  amis_params$target_ess))
   
 }
 
@@ -320,6 +320,7 @@ print.amis <- function(x, ...) {
 #' @param object The output from the function \code{\link{amis}()}.
 #' @param ... Other arguments to match the generic \code{summary()} function
 #' @return Summary statistics of the fitted model.
+#' @importFrom utils capture.output
 #' @details
 #' For illustrative examples, see \code{\link{amis}()}.
 #' @export
@@ -331,31 +332,30 @@ summary.amis <- function(object, ...) {
   x <- object
   amis_params <- x$amis_params
   
-  cat(paste0("Fitted model: \n"))
+  message(paste0("Fitted model:"))
   
   n_locs <- nrow(x$prevalence_map[[1]]$data)
   n_sims_total <- nrow(x$simulated_prevalences)
   n_iters <- n_sims_total/amis_params$n_samples
-  cat(paste0("- Number of iterations:  ",  n_iters, "\n"))
-  cat(paste0("- Total number of simulated samples:  ",  n_sims_total, "\n"))
-  cat(paste0("- Target effective sample size:  ",  amis_params$target_ess,"\n"))
+  message(paste0("- Number of iterations:  ",  n_iters))
+  message(paste0("- Total number of simulated samples:  ",  n_sims_total))
+  message(paste0("- Target effective sample size:  ",  amis_params$target_ess))
   
   ESS_by_location <- data.frame(ESS = round(x$ess, digits = 0))
   if(n_locs<=10){
-    cat(paste0("- Effective sample size by location: \n"))
-    print(ESS_by_location)
+    message("- Effective sample size by location:\n", paste(utils::capture.output(print(ESS_by_location)), collapse = "\n"))
   }else{
     which_didnot_exceed_ESS <- which(x$ess < amis_params$target_ess)
     num_below_ESS <- length(which_didnot_exceed_ESS)
     num_above_ESS <- n_locs - num_below_ESS
-    cat(paste0("Number of locations whose ESS exceeded the target ESS:  ",  num_above_ESS, "\n"))
-    cat(paste0("Number of locations whose ESS was lower the target ESS:  ",  num_below_ESS, "\n"))
+    message(paste0("Number of locations whose ESS exceeded the target ESS:  ",  num_above_ESS))
+    message(paste0("Number of locations whose ESS was lower the target ESS:  ",  num_below_ESS))
     if(num_below_ESS>0){
       if(num_below_ESS<=10){
         message(paste0("  ESS for the following location(s) was lower than the target ESS: "))
         below_ESS <- data.frame(ESS = round(x$ess[which_didnot_exceed_ESS], digits = 0))
         rownames(below_ESS) <- colnames(x$weight_matrix)[which_didnot_exceed_ESS]
-        print(below_ESS)
+        message(below_ESS)
       }else{
         message("   ESS of more than 10 locations was lower than the target ESS. To see all of them, run 'out$ess[(out$ess < out$amis_params$target_ess)]', where 'out' is an output returned by amis().")
       }
@@ -377,8 +377,8 @@ summary.amis <- function(object, ...) {
 #' @param exceedance_prob_threshold Numeric value. Default to \code{0.35}, i.e. the 
 #' probability that the statistic of interest (e.g. prevalence) is higher than \code{0.35}.
 #' @return A list with mean, median, and quantiles of the weighted distribution.
-#' @importFrom  Hmisc wtd.mean
-#' @importFrom  Hmisc wtd.quantile
+#' @importFrom Hmisc wtd.mean
+#' @importFrom Hmisc wtd.quantile
 #' @details
 #' For illustrative examples, see \code{\link{amis}()}.
 #' @export
@@ -513,7 +513,7 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL,
   
   if(what=="uncertainty"){
     if(datapoints=="proposed"){
-      cat(paste0("Plotting components of the mixture model (and samples simulated from) at iteration ", iteration, "...\n"))
+      message(paste0("Plotting components of the mixture model (and samples simulated from) at iteration ", iteration, "..."))
       clustering$data <- clustering$data_proposed
       n <- length(clustering$compon_proposal)
       clustering$n <- n
@@ -567,7 +567,7 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL,
         z[i,rest] <- 0
       }
       clustering$z <- z
-      cat(paste0("Plotting components of the fitted mixture model at iteration ", iteration, " and weighted samples of the previous iteration...\n"))
+      message(paste0("Plotting components of the fitted mixture model at iteration ", iteration, " and weighted samples of the previous iteration..."))
     }
     colnames(clustering$data) <- colnames(x$param)
     if(d==1){
@@ -587,7 +587,7 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL,
   }else if(what=="density"){
     # xlab = colnames(x$param)[1]
     # ylab = colnames(x$param)[2]
-    cat(paste0("Plotting density of the mixture model at iteration ", iteration, "...\n"))
+    message(paste0("Plotting density of the mixture model at iteration ", iteration, "..."))
     # mclust::plot.Mclust(clustering, what=what, xlab=xlab, ylab=ylab, ...)
     colnames(clustering$data) <- colnames(x$param)
     if(d==1){
@@ -600,7 +600,7 @@ plot_mixture_components <- function(x, what="uncertainty", iteration=NULL,
       title(main = main)
     }
   }else if(what=="BIC"){
-    cat(paste0("Plotting BIC against number of components at iteration ", iteration, "...\n"))
+    message(paste0("Plotting BIC against number of components at iteration ", iteration, "..."))
     mclust::plot.Mclust(clustering, what = what, 
                         legendArgs = list(plot=FALSE), xlab="Number of Components", ...)
     main <- ifelse(is.null(main), "BIC", main)

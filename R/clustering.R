@@ -18,11 +18,11 @@
 #' @import mclust
 #' @noRd
 # #' @export
-fit_mixture<-function(dat,max.components=10) {
+fit_mixture <- function(dat,max.components=10) {
   n <- nrow(dat)
   d <- ncol(dat)
   colnames(dat) <- NULL # remove colnames to prevent instigating bug in mclust
-  if (n<d+1) {stop("Not enough observations to fit mixture model.\n")}
+  if (n<d+1) {stop("Not enough observations to fit mixture model.")}
   max.components <- min(max.components,floor(n/(d+1)))
   BICmatrix <- matrix(NA,nrow=max.components,ncol=1)
   # Start by fitting one group
@@ -34,7 +34,7 @@ fit_mixture<-function(dat,max.components=10) {
   }
   clustering <- mclust::mvn(modelName=modelName,data=dat)
   BIC <- mclust::bic(modelName=modelName,loglik=clustering$loglik,n=n,d=d,G=1)
-  cat("  BIC:", BIC,"\n")
+  message(paste0("  BIC: ", BIC))
   BICmatrix[1, 1] <- BIC
   # fit agglomerative clustering model
   if (d==1) {

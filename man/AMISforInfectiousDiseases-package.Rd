@@ -4,9 +4,9 @@
 \name{AMISforInfectiousDiseases-package}
 \alias{AMISforInfectiousDiseases}
 \alias{AMISforInfectiousDiseases-package}
-\title{AMISforInfectiousDiseases: Implement the AMIS algorithm for Infectious Disease Models}
+\title{AMISforInfectiousDiseases: Implement the AMIS Algorithm for Infectious Disease Models}
 \description{
-The 'AMISforInfectiousDiseases' package implements the Adaptive Multiple Importance Sampling (AMIS) algorithm, as described by Retkute et al. (2021, \doi{10.1214/21-AOAS1486}), to estimate key epidemiological parameters by combining outputs from a geostatistical model of infectious diseases (such as prevalence, incidence, or relative risk) with a disease transmission model. Utilising the resulting posterior distributions, the package enables forward projections at the local level.
+Implements the Adaptive Multiple Importance Sampling (AMIS) algorithm, as described by Retkute et al. (2021, \doi{10.1214/21-AOAS1486}), to estimate key epidemiological parameters by combining outputs from a geostatistical model of infectious diseases (such as prevalence, incidence, or relative risk) with a disease transmission model. Utilising the resulting posterior distributions, the package enables forward projections at the local level.
 }
 \seealso{
 Useful links:
@@ -25,6 +25,12 @@ Authors:
   \item Renata Retkute (\href{https://orcid.org/0000-0002-3877-6440}{ORCID})
   \item Raiha Browning (\href{https://orcid.org/0000-0002-6175-2244}{ORCID})
   \item Thilbault Lestang
+}
+
+Other contributors:
+\itemize{
+  \item University of Warwick [copyright holder]
+  \item Oxford Research Software Engineering [copyright holder]
 }
 
 }

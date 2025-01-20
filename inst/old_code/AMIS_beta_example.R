@@ -8,7 +8,7 @@ transmission_model_identity <- function(seeds, parameters, n_tims=1) {
 # Generate samples for prevalence map with 3 locations given by B(2,1), B(1,1)=Uniform, B(1,2). 
 set.seed(123)
 L <- 3    # Number of locations
-M <- 1000 # Number of map samples
+M <- 500 # Number of map samples
 prevalence_map <- matrix(NA, L, M)
 for (l in 1:L) {
   prevalence_map[l,] <- rbeta(M, max(1,l-1), max(1,3-l))

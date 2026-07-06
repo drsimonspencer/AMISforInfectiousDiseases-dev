@@ -780,6 +780,7 @@ compute_model_evidence <- function(likelihoods, simulated_prevalences,
   #   lik_matrix <- function(l) t(l)
   # }
   
+  
   for (t in 1:n_tims) {
     
     lik_mat <- t(array(likelihoods[t,,], dim=c(n_locs, n_sims)))
@@ -849,6 +850,22 @@ compute_model_evidence <- function(likelihoods, simulated_prevalences,
       weight_matrix[which_invalid_sim_prev[[t]]+1L, locations_with_no_data] <- weight_inval_prev
       weight_matrix_loc[which_invalid_sim_prev[[t]]+1L, locations_with_no_data] <- weight_inval_prev
     }
+  }
+  
+  # Ensure the model-evidence calculation below always operates on log weights
+  if (!amis_params[["log"]]) {
+    weight_matrix     <- log(weight_matrix)
+    weight_matrix_loc <- log(weight_matrix_loc)
+    first_weight      <- log(first_weight)
+    
+    warning(
+      "Model evidence was computed with amis_params$log = FALSE. Weights are ",
+      "accumulated as products over timepoints and locations on the natural scale ",
+      "and only converted to the log scale to evaluate model evidence/ Any weight that ",
+      "underflowed to zero during accumulation becomes -Inf on conversion and is lost, ",
+      "which can bias the model evidence or return -Inf/NaN. Re-run AMIS with ",
+      "amis_params$log = TRUE to accumulate on the log scale and avoid underflow."
+      call. = FALSE
   }
   
   # Model evidence of full model

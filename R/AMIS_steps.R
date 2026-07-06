@@ -864,7 +864,7 @@ compute_model_evidence <- function(likelihoods, simulated_prevalences,
       "to the log scale to evaluate model evidence. Any weight that underflowed ",
       "to zero during accumulation becomes -Inf on conversion and is lost, ",
       "which can bias the model evidence or return -Inf/NaN. Re-run AMIS with ",
-      "amis_params$log = TRUE to accumulate on the log scale and avoid underflow."
+      "amis_params$log = TRUE to accumulate on the log scale and avoid underflow.",
       call. = FALSE
   }
   

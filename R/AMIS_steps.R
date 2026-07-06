@@ -756,7 +756,7 @@ compute_prior_proposal_ratio <- function(components, param, prior_density, df, l
 #' @param which_invalid_sim_prev List indicating, at each time, which simulated prevalences are invalid
 #' @param which_valid_locs_prev_map List showing which locations have valid data at each time
 #' @param locations_with_no_data Vector indicating which locations have no data at any time point
-#' @return A list containing an estimate of the log model evidence and corresponding log variance of this estimate for both the full likelihood model 
+#' @return A list containing an estimate of the log model evidence and corresponding log variance of the log model evidence estimate for both the full likelihood model 
 #'     (product over all locations), and for each location individually.
 #' @noRd
 # #' @export
@@ -852,25 +852,26 @@ compute_model_evidence <- function(likelihoods, simulated_prevalences,
   }
   
   # Model evidence of full model
-  joint_log_posterior <- rowSums(weight_matrix) + first_weight
-  M <- max(joint_log_posterior)
-  log_model_evidence <-  -log(n_sims) + M + log(sum(exp(joint_log_posterior - M))) 
-  M_var <- max((2*joint_log_posterior),(log(2)+joint_log_posterior),0)
-  log_model_evidence_var <- -2*log(n_sims) + M_var + log(sum(exp(2*joint_log_posterior - M_var),(-2*exp(joint_log_posterior - M_var)), n_sims*exp(-M_var)))
+  log_weight <- rowSums(weight_matrix) + first_weight
+  M <- max(log_weight)
+  log_model_evidence <-  -log(n_sims) + M + log(sum(exp(log_weight - M))) 
+  M_var <- max((2*log_weight - 2*log_model_evidence),(log(2)+log_weight-log_model_evidence),0)
+  log_model_evidence_var <- -2*log(n_sims) + M_var + log(sum(exp(2*log_weight - 2*log_model_evidence - M_var),(-2*exp(log_weight - log_model_evidence - M_var)), n_sims*exp(-M_var)))
   
   # Model evidence for each location subset
-  joint_log_posterior_loc <- weight_matrix_loc
-  M_loc <- apply(joint_log_posterior_loc,2,max)
+  log_weight_loc <- weight_matrix_loc
+  M_loc <- apply(log_weight_loc,2,max)
   log_model_evidence_loc <- sapply(1:n_locs, function(v) {
-    -log(n_sims) + M_loc[v] + log(sum(exp(joint_log_posterior_loc[,v] - M_loc[v])))
+    -log(n_sims) + M_loc[v] + log(sum(exp(log_weight_loc[,v] - M_loc[v])))
   })
   log_model_evidence_var_loc <- sapply(1:n_locs, function(v) {
-    -2*log(n_sims) + 2*M_loc[v] + log(sum(exp(2*joint_log_posterior_loc[,v] - 2*M_loc[v]),(-2*exp(joint_log_posterior_loc[,v] - 2*M_loc[v])), n_sims*exp(-2*M_loc[v])))
+    M_var_loc <- max((2*log_weight_loc[,v] - 2*log_model_evidence_loc[v]),(log(2)+log_weight_loc[,v]-log_model_evidence_loc[v]),0)
+    -2*log(n_sims) + M_var_loc + log(sum(exp(2*log_weight_loc[,v] - 2*log_model_evidence_loc[v] - M_var_loc),(-2*exp(log_weight_loc[,v] - log_model_evidence_loc[v]- M_var_loc)), n_sims*exp(-M_var_loc)))
   })
   
   return(list(evidence = cbind(log_model_evidence = log_model_evidence, log_variance = log_model_evidence_var), 
-              joint_log_posterior = joint_log_posterior,
+              log_weight = log_weight,
               evidence_by_location = cbind(log_model_evidence = log_model_evidence_loc, log_variance = log_model_evidence_var_loc), 
-              joint_log_posterior_by_location = joint_log_posterior_loc))
+              log_weight_by_location = log_weight_loc))
 }
 

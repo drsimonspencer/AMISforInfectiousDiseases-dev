@@ -860,9 +860,9 @@ compute_model_evidence <- function(likelihoods, simulated_prevalences,
     
     warning(
       "Model evidence was computed with amis_params$log = FALSE. Weights are ",
-      "accumulated as products over timepoints and locations on the natural scale ",
-      "and only converted to the log scale to evaluate model evidence/ Any weight that ",
-      "underflowed to zero during accumulation becomes -Inf on conversion and is lost, ",
+      "accumulated as products on the natural scale and only converted ",
+      "to the log scale to evaluate model evidence. Any weight that underflowed ",
+      "to zero during accumulation becomes -Inf on conversion and is lost, ",
       "which can bias the model evidence or return -Inf/NaN. Re-run AMIS with ",
       "amis_params$log = TRUE to accumulate on the log scale and avoid underflow."
       call. = FALSE

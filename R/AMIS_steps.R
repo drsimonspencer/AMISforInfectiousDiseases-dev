@@ -866,6 +866,7 @@ compute_model_evidence <- function(likelihoods, simulated_prevalences,
       "which can bias the model evidence or return -Inf/NaN. Re-run AMIS with ",
       "amis_params$log = TRUE to accumulate on the log scale and avoid underflow.",
       call. = FALSE
+    )
   }
   
   # Model evidence of full model
